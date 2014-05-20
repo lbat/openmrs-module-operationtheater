@@ -25,8 +25,14 @@ public class OperationTheater extends BaseOpenmrsObject implements Serializable 
 	private static final long serialVersionUID = 1L;
 	
 	private Integer id;
-	
-	@Override
+
+    /**
+     *
+     * @return
+     * @should return identifier
+     *
+     */
+    @Override
 	public Integer getId() {
 		return id;
 	}

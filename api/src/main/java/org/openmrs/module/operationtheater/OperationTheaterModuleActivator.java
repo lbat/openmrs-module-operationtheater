@@ -29,42 +29,42 @@ public class OperationTheaterModuleActivator implements ModuleActivator {
 	 * @see ModuleActivator#willRefreshContext()
 	 */
 	public void willRefreshContext() {
-		log.info("Refreshing Operation Theater Module Module");
+		log.info("Refreshing Operation Theater Module");
 	}
 	
 	/**
 	 * @see ModuleActivator#contextRefreshed()
 	 */
 	public void contextRefreshed() {
-		log.info("Operation Theater Module Module refreshed");
+		log.info("Operation Theater Module refreshed");
 	}
 	
 	/**
 	 * @see ModuleActivator#willStart()
 	 */
 	public void willStart() {
-		log.info("Starting Operation Theater Module Module");
+		log.info("Starting Operation Theater Module");
 	}
 	
 	/**
 	 * @see ModuleActivator#started()
 	 */
 	public void started() {
-		log.info("Operation Theater Module Module started");
+		log.info("Operation Theater Module started");
 	}
 	
 	/**
 	 * @see ModuleActivator#willStop()
 	 */
 	public void willStop() {
-		log.info("Stopping Operation Theater Module Module");
+		log.info("Stopping Operation Theater Module");
 	}
 	
 	/**
 	 * @see ModuleActivator#stopped()
 	 */
 	public void stopped() {
-		log.info("Operation Theater Module Module stopped");
+		log.info("Operation Theater Module stopped");
 	}
 		
 }

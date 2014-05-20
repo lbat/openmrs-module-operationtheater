@@ -14,15 +14,25 @@
 package org.openmrs.module.operationtheater.api;
 
 import static org.junit.Assert.*;
+
+import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.operationtheater.api.impl.OperationTheaterServiceImpl;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 
 /**
  * Tests {@link ${OperationTheaterService}}.
  */
 public class  OperationTheaterServiceTest extends BaseModuleContextSensitiveTest {
-	
+
+	private OperationTheaterService service;
+
+	@Before
+	public void setUp(){
+		service = new OperationTheaterServiceImpl();
+	}
+
 	@Test
 	public void shouldSetupContext() {
 		assertNotNull(Context.getService(OperationTheaterService.class));
