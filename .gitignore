@@ -71,4 +71,6 @@ nb-configuration.xml
 /webapp/src/main/webapp/WEB-INF/tags/module
 /webapp/src/main/webapp/WEB-INF/dwr-modules.xml
 /webapp/src/main/webapp/WEB-INF/module_messages*
+
+/omod/src/main/compass/sass-external/
 #############

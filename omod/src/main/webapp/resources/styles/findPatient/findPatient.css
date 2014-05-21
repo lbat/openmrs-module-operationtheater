@@ -1,0 +1,37 @@
+#patient-search-form input {
+  display: inline;
+}
+
+#patient-search-results {
+  margin-top: 1em;
+}
+#patient-search-results .patient-search-result {
+  padding: 10px 5px;
+  cursor: pointer;
+}
+#patient-search-results .patient-search-result:nth-child(odd) {
+  background-color: #eeeeee;
+}
+#patient-search-results .patient-search-result .patient-identifier {
+  display: inline-block;
+}
+#patient-search-results .patient-search-result .patient-identifier .identifier-type {
+  display: block;
+  font-size: 0.6em;
+  text-decoration: underline;
+}
+#patient-search-results .patient-search-result .patient-identifier .identifier {
+  display: block;
+}
+#patient-search-results .patient-search-result .preferred-name {
+  display: inline-block;
+  font-size: 1.5em;
+  padding: 5px;
+  width: 50%;
+}
+#patient-search-results .patient-search-result .age, #patient-search-results .patient-search-result .gender {
+  font-size: 1.2em;
+}
+#patient-search-results .patient-search-result a {
+  float: right;
+}

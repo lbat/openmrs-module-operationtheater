@@ -1,6 +1,7 @@
 [
     {
         "id": "operationtheater.openSurgery",
+        "instanceOf": "operationtheater.template.openSurgery",
         "description": "Opens an existing surgery record or offers to create a new one",
         "order": 2,
         "extensions": [
@@ -9,7 +10,7 @@
                 "extensionPointId": "org.openmrs.referenceapplication.homepageLink",
                 "type": "link",
                 "label": "${project.parent.artifactId}.openSurgery.button.label",
-                "url": "operationtheater/helloWorld.page",
+                "url": "${project.parent.artifactId}/findSurgery.page?app=${project.parent.artifactId}.openSurgery",
                 "icon": "icon-file",
                 "requiredPrivilege": "App: coreapps.findPatient"
             }
