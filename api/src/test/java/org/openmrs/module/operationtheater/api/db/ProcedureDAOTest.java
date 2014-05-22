@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.module.operationtheater.Procedure;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.openmrs.test.Verifies;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.text.SimpleDateFormat;
@@ -79,10 +80,9 @@ public class ProcedureDAOTest extends BaseModuleContextSensitiveTest {
 	 */
 	@Test
 	public void saveOrUpdate_shouldUpdateObjectIfItIsNotNullAndIdAlreadyInTheDb() throws Exception {
-		saveOrUpdate_shouldSaveNewEntryIfObjectIsNotNull();
-
-		List<Procedure> procedureList = procedureDAO.getAll();
-		Procedure procedure = procedureList.get(TOTAL_PROCEDURES);
+		Procedure procedure = new Procedure();
+		int id = 1;
+		procedure.setProcedureId(id);
 
 		procedure.setName("Another Test procedure");
 		procedure.setDescription("Another Test procedure description");
@@ -92,10 +92,10 @@ public class ProcedureDAOTest extends BaseModuleContextSensitiveTest {
 
 		procedureDAO.saveOrUpdate(procedure);
 
-		procedureList = procedureDAO.getAll();
-		assertThat(procedureList, hasSize(TOTAL_PROCEDURES+1));
+		List<Procedure> procedureList = procedureDAO.getAll();
+		assertThat(procedureList, hasSize(TOTAL_PROCEDURES));
 
-		Procedure actualProcedure = procedureList.get(TOTAL_PROCEDURES);
+		Procedure actualProcedure = procedureList.get(id-1);
 		assertEquals(procedure.getProcedureId(), actualProcedure.getProcedureId());
 		assertEquals(procedure.getName(), actualProcedure.getName());
 		assertEquals(procedure.getDescription(), actualProcedure.getDescription());
@@ -103,4 +103,12 @@ public class ProcedureDAOTest extends BaseModuleContextSensitiveTest {
 		assertEquals(procedure.getOtPreparationDuration(), actualProcedure.getOtPreparationDuration());
 		assertEquals(procedure.getInpatientStay(), actualProcedure.getInpatientStay());
 	}
+
+	@Test
+	@Verifies(value="should return all entries in the table", method = "getAll")
+	public void getAll_shouldReturnAllEntriesInTheTable(){
+		List<Procedure> procedureList = procedureDAO.getAll();
+		assertThat(procedureList, hasSize(TOTAL_PROCEDURES));
+	}
+
 }

@@ -14,6 +14,12 @@ public interface GenericDAO<T> {
 
 	T getByUuid(String uuid);
 
+	/**
+	 * returns all entries in the table
+	 *
+	 * @return
+	 * @should return all entries in the table
+	 */
 	List<T> getAll();
 
 	List<T> getAll(boolean includeRetired);

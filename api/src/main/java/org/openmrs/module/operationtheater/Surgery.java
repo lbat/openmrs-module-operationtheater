@@ -1,23 +1,51 @@
 package org.openmrs.module.operationtheater;
 
+import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Patient;
 
 import javax.persistence.*;
 
 /**
- * Defines a Surgery in the system. TODO javadoc
+ * Defines a Surgery in the system.
  *
- * @version 2.0
  */
 @Entity
 @Table(name = "surgery")
-public class Surgery{ //TODO extends BaseOpenmrsObject implements OpenmrsData {
+public class Surgery extends BaseOpenmrsData {
 
 	@Id
 	@GeneratedValue
 	@Column(name = "surgery_id")
-	private int surgeryId;
+	private Integer surgeryId;
 
+
+	@ManyToOne
+	@JoinColumn(name="patient_id", nullable = false)
 	private Patient patient;
 
+	public int getSurgeryId() {
+		return surgeryId;
+	}
+
+	public void setSurgeryId(int surgeryId) {
+		this.surgeryId = surgeryId;
+	}
+
+	@Override
+	public Integer getId() {
+		return getSurgeryId();
+	}
+
+	@Override
+	public void setId(Integer integer) {
+		setSurgeryId(integer);
+	}
+
+	public Patient getPatient() {
+		return patient;
+	}
+
+	public void setPatient(Patient patient) {
+		this.patient = patient;
+	}
 }

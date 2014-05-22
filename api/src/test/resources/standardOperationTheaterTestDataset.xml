@@ -1,5 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <dataset>
+    <!-- Openmrs core -->
+    <patient patient_id="1" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"/>
+    <patient patient_id="2" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"/>
+
+    <!-- Operation Theather Module -->
     <procedure procedure_id="1" name="Procedure Name" description="procedure description" intervention_duration="2000-01-01 02:12:00.0" ot_preparation_duration="2000-01-01 00:23:00.0" inpatient_stay="4" />
     <procedure procedure_id="2" name="Procedure Name 2" description="procedure description 2" intervention_duration="2000-01-01 04:12:00.0" ot_preparation_duration="2000-01-01 00:46:00.0" inpatient_stay="8" />
+
+    <surgery surgery_id="1" patient_id="1" />
+
  </dataset>
