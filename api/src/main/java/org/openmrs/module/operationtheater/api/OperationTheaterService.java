@@ -13,8 +13,17 @@
  */
 package org.openmrs.module.operationtheater.api;
 
+import org.openmrs.api.APIException;
 import org.openmrs.api.OpenmrsService;
+import org.openmrs.api.PatientService;
+import org.openmrs.api.db.PatientDAO;
+import org.openmrs.module.operationtheater.Procedure;
+import org.openmrs.module.operationtheater.Surgery;
+import org.openmrs.module.operationtheater.api.db.ProcedureDAO;
+import org.openmrs.module.operationtheater.api.db.SurgeryDAO;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * This service exposes module's core functionality. It is a Spring managed bean which is configured in moduleApplicationContext.xml.
@@ -28,10 +37,54 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional
 public interface OperationTheaterService extends OpenmrsService {
-     
-	/*
-	 * Add service methods here
-	 * 
-	 */
 
+	/**
+	 * Sets the DAO for this service. This is done by DI and Spring. See the
+	 * applicationContext-service.xml definition file.
+	 *
+	 * @param dao DAO for this service
+	 */
+	public void setProcedureDAO(ProcedureDAO dao);
+
+	/**
+	 * Sets the DAO for this service. This is done by DI and Spring. See the
+	 * applicationContext-service.xml definition file.
+	 *
+	 * @param dao DAO for this service
+	 */
+	public void setSurgeryDAO(SurgeryDAO dao);
+
+	/**
+	 * Sets the DAO for the Patient service. This is done by DI and Spring. See the
+	 * applicationContext-service.xml definition file.
+	 *
+	 * @param dao DAO for this service
+	 */
+	public void setPatientService(PatientService dao);
+
+	/**
+	 * Creates or updates the given surgery in the database.
+	 *
+	 * @param surgery surgery to be created
+	 * @throws APIException
+	 * @should call surgeryDao saveOrUpdate
+	 */
+	public void saveSurgery(Surgery surgery) throws APIException;
+
+	/**
+	 * Creates or updates the given surgery in the database.
+	 *
+	 * @param procedure procedure to be created
+	 * @throws org.openmrs.api.APIException
+	 * @should call procedureDao saveOrUpdate
+	 */
+	public void saveProcedure(Procedure procedure) throws APIException;
+
+	/**
+	 * gets list of all Procedures in the database
+	 *
+	 * @return
+	 * @throws org.openmrs.api.APIException
+	 */
+	public List<Procedure> getAllProcedures() throws APIException;
 }

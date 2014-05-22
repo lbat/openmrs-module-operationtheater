@@ -1,30 +1,39 @@
 package org.openmrs.module.operationtheater.api.db;
 
+import org.springframework.stereotype.Repository;
+
 import java.util.List;
 
 /**
- * Hibernate specific GenericDAO database methods. <br/>
- * <br/>
- * This class should not be used directly. All database calls should go through the Service layer. <br/>
- * <br/>
- * Proper use: <code>
- *   PersonService ps = Context.getXYService();
- *   ps.getPeople("name", false);
- * </code>
- *
- * @see org.openmrs.api.context.Context
+ * Hibernate specific GenericDAO database methods.
  */
+@Repository
 public interface GenericDAO<T> {
 
-	public T get(long id);
+	T getById(Integer id);
 
-	public List<T> getAll();
+	T getByUuid(String uuid);
 
-	public void create(final T t);
+	List<T> getAll();
 
-	public void update(final T t);
+	List<T> getAll(boolean includeRetired);
 
-	public void delete(final T t);
+	List<T> getAllData(boolean includeVoided);
 
-	public void deleteById(long id);
+	List<T> getAll(String fuzzySearchPhrase);
+
+	/**
+	 * save or update the object in the database
+	 *
+	 * @param object
+	 * @return
+	 * @should save new entry if object is not null
+	 * @should not save object if it is null
+	 * @should  update object if it is not null and id already in the db
+	 */
+	T saveOrUpdate(T object);
+
+	T update(T object);
+
+	void delete(T object);
 }

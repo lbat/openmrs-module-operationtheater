@@ -15,29 +15,20 @@ package org.openmrs.module.operationtheater.api.db.hibernate;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.SessionFactory;
 import org.openmrs.module.operationtheater.Surgery;
-import org.openmrs.module.operationtheater.api.db.GenericDAO;
 import org.openmrs.module.operationtheater.api.db.OperationTheaterDAO;
 import org.openmrs.module.operationtheater.api.db.SurgeryDAO;
+import org.springframework.stereotype.Repository;
 
 /**
  * It is a default implementation of  {@link OperationTheaterDAO}.
  */
+@Repository
 public class HibernateSurgeryDAO extends HibernateGenericDAO<Surgery> implements SurgeryDAO {
 	protected final Log log = LogFactory.getLog(this.getClass());
 
-	private SessionFactory sessionFactory;
-
 	public HibernateSurgeryDAO() {
 		super(Surgery.class);
-	}
-
-	/**
-	 * @param sessionFactory the sessionFactory to set
-	 */
-	public void setSessionFactory(SessionFactory sessionFactory) {
-		this.sessionFactory = sessionFactory;
 	}
 
 }

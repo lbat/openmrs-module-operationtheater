@@ -13,13 +13,26 @@
  */
 package org.openmrs.module.operationtheater.api;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.operationtheater.Procedure;
+import org.openmrs.module.operationtheater.Surgery;
+import org.openmrs.module.operationtheater.api.db.ProcedureDAO;
+import org.openmrs.module.operationtheater.api.db.SurgeryDAO;
+import org.openmrs.module.operationtheater.api.db.hibernate.HibernateProcedureDAO;
+import org.openmrs.module.operationtheater.api.db.hibernate.HibernateSurgeryDAO;
 import org.openmrs.module.operationtheater.api.impl.OperationTheaterServiceImpl;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.openmrs.test.Verifies;
+
+import java.text.SimpleDateFormat;
+import java.util.List;
 
 /**
  * Tests {@link ${OperationTheaterService}}.
@@ -28,13 +41,37 @@ public class  OperationTheaterServiceTest extends BaseModuleContextSensitiveTest
 
 	private OperationTheaterService service;
 
+	private SurgeryDAO surgeryDAO;
+
+	private ProcedureDAO procedureDAO;
+
 	@Before
 	public void setUp(){
 		service = new OperationTheaterServiceImpl();
+		surgeryDAO = Mockito.mock(HibernateSurgeryDAO.class);
+		service.setSurgeryDAO(surgeryDAO);
+		procedureDAO = Mockito.mock(HibernateProcedureDAO.class);
+		service.setProcedureDAO(procedureDAO);
 	}
 
 	@Test
 	public void shouldSetupContext() {
 		assertNotNull(Context.getService(OperationTheaterService.class));
+	}
+
+	@Test
+	@Verifies(value="should call surgeryDao saveOrUpdate", method="saveSurgery(Surgery)")
+	public void saveSurgery_shouldCallSurgeryDAOSaveOrUpdate() throws Exception {
+		Surgery surgery = new Surgery();
+		service.saveSurgery(surgery);
+		Mockito.verify(surgeryDAO).saveOrUpdate(surgery);
+	}
+
+	@Test
+	@Verifies(value = "should call procedureDao saveOrUpdate", method = "saveProcedure()")
+	public void saveProcedure_shouldCreateNewDbEntryIfObjectIsNotNull() throws Exception {
+		Procedure procedure = new Procedure();
+		service.saveProcedure(procedure);
+		Mockito.verify(procedureDAO).saveOrUpdate(procedure);
 	}
 }

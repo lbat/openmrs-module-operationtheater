@@ -1,0 +1,5 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+    <procedure procedure_id="1" name="Procedure Name" description="procedure description" intervention_duration="2000-01-01 02:12:00.0" ot_preparation_duration="2000-01-01 00:23:00.0" inpatient_stay="4" />
+    <procedure procedure_id="2" name="Procedure Name 2" description="procedure description 2" intervention_duration="2000-01-01 04:12:00.0" ot_preparation_duration="2000-01-01 00:46:00.0" inpatient_stay="8" />
+ </dataset>

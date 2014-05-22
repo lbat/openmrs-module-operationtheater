@@ -27,11 +27,12 @@
 	</extension>
 	
 	<!-- Maps hibernate file's, if present -->
-	<mappingFiles>
-				
-		OperationTheater.hbm.xml
-				
-	</mappingFiles>
+	<mappingFiles></mappingFiles>
+
+    <!-- Packages that will be scanned for JPA annotations -->
+    <packagesWithMappedClasses>
+        org.openmrs.module.operationtheater
+    </packagesWithMappedClasses>
 
 	<!-- Internationalization -->
 	<!-- All message codes should start with ${project.parent.artifactId}. -->

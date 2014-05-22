@@ -13,11 +13,22 @@
  */
 package org.openmrs.module.operationtheater.api.impl;
 
+import org.openmrs.api.APIException;
+import org.openmrs.api.PatientService;
+import org.openmrs.api.db.PatientDAO;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.module.operationtheater.Procedure;
+import org.openmrs.module.operationtheater.Surgery;
 import org.openmrs.module.operationtheater.api.OperationTheaterService;
 import org.openmrs.module.operationtheater.api.db.OperationTheaterDAO;
+import org.openmrs.module.operationtheater.api.db.ProcedureDAO;
+import org.openmrs.module.operationtheater.api.db.SurgeryDAO;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * It is a default implementation of {@link OperationTheaterService}.
@@ -25,20 +36,43 @@ import org.openmrs.module.operationtheater.api.db.OperationTheaterDAO;
 public class OperationTheaterServiceImpl extends BaseOpenmrsService implements OperationTheaterService {
 	
 	protected final Log log = LogFactory.getLog(this.getClass());
-	
-	private OperationTheaterDAO dao;
-	
-	/**
-     * @param dao the dao to set
-     */
-    public void setDao(OperationTheaterDAO dao) {
-	    this.dao = dao;
-    }
-    
-    /**
-     * @return the dao
-     */
-    public OperationTheaterDAO getDao() {
-	    return dao;
-    }
+
+	@Autowired
+	private ProcedureDAO procedureDAO;
+
+	@Autowired
+	private SurgeryDAO surgeryDAO;
+
+	@Resource(name="patientService")
+	private PatientService patientService;
+
+	@Override
+	public void setSurgeryDAO(SurgeryDAO dao) {
+		this.surgeryDAO = dao;
+	}
+
+	@Override
+	public void setProcedureDAO(ProcedureDAO dao) {
+		this.procedureDAO = dao;
+	}
+
+	@Override
+	public void setPatientService(PatientService patientService) {
+		this.patientService = patientService;
+	}
+
+	@Override
+	public void saveSurgery(Surgery surgery) throws APIException {
+		surgeryDAO.saveOrUpdate(surgery);
+	}
+
+	@Override
+	public void saveProcedure(Procedure procedure) throws APIException {
+		procedureDAO.saveOrUpdate(procedure);
+	}
+
+	@Override
+	public List<Procedure> getAllProcedures() throws APIException {
+		return procedureDAO.getAll();
+	}
 }

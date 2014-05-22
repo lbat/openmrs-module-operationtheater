@@ -34,7 +34,7 @@
 	</modules>
 	
 	<properties>
-		<openMRSVersion>1.8.2</openMRSVersion>
+		<openMRSVersion>1.9.7</openMRSVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <appframeworkVersion>2.0</appframeworkVersion>
@@ -143,7 +143,7 @@
             <!-- End OpenMRS modules -->
 
             <!-- Begin Test specific dependencies -->
-            <dependency>
+            <!--<dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
                 <version>1.9.5</version>
@@ -174,7 +174,7 @@
                 <artifactId>hamcrest-all</artifactId>
                 <version>1.3</version>
                 <scope>test</scope>
-            </dependency>
+            </dependency>-->
             <!-- End Test specific dependencies -->
 
 
