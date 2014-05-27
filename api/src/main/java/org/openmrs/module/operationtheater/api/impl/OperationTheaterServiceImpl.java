@@ -25,6 +25,7 @@ import org.openmrs.module.operationtheater.api.OperationTheaterService;
 import org.openmrs.module.operationtheater.api.db.OperationTheaterDAO;
 import org.openmrs.module.operationtheater.api.db.ProcedureDAO;
 import org.openmrs.module.operationtheater.api.db.SurgeryDAO;
+import org.openmrs.validator.ValidateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Resource;
@@ -62,17 +63,46 @@ public class OperationTheaterServiceImpl extends BaseOpenmrsService implements O
 	}
 
 	@Override
-	public void saveSurgery(Surgery surgery) throws APIException {
-		surgeryDAO.saveOrUpdate(surgery);
+	public Surgery saveSurgery(Surgery surgery) throws APIException {
+		ValidateUtil.validate(surgery);
+		return surgeryDAO.saveOrUpdate(surgery);
 	}
 
 	@Override
-	public void saveProcedure(Procedure procedure) throws APIException {
-		procedureDAO.saveOrUpdate(procedure);
+	public List<Surgery> getAllSurgeries(boolean includeVoided) {
+		return surgeryDAO.getAllData(includeVoided);
+	}
+
+	@Override
+	public Surgery getSurgeryByUuid(String uuid) {
+		return surgeryDAO.getByUuid(uuid);
+	}
+
+	@Override
+	public Surgery voidSurgery(Surgery surgery, String reason) {
+		if(surgery == null)
+			return null;
+
+		return surgeryDAO.saveOrUpdate(surgery);
+	}
+
+	@Override
+	public Surgery unvoidSurgery(Surgery surgery) {
+		if(surgery == null)
+			return null;
+
+		return surgeryDAO.saveOrUpdate(surgery);
+	}
+
+	@Override
+	public Procedure saveProcedure(Procedure procedure) throws APIException {
+		//TODO add validator
+		return procedureDAO.saveOrUpdate(procedure);
 	}
 
 	@Override
 	public List<Procedure> getAllProcedures() throws APIException {
 		return procedureDAO.getAll();
 	}
+
 }

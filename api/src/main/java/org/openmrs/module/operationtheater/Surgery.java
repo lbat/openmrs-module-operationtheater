@@ -11,13 +11,12 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "surgery")
-public class Surgery extends BaseOpenmrsData {
+public class Surgery extends BaseOpenmrsDataJPA {
 
 	@Id
 	@GeneratedValue
 	@Column(name = "surgery_id")
 	private Integer surgeryId;
-
 
 	@ManyToOne
 	@JoinColumn(name="patient_id", nullable = false)

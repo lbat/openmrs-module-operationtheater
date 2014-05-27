@@ -73,6 +73,10 @@
             org.openmrs.module.appframework
         </require_module>
 
+        <require_module version="${webservicesRestVersion}">
+            org.openmrs.module.webservices.rest
+        </require_module>
+
     </require_modules>
     <!-- /Module Dependencies -->
 </module>

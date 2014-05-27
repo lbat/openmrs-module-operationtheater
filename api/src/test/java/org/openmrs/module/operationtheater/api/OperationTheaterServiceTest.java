@@ -13,14 +13,11 @@
  */
 package org.openmrs.module.operationtheater.api;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.openmrs.api.context.Context;
 import org.openmrs.module.operationtheater.Procedure;
 import org.openmrs.module.operationtheater.Surgery;
 import org.openmrs.module.operationtheater.api.db.ProcedureDAO;
@@ -28,16 +25,27 @@ import org.openmrs.module.operationtheater.api.db.SurgeryDAO;
 import org.openmrs.module.operationtheater.api.db.hibernate.HibernateProcedureDAO;
 import org.openmrs.module.operationtheater.api.db.hibernate.HibernateSurgeryDAO;
 import org.openmrs.module.operationtheater.api.impl.OperationTheaterServiceImpl;
-import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.openmrs.test.Verifies;
+import org.openmrs.validator.ValidateUtil;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
 
 /**
  * Tests {@link ${OperationTheaterService}}.
+ * for context sensitive tests have a look at {@link org.openmrs.module.operationtheater.api.OperationTheaterServiceTest1}
  */
-public class  OperationTheaterServiceTest extends BaseModuleContextSensitiveTest {
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(ValidateUtil.class)
+public class  OperationTheaterServiceTest{ //extends BaseModuleContextSensitiveTest {
 
 	private OperationTheaterService service;
 
@@ -54,17 +62,25 @@ public class  OperationTheaterServiceTest extends BaseModuleContextSensitiveTest
 		service.setProcedureDAO(procedureDAO);
 	}
 
+	/**
+	 * @verifies validate surgery object and call surgeryDao saveOrUpdate
+	 * @see OperationTheaterService#saveSurgery(org.openmrs.module.operationtheater.Surgery)
+	 */
 	@Test
-	public void shouldSetupContext() {
-		assertNotNull(Context.getService(OperationTheaterService.class));
-	}
+	public void saveSurgery_shouldValidateSurgeryObject() throws Exception {
+		PowerMockito.spy(ValidateUtil.class);
 
-	@Test
-	@Verifies(value="should call surgeryDao saveOrUpdate", method="saveSurgery(Surgery)")
-	public void saveSurgery_shouldCallSurgeryDAOSaveOrUpdate() throws Exception {
+		//do not execute the validate method
+		ArgumentCaptor<Surgery> captor = ArgumentCaptor.forClass(Surgery.class);
+		PowerMockito.doNothing().when(
+				ValidateUtil.class, "validate", captor.capture());
+
 		Surgery surgery = new Surgery();
 		service.saveSurgery(surgery);
+
 		Mockito.verify(surgeryDAO).saveOrUpdate(surgery);
+		assertThat(captor.getAllValues(), hasSize(1));
+		assertEquals(surgery, captor.getValue());
 	}
 
 	@Test
@@ -73,5 +89,40 @@ public class  OperationTheaterServiceTest extends BaseModuleContextSensitiveTest
 		Procedure procedure = new Procedure();
 		service.saveProcedure(procedure);
 		Mockito.verify(procedureDAO).saveOrUpdate(procedure);
+	}
+
+	/**
+	 * @verifies return result of surgeryDAO getAllData method with parameter includeVoided
+	 * @see OperationTheaterService#getAllSurgeries(boolean)
+	 */
+	@Test
+	public void getAllSurgeries_shouldReturnResultOfSurgeryDAOGetAllDataMethodWithParameterIncludeVoided() throws Exception {
+		List<Surgery> surgeryList = new ArrayList<Surgery>();
+		surgeryList.add(new Surgery());
+
+		when(surgeryDAO.getAllData(true)).thenReturn(surgeryList);
+		List<Surgery> result = service.getAllSurgeries(true);
+		assertEquals(surgeryList, result);
+//		Mockito.verify(surgeryDAO).getAllData(true);
+
+		when(surgeryDAO.getAllData(false)).thenReturn(surgeryList);
+		result = service.getAllSurgeries(false);
+		assertEquals(surgeryList, result);
+//		Mockito.verify(surgeryDAO).getAllData(false);
+	}
+
+	/**
+	 * @verifies call surgeryDAO getByUuid
+	 * @see OperationTheaterService#getSurgeryByUuid(String)
+	 */
+	@Test
+	public void getSurgeryByUuid_shouldCallSurgeryDAOGetByUuid() throws Exception {
+		String uuid = "ca352fc1-1691-11df-97a5-7038c432aab5";
+		Surgery surgery = new Surgery();
+		when(surgeryDAO.getByUuid(uuid)).thenReturn(surgery);
+
+		Surgery actualSurgery = service.getSurgeryByUuid(uuid);
+
+		assertEquals(surgery, actualSurgery);
 	}
 }

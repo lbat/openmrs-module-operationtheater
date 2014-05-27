@@ -1,6 +1,5 @@
 package org.openmrs.module.operationtheater.api.db;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.module.operationtheater.Procedure;
@@ -14,6 +13,7 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -45,7 +45,8 @@ public class ProcedureDAOTest extends BaseModuleContextSensitiveTest {
 		procedure.setOtPreparationDuration(new SimpleDateFormat("HH:mm").parse("00:30"));
 		procedure.setInpatientStay(4);
 
-		procedureDAO.saveOrUpdate(procedure);
+		Procedure savedProcedure = procedureDAO.saveOrUpdate(procedure);
+		assertThat(savedProcedure.getId(), is(TOTAL_PROCEDURES+1));
 
 		List<Procedure> procedureList = procedureDAO.getAll();
 		assertThat(procedureList, hasSize(TOTAL_PROCEDURES+1));
@@ -90,7 +91,8 @@ public class ProcedureDAOTest extends BaseModuleContextSensitiveTest {
 		procedure.setOtPreparationDuration(new SimpleDateFormat("HH:mm").parse("01:30"));
 		procedure.setInpatientStay(10);
 
-		procedureDAO.saveOrUpdate(procedure);
+		Procedure savedProcedure = procedureDAO.saveOrUpdate(procedure);
+		assertThat(savedProcedure.getId(), is(id));
 
 		List<Procedure> procedureList = procedureDAO.getAll();
 		assertThat(procedureList, hasSize(TOTAL_PROCEDURES));

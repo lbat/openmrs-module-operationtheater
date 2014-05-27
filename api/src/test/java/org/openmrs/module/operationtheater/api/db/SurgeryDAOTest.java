@@ -5,18 +5,17 @@ import org.junit.Test;
 import org.openmrs.Patient;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.operationtheater.Procedure;
 import org.openmrs.module.operationtheater.Surgery;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.openmrs.test.Verifies;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.text.SimpleDateFormat;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -30,7 +29,7 @@ public class SurgeryDAOTest extends BaseModuleContextSensitiveTest {
 
 	private PatientService service;
 
-	private static int TOTAL_SURGERIES = 1;
+	private static int TOTAL_SURGERIES = 2;
 
 	@Before
 	public void setUp() throws Exception{
@@ -48,7 +47,8 @@ public class SurgeryDAOTest extends BaseModuleContextSensitiveTest {
 		Patient patient = service.getPatient(1);
 		surgery.setPatient(patient);
 
-		surgeryDAO.saveOrUpdate(surgery);
+		Surgery savedSurgery = surgeryDAO.saveOrUpdate(surgery);
+		assertThat(savedSurgery.getId(), is(TOTAL_SURGERIES+1));
 
 		List<Surgery> surgeryList = surgeryDAO.getAll();
 		assertThat(surgeryList, hasSize(TOTAL_SURGERIES +1));
@@ -101,6 +101,17 @@ public class SurgeryDAOTest extends BaseModuleContextSensitiveTest {
 	public void getAll_shouldReturnAllEntriesInTheTable(){
 		List<Surgery> surgeryList = surgeryDAO.getAll();
 		assertThat(surgeryList, hasSize(TOTAL_SURGERIES));
+	}
+
+	@Test
+	@Verifies(value="should return the object with the specified uuid", method="getByUuid")
+	public void getByUuid_shouldReturnTheObjectWithTheSpecifiedUuid() throws Exception{
+		String uuid = "ca352fc1-1691-11df-97a5-7038c432aab5";
+		Surgery surgery = surgeryDAO.getByUuid(uuid);
+
+		assertThat(surgery.getId(), is(1));
+		assertThat(surgery.getPatient().getId(), is(1));
+//		assertThat(surgery.getCreator().getId(), is(1));
 	}
 
 }

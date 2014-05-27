@@ -67,18 +67,29 @@ public interface OperationTheaterService extends OpenmrsService {
 	 *
 	 * @param surgery surgery to be created
 	 * @throws APIException
-	 * @should call surgeryDao saveOrUpdate
+	 * @return created or updated surgery
+	 * @should validate surgery object and call surgeryDao saveOrUpdate
 	 */
-	public void saveSurgery(Surgery surgery) throws APIException;
+	public Surgery saveSurgery(Surgery surgery) throws APIException;
+
+	/**
+	 * Get all surgeries based on includeVoided flag
+	 *
+	 * @param includeVoided
+	 * @return List of all time slots
+	 * @should return result of surgeryDAO getAllData method with parameter includeVoided
+	 */
+	public List<Surgery> getAllSurgeries(boolean includeVoided);
 
 	/**
 	 * Creates or updates the given surgery in the database.
 	 *
 	 * @param procedure procedure to be created
 	 * @throws org.openmrs.api.APIException
+	 * @return created or updated procedure
 	 * @should call procedureDao saveOrUpdate
 	 */
-	public void saveProcedure(Procedure procedure) throws APIException;
+	public Procedure saveProcedure(Procedure procedure) throws APIException;
 
 	/**
 	 * gets list of all Procedures in the database
@@ -87,4 +98,30 @@ public interface OperationTheaterService extends OpenmrsService {
 	 * @throws org.openmrs.api.APIException
 	 */
 	public List<Procedure> getAllProcedures() throws APIException;
+
+	/**
+	 * Get the surgery with the specified uuid
+	 *
+	 * @param uuid
+	 * @return surgery with given uuid
+	 * @should call surgeryDAO getByUuid
+	 */
+	public Surgery getSurgeryByUuid(String uuid);
+
+	/**
+	 * void the given surgery
+	 *
+	 * @param surgery
+	 * @param reason for the voiding
+	 * @should void the given surgery
+	 */
+	public Surgery voidSurgery(Surgery surgery, String reason);
+
+	/**
+	 * unvoid the given surgery
+	 * @param surgery
+	 * @return
+	 * @should unvoid the given surgery
+	 */
+	public Surgery unvoidSurgery(Surgery surgery);
 }

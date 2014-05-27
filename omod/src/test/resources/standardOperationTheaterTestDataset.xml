@@ -14,4 +14,4 @@
     <surgery surgery_id="1" patient_id="1" uuid="ca352fc1-1691-11df-97a5-7038c432aab5" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"/>
     <surgery surgery_id="2" patient_id="1" uuid="ca352fc1-1691-11df-97a5-7038c432aab6" creator="1" date_created="2005-01-01 00:00:00.0" voided="true" void_reason="void reason"/>
 
-</dataset>
+ </dataset>

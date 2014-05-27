@@ -12,6 +12,13 @@ public interface GenericDAO<T> {
 
 	T getById(Integer id);
 
+	/**
+	 * get the object with the specified uuid
+	 *
+	 * @param uuid
+	 * @return
+	 * @should return the object with the specified uuid
+	 */
 	T getByUuid(String uuid);
 
 	/**
@@ -24,6 +31,13 @@ public interface GenericDAO<T> {
 
 	List<T> getAll(boolean includeRetired);
 
+	/**
+	 * Get all entries based on includeVoided flag
+	 *
+	 * @param includeVoided
+	 * @return List of all entries based on includeVoided flag
+	 * @should get all entries based on include voided flag.
+	 */
 	List<T> getAllData(boolean includeVoided);
 
 	List<T> getAll(String fuzzySearchPhrase);
