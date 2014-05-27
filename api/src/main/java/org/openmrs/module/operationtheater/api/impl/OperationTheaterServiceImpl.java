@@ -96,7 +96,7 @@ public class OperationTheaterServiceImpl extends BaseOpenmrsService implements O
 
 	@Override
 	public Procedure saveProcedure(Procedure procedure) throws APIException {
-		//TODO add validator
+		ValidateUtil.validate(procedure);
 		return procedureDAO.saveOrUpdate(procedure);
 	}
 

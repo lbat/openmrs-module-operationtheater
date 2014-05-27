@@ -87,7 +87,8 @@ public interface OperationTheaterService extends OpenmrsService {
 	 * @param procedure procedure to be created
 	 * @throws org.openmrs.api.APIException
 	 * @return created or updated procedure
-	 * @should call procedureDao saveOrUpdate
+	 * @should validate procedure object and call procedureDao saveOrUpdate
+	 *
 	 */
 	public Procedure saveProcedure(Procedure procedure) throws APIException;
 

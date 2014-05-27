@@ -83,12 +83,25 @@ public class  OperationTheaterServiceTest{ //extends BaseModuleContextSensitiveT
 		assertEquals(surgery, captor.getValue());
 	}
 
+	/**
+	 * @verifies validate procedure object and call procedureDao saveOrUpdate
+	 * @see OperationTheaterService#saveProcedure(org.openmrs.module.operationtheater.Procedure)
+	 */
 	@Test
-	@Verifies(value = "should call procedureDao saveOrUpdate", method = "saveProcedure()")
 	public void saveProcedure_shouldCreateNewDbEntryIfObjectIsNotNull() throws Exception {
+		PowerMockito.spy(ValidateUtil.class);
+
+		//do not execute the validate method
+		ArgumentCaptor<Procedure> captor = ArgumentCaptor.forClass(Procedure.class);
+		PowerMockito.doNothing().when(
+				ValidateUtil.class, "validate", captor.capture());
+
 		Procedure procedure = new Procedure();
 		service.saveProcedure(procedure);
+
 		Mockito.verify(procedureDAO).saveOrUpdate(procedure);
+		assertThat(captor.getAllValues(), hasSize(1));
+		assertEquals(procedure, captor.getValue());
 	}
 
 	/**

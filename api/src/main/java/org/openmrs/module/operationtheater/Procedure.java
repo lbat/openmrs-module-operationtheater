@@ -5,7 +5,6 @@ import org.apache.commons.logging.LogFactory;
 import org.openmrs.BaseOpenmrsData;
 
 import javax.persistence.*;
-import java.util.Date;
 
 /**
  * Defines a Procedure in the system.
@@ -30,19 +29,19 @@ import java.util.Date;
 	private String description;
 
 	/**
-	 * average timespan required to perform this procedure
+	 * average timespan in minutes required to perform this procedure
 	 */
 	@Basic
 	@Column(name = "intervention_duration")
-	private Date interventionDuration;
+	private Integer interventionDuration;
 
 	/**
-	 * average timespan required to prepare the operation theater
+	 * average timespan in minutes required to prepare the operation theater
 	 * for this particular procedure
 	 */
 	@Basic
 	@Column(name = "ot_preparation_duration")
-	private Date otPreparationDuration;
+	private Integer otPreparationDuration;
 
 	/**
 	 * average number of days the patient has to stay in the hospital
@@ -50,7 +49,7 @@ import java.util.Date;
 	 */
 	@Basic
 	@Column(name = "inpatient_stay")
-	private int inpatientStay;
+	private Integer inpatientStay;
 
 	public int getProcedureId() {
 		return procedureId;
@@ -86,19 +85,19 @@ import java.util.Date;
 		this.description = description;
 	}
 
-	public Date getInterventionDuration() {
+	public Integer getInterventionDuration() {
 		return interventionDuration;
 	}
 
-	public void setInterventionDuration(Date interventionDuration) {
+	public void setInterventionDuration(Integer interventionDuration) {
 		this.interventionDuration = interventionDuration;
 	}
 
-	public Date getOtPreparationDuration() {
+	public Integer getOtPreparationDuration() {
 		return otPreparationDuration;
 	}
 
-	public void setOtPreparationDuration(Date otPreparationDuration) {
+	public void setOtPreparationDuration(Integer otPreparationDuration) {
 		this.otPreparationDuration = otPreparationDuration;
 	}
 

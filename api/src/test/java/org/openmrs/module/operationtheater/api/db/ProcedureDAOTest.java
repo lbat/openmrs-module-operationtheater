@@ -41,8 +41,8 @@ public class ProcedureDAOTest extends BaseModuleContextSensitiveTest {
 		Procedure procedure = new Procedure();
 		procedure.setName("Test procedure");
 		procedure.setDescription("Test procedure description");
-		procedure.setInterventionDuration(new SimpleDateFormat("HH:mm").parse("01:15"));
-		procedure.setOtPreparationDuration(new SimpleDateFormat("HH:mm").parse("00:30"));
+		procedure.setInterventionDuration(75);
+		procedure.setOtPreparationDuration(30);
 		procedure.setInpatientStay(4);
 
 		Procedure savedProcedure = procedureDAO.saveOrUpdate(procedure);
@@ -87,8 +87,8 @@ public class ProcedureDAOTest extends BaseModuleContextSensitiveTest {
 
 		procedure.setName("Another Test procedure");
 		procedure.setDescription("Another Test procedure description");
-		procedure.setInterventionDuration(new SimpleDateFormat("HH:mm").parse("11:15"));
-		procedure.setOtPreparationDuration(new SimpleDateFormat("HH:mm").parse("01:30"));
+		procedure.setInterventionDuration(245);
+		procedure.setOtPreparationDuration(62);
 		procedure.setInpatientStay(10);
 
 		Procedure savedProcedure = procedureDAO.saveOrUpdate(procedure);
