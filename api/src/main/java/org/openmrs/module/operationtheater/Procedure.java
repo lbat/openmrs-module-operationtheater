@@ -11,7 +11,7 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "procedure")
- public class Procedure extends BaseOpenmrsData{
+ public class Procedure extends BaseOpenmrsMetadataJPA{
 
 	private static final Log log = LogFactory.getLog(Procedure.class);
 
@@ -20,19 +20,11 @@ import javax.persistence.*;
 	@Column(name = "procedure_id")
 	private int procedureId;
 
-	@Basic
-	@Column(name = "name")
-	private String name;
-
-	@Basic
-	@Column(name = "description")
-	private String description;
-
 	/**
 	 * average timespan in minutes required to perform this procedure
 	 */
 	@Basic
-	@Column(name = "intervention_duration")
+	@Column(name = "intervention_duration", nullable = false)
 	private Integer interventionDuration;
 
 	/**
@@ -40,7 +32,7 @@ import javax.persistence.*;
 	 * for this particular procedure
 	 */
 	@Basic
-	@Column(name = "ot_preparation_duration")
+	@Column(name = "ot_preparation_duration", nullable = false)
 	private Integer otPreparationDuration;
 
 	/**
@@ -48,7 +40,7 @@ import javax.persistence.*;
 	 * after this procedure
 	 */
 	@Basic
-	@Column(name = "inpatient_stay")
+	@Column(name = "inpatient_stay", nullable = false)
 	private Integer inpatientStay;
 
 	public int getProcedureId() {
@@ -67,22 +59,6 @@ import javax.persistence.*;
 	@Override
 	public void setId(Integer id) {
 		setProcedureId(id);
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
 	}
 
 	public Integer getInterventionDuration() {

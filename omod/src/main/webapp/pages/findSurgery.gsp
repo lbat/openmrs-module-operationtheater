@@ -3,7 +3,7 @@
         ui.includeCss("coreapps", "findpatient/findPatient.css")
         ui.includeCss("uicommons", "datatables/dataTables_jui.css")
         ui.includeJavascript("uicommons", "datatables/jquery.dataTables.min.js")
-        ui.includeJavascript("coreapps", "findpatient/patientSearchWidget.js")
+        ui.includeJavascript("operationtheater", "surgerySearchWidget.js")
         ui.includeJavascript("uicommons", "moment.min.js")
         %>
 <script type="text/javascript">

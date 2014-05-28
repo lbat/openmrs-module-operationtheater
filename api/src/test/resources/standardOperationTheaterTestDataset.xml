@@ -8,8 +8,8 @@
     <person person_id="2" voided="false" date_created="2005-01-01 00:00:00.0" uuid="31e09960-8f52-11e3-baa8-0800200c9a66" creator="1" />
 
     <!-- Operation Theather Module -->
-    <procedure procedure_id="1" name="Procedure Name" description="procedure description" intervention_duration="122" ot_preparation_duration="23" inpatient_stay="4" />
-    <procedure procedure_id="2" name="Procedure Name 2" description="procedure description 2" intervention_duration="252" ot_preparation_duration="46" inpatient_stay="8" />
+    <procedure procedure_id="1" name="Procedure Name" description="procedure description" intervention_duration="122" ot_preparation_duration="23" inpatient_stay="4" creator="1" date_created="2005-01-01 00:00:00.0"/>
+    <procedure procedure_id="2" name="Procedure Name 2" description="procedure description 2" intervention_duration="252" ot_preparation_duration="46" inpatient_stay="8" creator="1" date_created="2005-01-01 00:00:00.0"/>
 
     <surgery surgery_id="1" patient_id="1" uuid="ca352fc1-1691-11df-97a5-7038c432aab5" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"/>
     <surgery surgery_id="2" patient_id="1" uuid="ca352fc1-1691-11df-97a5-7038c432aab6" creator="1" date_created="2005-01-01 00:00:00.0" voided="true" void_reason="void reason"/>

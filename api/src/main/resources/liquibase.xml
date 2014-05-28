@@ -20,7 +20,9 @@
             <column name="surgery_id" type="integer" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
-            <column name="patient_id" type="integer"/>
+            <column name="patient_id" type="integer" >
+                <constraints nullable="false"/>
+            </column>
 
             <column name="uuid" type="char(38)">
                 <constraints nullable="false" unique="true"/>
@@ -44,6 +46,67 @@
         <addForeignKeyConstraint constraintName="surgery_patient_fk"
                                  baseTableName="surgery" baseColumnNames="patient_id" referencedTableName="patient"
                                  referencedColumnNames="patient_id" />
+        <addForeignKeyConstraint constraintName="surgery_creator"
+                                 baseTableName="surgery" baseColumnNames="creator"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="surgery_changed_by"
+                                 baseTableName="surgery" baseColumnNames="changed_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="surgery_retired_by"
+                                 baseTableName="surgery" baseColumnNames="voided_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+    </changeSet>
+
+    <changeSet author="Lukas Breitwieser" id="operationtheater-201405281149">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="procedure"/></not>
+        </preConditions>
+        <comment>
+            Create the procedure table
+        </comment>
+        <createTable tableName="procedure">
+
+            <column name="procedure_id" type="integer" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="intervention_duration" type="integer" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="ot_preparation_duration" type="integer" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="inpatient_stay" type="integer" >
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="uuid" type="char(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="creator" type="int" >
+                <constraints nullable="false" />
+            </column>
+            <column name="date_created" type="datetime" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int" />
+            <column name="date_changed" type="datetime" />
+            <column name="retired" type="tinyint" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="retired_by" type="int" />
+            <column name="date_retired" type="datetime" />
+            <column name="retire_reason" type="varchar(255)" defaultValue="null"/>
+        </createTable>
+
+        <addForeignKeyConstraint constraintName="procedure_creator"
+                                 baseTableName="procedure" baseColumnNames="creator"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="procedure_changed_by"
+                                 baseTableName="procedure" baseColumnNames="changed_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="procedure_retired_by"
+                                 baseTableName="procedure" baseColumnNames="retired_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
     </changeSet>
     
 </databaseChangeLog>
