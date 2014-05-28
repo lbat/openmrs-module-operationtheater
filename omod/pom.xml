@@ -94,7 +94,7 @@
             <artifactId>appui-api</artifactId>
         </dependency>
 
-        <!--<dependency>
+        <dependency>
             <groupId>org.openmrs.module</groupId>
             <artifactId>emrapi-api</artifactId>
         </dependency>
@@ -105,7 +105,7 @@
             <version>${appuiVersion}</version>
             <type>jar</type>
             <scope>provided</scope>
-        </dependency>-->
+        </dependency>
 
         <dependency>
             <groupId>org.openmrs.module</groupId>
@@ -135,6 +135,56 @@
             <classifier>tests</classifier>
         </dependency>
 
+        <!-- OpenMRS modules simply required to fire up the application context when running component tests -->
+        <dependency>
+            <groupId>org.openmrs.module</groupId>
+            <artifactId>reporting-api</artifactId>
+            <version>${reportingVersion}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.openmrs.module</groupId>
+            <artifactId>htmlformentry-api</artifactId>
+            <version>${htmlformentryVersion}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.openmrs.module</groupId>
+            <artifactId>serialization.xstream-api</artifactId>
+            <version>${serializationxstreamVersion}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.openmrs.module</groupId>
+            <artifactId>calculation-api</artifactId>
+            <version>${calculationVersion}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.openmrs.module</groupId>
+            <artifactId>providermanagement-api</artifactId>
+            <version>${providerManagementVersion}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.openmrs.module</groupId>
+            <artifactId>paperrecord-api</artifactId>
+            <version>${paperrecordVersion}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.openmrs.module</groupId>
+            <artifactId>idgen-api</artifactId>
+            <version>${idgenVersion}</version>
+            <type>jar</type>
+            <scope>provided</scope>
+        </dependency>
         <!-- End OpenMRS modules -->
 
         <!-- Resolves error that AppTest couldn't find class javax.validation.Validator in AppTestUtil -->

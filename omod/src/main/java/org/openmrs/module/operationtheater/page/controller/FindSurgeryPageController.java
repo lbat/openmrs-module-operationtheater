@@ -8,6 +8,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.appframework.domain.AppDescriptor;
 //import org.openmrs.module.appui.UiSessionContext;
 //import org.openmrs.module.emrapi.utils.GeneralUtils;
+import org.openmrs.module.appui.UiSessionContext;
 import org.openmrs.ui.framework.page.PageModel;
 import org.openmrs.util.OpenmrsConstants;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,24 +27,22 @@ public class FindSurgeryPageController {
 	 * @param app
 	 * @param sessionContext
 	 */
-//	public void get(PageModel model, @RequestParam("app") AppDescriptor app, UiSessionContext sessionContext) {
-//		model.addAttribute("afterSelectedUrl", app.getConfig().get("afterSelectedUrl").getTextValue());
-//		model.addAttribute("heading", app.getConfig().get("label").getTextValue());
-//		model.addAttribute("label", app.getConfig().get("label").getTextValue());
-//		model.addAttribute("minSearchCharacters",
-//				Context.getAdministrationService()
-//						.getGlobalProperty(OpenmrsConstants.GLOBAL_PROPERTY_MIN_SEARCH_CHARACTERS, "1"));
-//
-//		model.addAttribute("dateFormatter", new SimpleDateFormat("dd-MMM-yyy", Context.getLocale()));
-//
-//		if (app.getConfig().get("showLastViewedPatients").getBooleanValue()) {
-//			List<Patient> patients = null;//GeneralUtils.getLastViewedPatients(sessionContext.getCurrentUser());
-//			model.addAttribute("lastViewedPatients", patients);
-//		}
-//		model.addAttribute("showLastViewedPatients", app.getConfig().get("showLastViewedPatients").getBooleanValue());
-//	}
-	public void get(PageModel model, @RequestParam("app") AppDescriptor app){
+	public void get(PageModel model, @RequestParam("app") AppDescriptor app, UiSessionContext sessionContext) {
+		model.addAttribute("afterSelectedUrl", app.getConfig().get("afterSelectedUrl").getTextValue());
+		model.addAttribute("heading", app.getConfig().get("label").getTextValue());
+		model.addAttribute("label", app.getConfig().get("label").getTextValue());
+		model.addAttribute("minSearchCharacters",
+				Context.getAdministrationService()
+						.getGlobalProperty(OpenmrsConstants.GLOBAL_PROPERTY_MIN_SEARCH_CHARACTERS, "1"));
 
+		model.addAttribute("dateFormatter", new SimpleDateFormat("dd-MMM-yyy", Context.getLocale()));
+
+		if (app.getConfig().get("showLastViewedPatients").getBooleanValue()) {
+			List<Patient> patients = null;//GeneralUtils.getLastViewedPatients(sessionContext.getCurrentUser());
+			model.addAttribute("lastViewedPatients", patients);
+		}
+		model.addAttribute("showLastViewedPatients", app.getConfig().get("showLastViewedPatients").getBooleanValue());
 	}
+
 
 }
