@@ -1,0 +1,8 @@
+{
+    "name": "Operation Theater Module",
+    "version": "0.0.1",
+    "dependencies": {
+        "fullcalendar": "1.6.4"
+    },
+    "private": true
+}

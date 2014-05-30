@@ -73,4 +73,5 @@ nb-configuration.xml
 /webapp/src/main/webapp/WEB-INF/module_messages*
 
 /omod/src/main/compass/sass-external/
+/omod/src/main/webapp/resources/bower_components/
 #############
