@@ -115,6 +115,11 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.openmrs.module</groupId>
+            <artifactId>appointmentscheduling-api</artifactId>
+        </dependency>
+
         <!-- Rest webservice -->
         <dependency>
             <groupId>org.openmrs.module</groupId>

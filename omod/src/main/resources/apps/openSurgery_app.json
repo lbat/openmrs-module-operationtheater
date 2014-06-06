@@ -9,7 +9,7 @@
                 "id": "coreapps.activeVisitsHomepageLink",
                 "extensionPointId": "org.openmrs.referenceapplication.homepageLink",
                 "type": "link",
-                "label": "${project.parent.artifactId}.openSurgery.button.label",
+                "label": "${project.parent.artifactId}.openSurgery.app.button.label",
                 "url": "${project.parent.artifactId}/findSurgery.page?app=${project.parent.artifactId}.openSurgery",
                 "icon": "icon-file",
                 "requiredPrivilege": "App: coreapps.findPatient"
