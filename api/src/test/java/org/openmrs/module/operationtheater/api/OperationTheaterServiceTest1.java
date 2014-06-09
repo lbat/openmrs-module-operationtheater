@@ -46,7 +46,7 @@ public class OperationTheaterServiceTest1 extends BaseModuleContextSensitiveTest
 	private ProcedureDAO procedureDAO;
 
 	@Before
-	public void setUp(){
+	public void setUp() {
 		service = Context.getService(OperationTheaterService.class);
 		surgeryDAO = Mockito.mock(HibernateSurgeryDAO.class);
 		service.setSurgeryDAO(surgeryDAO);
@@ -61,6 +61,7 @@ public class OperationTheaterServiceTest1 extends BaseModuleContextSensitiveTest
 
 	/**
 	 * test needs to be context sensitive because the actual voiding is done through AOP
+	 *
 	 * @verifies void the given surgery
 	 * @see OperationTheaterService#voidSurgery(org.openmrs.module.operationtheater.Surgery, String)
 	 */

@@ -1,16 +1,16 @@
 <%
-        ui.decorateWith("appui", "standardEmrPage")
+    ui.decorateWith("appui", "standardEmrPage")
 
-        ui.includeCss("referenceapplication", "referenceapplication.css")
+    ui.includeCss("referenceapplication", "referenceapplication.css")
 
-        ui.includeCss("operationtheater", "bower_components/fullcalendar/fullcalendar.css")
-        ui.includeJavascript("operationtheater", "bower_components/fullcalendar/fullcalendar.js")
+    ui.includeCss("operationtheater", "bower_components/fullcalendar/fullcalendar.css")
+    ui.includeJavascript("operationtheater", "bower_components/fullcalendar/fullcalendar.js")
 
-        ui.includeJavascript("operationtheater", "scheduling.js")
-        ui.includeJavascript("uicommons", "emr.js")
-        ui.includeJavascript("uicommons", "moment.min.js")
-        ui.includeJavascript("uicommons", "datetimepicker/bootstrap-datetimepicker.min.js")
-        %>
+    ui.includeJavascript("operationtheater", "scheduling.js")
+    ui.includeJavascript("uicommons", "emr.js")
+    ui.includeJavascript("uicommons", "moment.min.js")
+    ui.includeJavascript("uicommons", "datetimepicker/bootstrap-datetimepicker.min.js")
+%>
 <script type="text/javascript">
 
     var breadcrumbs = [
@@ -60,7 +60,7 @@
                 params.start = jq.fullCalendar.formatDate(start, 'yyyy-MM-dd');
                 params.end = jq.fullCalendar.formatDate(end, 'yyyy-MM-dd');
                 params.resources = operationTheaters;
-                jq.ajaxSetup({ scriptCharset: "utf-8" , contentType: "application/json; charset=utf-8"});
+                jq.ajaxSetup({ scriptCharset: "utf-8", contentType: "application/json; charset=utf-8"});
                 jq.getJSON('${ ui.actionLink("operationtheater", "scheduling", "getEvents") }', jq.param(params, true))
                         .success(function (data) {
                             callback(data);
@@ -76,7 +76,7 @@
         //customize fullcalendars design
 //        jq("span.fc-button").addClass("button");
         //add datepicker button
-        jq('span:contains(today)').parents ('td').append ('<span class="fc-header-space"></span><span id="datepicker-link" class="button" href="#" onclick="return false"><i class ="icon-calendar"></i></span>');
+        jq('span:contains(today)').parents('td').append('<span class="fc-header-space"></span><span id="datepicker-link" class="button" href="#" onclick="return false"><i class ="icon-calendar"></i></span>');
 //        jq('span:contains(today)').parents ('td').append ('<div>'+
 //                '<form id="form_datetime">'+
 //                '<input width="1px" hidden="true" type="text" value="" style="display: none">'+
@@ -106,27 +106,25 @@
 //        });
 
         jq('td.fc-header-right').empty();
-        jq('td.fc-header-right').append('<div class="dropdown" style="margin-right:0px; top:0px">'+
-                                    '<span class="dropdown-name">'+
-                                    '    <i class="icon-cog"></i>'+
-                                    '    Actions'+
-                                    '    <i class="icon-sort-down"></i>'+
-                                    '</span>'+
-                                    '<ul>'+
-                                    '    <li>'+
-                                    '        <a href="#"><i class="icon-filter"></i>Filter</a>'+
-                                    '    </li>'+
-                                    '</ul>'+
-                                '</div>');
-
-
+        jq('td.fc-header-right').append('<div class="dropdown" style="margin-right:0px; top:0px">' +
+                '<span class="dropdown-name">' +
+                '    <i class="icon-cog"></i>' +
+                '    Actions' +
+                '    <i class="icon-sort-down"></i>' +
+                '</span>' +
+                '<ul>' +
+                '    <li>' +
+                '        <a href="#"><i class="icon-filter"></i>Filter</a>' +
+                '    </li>' +
+                '</ul>' +
+                '</div>');
 
 
         //remove border from header table
-        jq("table.fc-header tr").css("border-collapse","collapse");
-        jq("table.fc-header tr").css("border","0");
-        jq("table.fc-header td").css("border-collapse","collapse");
-        jq("table.fc-header td").css("border","0");
+        jq("table.fc-header tr").css("border-collapse", "collapse");
+        jq("table.fc-header tr").css("border", "0");
+        jq("table.fc-header td").css("border-collapse", "collapse");
+        jq("table.fc-header td").css("border", "0");
     });
 
 </script>

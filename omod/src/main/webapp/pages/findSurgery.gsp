@@ -1,11 +1,11 @@
 <%
-        ui.decorateWith("appui", "standardEmrPage")
-        ui.includeCss("coreapps", "findpatient/findPatient.css")
-        ui.includeCss("uicommons", "datatables/dataTables_jui.css")
-        ui.includeJavascript("uicommons", "datatables/jquery.dataTables.min.js")
-        ui.includeJavascript("operationtheater", "surgerySearchWidget.js")
-        ui.includeJavascript("uicommons", "moment.min.js")
-        %>
+    ui.decorateWith("appui", "standardEmrPage")
+    ui.includeCss("coreapps", "findpatient/findPatient.css")
+    ui.includeCss("uicommons", "datatables/dataTables_jui.css")
+    ui.includeJavascript("uicommons", "datatables/jquery.dataTables.min.js")
+    ui.includeJavascript("operationtheater", "surgerySearchWidget.js")
+    ui.includeJavascript("uicommons", "moment.min.js")
+%>
 <script type="text/javascript">
     var breadcrumbs = [
         { icon: "icon-home", link: '/' + OPENMRS_CONTEXT_PATH + '/index.htm' },
@@ -15,15 +15,15 @@
     var lastViewedPatients = [];
     <% if (showLastViewedPatients) {
             lastViewedPatients.each { it -> %>
-            lastViewedPatients.push({uuid:"${ it.uuid }",fullName:"${ it.personName.fullName }",gender:"${ it.gender }",
-                age:"${ it.age ?: '' }", birthdate:"${ it.birthdate ? dateFormatter.format(it.birthdate) : '' }",
-                birthdateEstimated: ${ it.birthdateEstimated }, identifier:"${ it.patientIdentifier.identifier }"});
+    lastViewedPatients.push({uuid: "${ it.uuid }", fullName: "${ it.personName.fullName }", gender: "${ it.gender }",
+        age: "${ it.age ?: '' }", birthdate: "${ it.birthdate ? dateFormatter.format(it.birthdate) : '' }",
+        birthdateEstimated: ${ it.birthdateEstimated }, identifier: "${ it.patientIdentifier.identifier }"});
     <% }
         }%>
 
-    jq(function() {
+    jq(function () {
         var widgetConfig = {
-            initialPatients : lastViewedPatients,
+            initialPatients: lastViewedPatients,
             minSearchCharacters: ${minSearchCharacters},
             afterSelectedUrl: '${ ui.escapeJs(afterSelectedUrl) }',
             messages: {
@@ -51,11 +51,12 @@
 </script>
 
 <h2>
-${ ui.message(heading) }
+    ${ui.message(heading)}
 </h2>
 
 <form method="get" id="patient-search-form" onsubmit="return false">
-<input type="text" id="patient-search" placeholder="${ ui.message("coreapps.findPatient.search.placeholder") }" autocomplete="off"/>
+    <input type="text" id="patient-search" placeholder="${ui.message("coreapps.findPatient.search.placeholder")}"
+           autocomplete="off"/>
 </form>
 
 <div id="patient-search-results"></div>

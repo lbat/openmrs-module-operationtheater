@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
- 
-<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
     <!--
         See http://www.liquibase.org/manual/home#available_database_refactorings
@@ -10,7 +10,9 @@
     -->
     <changeSet author="Lukas Breitwieser" id="operationtheater-201405231149">
         <preConditions onFail="MARK_RAN">
-            <not><tableExists tableName="surgery"/></not>
+            <not>
+                <tableExists tableName="surgery"/>
+            </not>
         </preConditions>
         <comment>
             Create the surgery table
@@ -20,32 +22,32 @@
             <column name="surgery_id" type="integer" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
-            <column name="patient_id" type="integer" >
+            <column name="patient_id" type="integer">
                 <constraints nullable="false"/>
             </column>
 
             <column name="uuid" type="char(38)">
                 <constraints nullable="false" unique="true"/>
             </column>
-            <column name="creator" type="int" >
-                <constraints nullable="false" />
-            </column>
-            <column name="date_created" type="datetime" >
+            <column name="creator" type="int">
                 <constraints nullable="false"/>
             </column>
-            <column name="changed_by" type="int" />
-            <column name="date_changed" type="datetime" />
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
             <column name="voided" type="tinyint" defaultValueNumeric="0">
                 <constraints nullable="false"/>
             </column>
-            <column name="voided_by" type="int" />
-            <column name="date_voided" type="datetime" />
+            <column name="voided_by" type="int"/>
+            <column name="date_voided" type="datetime"/>
             <column name="void_reason" type="varchar(255)" defaultValue="null"/>
         </createTable>
 
         <addForeignKeyConstraint constraintName="surgery_patient_fk"
                                  baseTableName="surgery" baseColumnNames="patient_id" referencedTableName="patient"
-                                 referencedColumnNames="patient_id" />
+                                 referencedColumnNames="patient_id"/>
         <addForeignKeyConstraint constraintName="surgery_creator"
                                  baseTableName="surgery" baseColumnNames="creator"
                                  referencedTableName="users" referencedColumnNames="user_id"/>
@@ -59,7 +61,9 @@
 
     <changeSet author="Lukas Breitwieser" id="operationtheater-201405281149">
         <preConditions onFail="MARK_RAN">
-            <not><tableExists tableName="procedure"/></not>
+            <not>
+                <tableExists tableName="procedure"/>
+            </not>
         </preConditions>
         <comment>
             Create the procedure table
@@ -69,32 +73,32 @@
             <column name="procedure_id" type="integer" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
-            <column name="intervention_duration" type="integer" >
+            <column name="intervention_duration" type="integer">
                 <constraints nullable="false"/>
             </column>
-            <column name="ot_preparation_duration" type="integer" >
+            <column name="ot_preparation_duration" type="integer">
                 <constraints nullable="false"/>
             </column>
-            <column name="inpatient_stay" type="integer" >
+            <column name="inpatient_stay" type="integer">
                 <constraints nullable="false"/>
             </column>
 
             <column name="uuid" type="char(38)">
                 <constraints nullable="false" unique="true"/>
             </column>
-            <column name="creator" type="int" >
-                <constraints nullable="false" />
-            </column>
-            <column name="date_created" type="datetime" >
+            <column name="creator" type="int">
                 <constraints nullable="false"/>
             </column>
-            <column name="changed_by" type="int" />
-            <column name="date_changed" type="datetime" />
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
             <column name="retired" type="tinyint" defaultValueNumeric="0">
                 <constraints nullable="false"/>
             </column>
-            <column name="retired_by" type="int" />
-            <column name="date_retired" type="datetime" />
+            <column name="retired_by" type="int"/>
+            <column name="date_retired" type="datetime"/>
             <column name="retire_reason" type="varchar(255)" defaultValue="null"/>
         </createTable>
 
@@ -108,5 +112,5 @@
                                  baseTableName="procedure" baseColumnNames="retired_by"
                                  referencedTableName="users" referencedColumnNames="user_id"/>
     </changeSet>
-    
+
 </databaseChangeLog>

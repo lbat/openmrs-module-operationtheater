@@ -4,7 +4,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.module.operationtheater.Procedure;
 import org.openmrs.module.operationtheater.api.db.ProcedureDAO;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -13,6 +12,7 @@ import org.springframework.stereotype.Repository;
 //@Qualifier("procedureDAO")
 @Repository
 public class HibernateProcedureDAO extends HibernateGenericDAO<Procedure> implements ProcedureDAO {
+
 	protected final Log log = LogFactory.getLog(this.getClass());
 
 	public HibernateProcedureDAO() {

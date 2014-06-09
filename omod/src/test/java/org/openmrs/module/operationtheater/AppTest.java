@@ -30,7 +30,8 @@ public class AppTest {
 		assertThat(app.getExtensions().get(0).getExtensionPointId(), is("org.openmrs.referenceapplication.homepageLink"));
 		assertThat(app.getExtensions().get(0).getType(), is("link"));
 		assertThat(app.getExtensions().get(0).getLabel(), is("operationtheater.openSurgery.app.button.label"));
-		assertThat(app.getExtensions().get(0).getUrl(), is("operationtheater/findSurgery.page?app=operationtheater.openSurgery"));
+		assertThat(app.getExtensions().get(0).getUrl(),
+				is("operationtheater/findSurgery.page?app=operationtheater.openSurgery"));
 		assertThat(app.getExtensions().get(0).getIcon(), is("icon-file"));
 		//TODO priviledge
 		//assertThat(app.getExtensions().get(0).getRequiredPrivilege(), is());

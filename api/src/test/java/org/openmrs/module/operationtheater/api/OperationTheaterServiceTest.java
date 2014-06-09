@@ -25,7 +25,6 @@ import org.openmrs.module.operationtheater.api.db.SurgeryDAO;
 import org.openmrs.module.operationtheater.api.db.hibernate.HibernateProcedureDAO;
 import org.openmrs.module.operationtheater.api.db.hibernate.HibernateSurgeryDAO;
 import org.openmrs.module.operationtheater.api.impl.OperationTheaterServiceImpl;
-import org.openmrs.test.Verifies;
 import org.openmrs.validator.ValidateUtil;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -45,7 +44,7 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(ValidateUtil.class)
-public class  OperationTheaterServiceTest{ //extends BaseModuleContextSensitiveTest {
+public class OperationTheaterServiceTest { //extends BaseModuleContextSensitiveTest {
 
 	private OperationTheaterService service;
 
@@ -54,7 +53,7 @@ public class  OperationTheaterServiceTest{ //extends BaseModuleContextSensitiveT
 	private ProcedureDAO procedureDAO;
 
 	@Before
-	public void setUp(){
+	public void setUp() {
 		service = new OperationTheaterServiceImpl();
 		surgeryDAO = Mockito.mock(HibernateSurgeryDAO.class);
 		service.setSurgeryDAO(surgeryDAO);
@@ -116,12 +115,12 @@ public class  OperationTheaterServiceTest{ //extends BaseModuleContextSensitiveT
 		when(surgeryDAO.getAllData(true)).thenReturn(surgeryList);
 		List<Surgery> result = service.getAllSurgeries(true);
 		assertEquals(surgeryList, result);
-//		Mockito.verify(surgeryDAO).getAllData(true);
+		//		Mockito.verify(surgeryDAO).getAllData(true);
 
 		when(surgeryDAO.getAllData(false)).thenReturn(surgeryList);
 		result = service.getAllSurgeries(false);
 		assertEquals(surgeryList, result);
-//		Mockito.verify(surgeryDAO).getAllData(false);
+		//		Mockito.verify(surgeryDAO).getAllData(false);
 	}
 
 	/**

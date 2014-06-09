@@ -17,10 +17,8 @@ import org.openmrs.test.Verifies;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 
 /**
  * Tests {@link SurgeryResource1_9}
@@ -48,20 +46,21 @@ public class SurgeryResource1_9ControllerTest extends MainResourceControllerTest
 		assertEquals(getUuid(), PropertyUtils.getProperty(result, "uuid"));
 		assertEquals(true, PropertyUtils.getProperty(result, "voided"));
 		//TODO add check for display string
-//		Assert.assertEquals("Hippocrates of Cos, Xanadu: 2007-01-01 00:00:00.2 - 2007-01-01 01:00:00.0",
-//				PropertyUtils.getProperty(result, "display"));
+		//		Assert.assertEquals("Hippocrates of Cos, Xanadu: 2007-01-01 00:00:00.2 - 2007-01-01 01:00:00.0",
+		//				PropertyUtils.getProperty(result, "display"));
 		Assert.assertEquals("22b47970-8f52-11e3-baa8-0800200c9a66", Util.getByPath(result, "patient/uuid"));
 	}
 
 	@Test
-	@Verifies(value="should get all surgeries", method="doGetAll(RequestContext)")
-	public void shouldGetAllSurgeries() throws Exception{
+	@Verifies(value = "should get all surgeries", method = "doGetAll(RequestContext)")
+	public void shouldGetAllSurgeries() throws Exception {
 		MockHttpServletRequest req = newGetRequest(getURI(), new MainResourceControllerTest.Parameter(
 				RestConstants.REQUEST_PROPERTY_FOR_INCLUDE_ALL, "true"));
 		SimpleObject result = deserialize(handle(req));
 
 		assertEquals(2, Util.getResultsSize(result));
-		assertEquals(SurgeryResource1_9Test.SURGERY_UUID, PropertyUtils.getProperty(Util.getResultsList(result).get(0), "uuid"));
+		assertEquals(SurgeryResource1_9Test.SURGERY_UUID,
+				PropertyUtils.getProperty(Util.getResultsList(result).get(0), "uuid"));
 		assertEquals(getUuid(), PropertyUtils.getProperty(Util.getResultsList(result).get(1), "uuid"));
 	}
 
@@ -77,8 +76,8 @@ public class SurgeryResource1_9ControllerTest extends MainResourceControllerTest
 		Assert.assertNotNull(result);
 		Assert.assertEquals(getUuid(), PropertyUtils.getProperty(result, "uuid"));
 		//TODO add check for display string
-//		Assert.assertEquals("Hippocrates of Cos, Xanadu: 2007-01-01 00:00:00.2 - 2007-01-01 01:00:00.0",
-//				PropertyUtils.getProperty(result, "display"));
+		//		Assert.assertEquals("Hippocrates of Cos, Xanadu: 2007-01-01 00:00:00.2 - 2007-01-01 01:00:00.0",
+		//				PropertyUtils.getProperty(result, "display"));
 
 		Assert.assertEquals("22b47970-8f52-11e3-baa8-0800200c9a66", Util.getByPath(result, "patient/uuid"));
 
@@ -89,7 +88,7 @@ public class SurgeryResource1_9ControllerTest extends MainResourceControllerTest
 	@Test
 	public void shouldVoidATimeSlot() throws Exception {
 
-		MockHttpServletRequest req = request(RequestMethod.DELETE, getURI() + "/"+ SurgeryResource1_9Test.SURGERY_UUID);
+		MockHttpServletRequest req = request(RequestMethod.DELETE, getURI() + "/" + SurgeryResource1_9Test.SURGERY_UUID);
 		req.addParameter("!purge", "");
 		req.addParameter("reason", "really ridiculous random reason");
 		handle(req);

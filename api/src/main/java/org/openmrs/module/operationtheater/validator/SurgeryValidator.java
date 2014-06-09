@@ -8,7 +8,6 @@ import org.openmrs.module.operationtheater.Surgery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.validation.Errors;
-import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
 /**
@@ -17,7 +16,9 @@ import org.springframework.validation.Validator;
 @Handler(supports = { Surgery.class }, order = 50)
 public class SurgeryValidator implements Validator {
 
-	/** Log for this class and subclasses */
+	/**
+	 * Log for this class and subclasses
+	 */
 	protected final Log log = LogFactory.getLog(getClass());
 
 	@Autowired
@@ -27,6 +28,7 @@ public class SurgeryValidator implements Validator {
 	public void setPatientService(PatientService patientService) {
 		this.patientService = patientService;
 	}
+
 	/**
 	 * Determines if the command object being submitted is a valid type
 	 *
@@ -40,15 +42,15 @@ public class SurgeryValidator implements Validator {
 	/**
 	 * Checks the form object for any inconsistencies/errors
 	 *
-	 * @see org.springframework.validation.Validator#validate(java.lang.Object,
-	 *      org.springframework.validation.Errors)
 	 * @should fail validation if obj is not instance of surgery
 	 * @should fail validation if patient is null or empty
 	 * @should fail validation if patient does not exist
 	 * @should pass validation if all required fields have proper values
+	 * @see org.springframework.validation.Validator#validate(java.lang.Object,
+	 * org.springframework.validation.Errors)
 	 */
 	public void validate(Object obj, Errors errors) {
-		if(!(obj instanceof  Surgery)){
+		if (!(obj instanceof Surgery)) {
 			errors.rejectValue("surgery", "error.general");
 			return;
 		}
@@ -57,11 +59,11 @@ public class SurgeryValidator implements Validator {
 			errors.rejectValue("surgery", "error.general");
 			return;
 		}
-		if(surgery.getPatient() == null){
+		if (surgery.getPatient() == null) {
 			errors.rejectValue("patient", "operationtheater.Surgery.emptyPatientID");
 			return;
 		}
-		if(patientService.getPatient(surgery.getPatient().getId()) == null) {
+		if (patientService.getPatient(surgery.getPatient().getId()) == null) {
 			errors.rejectValue("patient", "operationtheater.surgery.patientDoesNotExist");
 		}
 	}

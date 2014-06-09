@@ -1,10 +1,8 @@
 package org.openmrs.module.operationtheater.validator;
 
 import org.apache.commons.lang.StringUtils;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openmrs.api.PatientService;
 import org.openmrs.module.operationtheater.Procedure;
 import org.springframework.validation.Errors;
 
@@ -90,7 +88,7 @@ public class ProcedureValidatorTest {
 	@Test
 	public void validate_shouldFailValidationIfDescriptionIsNullEmptyOrWhitespaceOrLongerThan1024Chars() throws Exception {
 		String fieldName = "description";
-		String messageId = MESSAGE_PREFIX + fieldName+".errorMessage";
+		String messageId = MESSAGE_PREFIX + fieldName + ".errorMessage";
 		Procedure procedure = createValidProcedure();
 
 		//null
@@ -125,7 +123,7 @@ public class ProcedureValidatorTest {
 	@Test
 	public void validate_shouldFailValidationIfInterventionDurationIsNullNegativeOrGreaterThan24Hours() throws Exception {
 		String fieldName = "interventionDuration";
-		String messageId = MESSAGE_PREFIX + fieldName+".errorMessage";
+		String messageId = MESSAGE_PREFIX + fieldName + ".errorMessage";
 		Procedure procedure = createValidProcedure();
 
 		//null
@@ -141,7 +139,7 @@ public class ProcedureValidatorTest {
 
 		//longer than 24 hours
 		errors = mock(Errors.class);
-		procedure.setInterventionDuration(24*60+1);
+		procedure.setInterventionDuration(24 * 60 + 1);
 		validator.validate(procedure, errors);
 		verify(errors).rejectValue(fieldName, messageId, null, null);
 	}
@@ -153,7 +151,7 @@ public class ProcedureValidatorTest {
 	@Test
 	public void validate_shouldFailValidationIfOtPreparationDurationIsNullNegativeOrGreaterThan5Hours() throws Exception {
 		String fieldName = "otPreparationDuration";
-		String messageId = MESSAGE_PREFIX + fieldName+".errorMessage";
+		String messageId = MESSAGE_PREFIX + fieldName + ".errorMessage";
 		Procedure procedure = createValidProcedure();
 
 		//null
@@ -169,7 +167,7 @@ public class ProcedureValidatorTest {
 
 		//longer than 5 hours
 		errors = mock(Errors.class);
-		procedure.setOtPreparationDuration(5*60+1);
+		procedure.setOtPreparationDuration(5 * 60 + 1);
 		validator.validate(procedure, errors);
 		verify(errors).rejectValue(fieldName, messageId, null, null);
 	}
@@ -181,7 +179,7 @@ public class ProcedureValidatorTest {
 	@Test
 	public void validate_shouldFailValidationIfInpatientStayIsNullNegativeOrGreaterThan60Days() throws Exception {
 		String fieldName = "otPreparationDuration";
-		String messageId = MESSAGE_PREFIX + fieldName+".errorMessage";
+		String messageId = MESSAGE_PREFIX + fieldName + ".errorMessage";
 		Procedure procedure = createValidProcedure();
 
 		//null
@@ -197,7 +195,7 @@ public class ProcedureValidatorTest {
 
 		//longer than 5 hours
 		errors = mock(Errors.class);
-		procedure.setOtPreparationDuration(5*60+1);
+		procedure.setOtPreparationDuration(5 * 60 + 1);
 		validator.validate(procedure, errors);
 		verify(errors).rejectValue(fieldName, messageId, null, null);
 	}

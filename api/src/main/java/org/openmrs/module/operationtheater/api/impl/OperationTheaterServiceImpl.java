@@ -13,16 +13,14 @@
  */
 package org.openmrs.module.operationtheater.api.impl;
 
-import org.openmrs.api.APIException;
-import org.openmrs.api.PatientService;
-import org.openmrs.api.db.PatientDAO;
-import org.openmrs.api.impl.BaseOpenmrsService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.api.APIException;
+import org.openmrs.api.PatientService;
+import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.operationtheater.Procedure;
 import org.openmrs.module.operationtheater.Surgery;
 import org.openmrs.module.operationtheater.api.OperationTheaterService;
-import org.openmrs.module.operationtheater.api.db.OperationTheaterDAO;
 import org.openmrs.module.operationtheater.api.db.ProcedureDAO;
 import org.openmrs.module.operationtheater.api.db.SurgeryDAO;
 import org.openmrs.validator.ValidateUtil;
@@ -35,7 +33,7 @@ import java.util.List;
  * It is a default implementation of {@link OperationTheaterService}.
  */
 public class OperationTheaterServiceImpl extends BaseOpenmrsService implements OperationTheaterService {
-	
+
 	protected final Log log = LogFactory.getLog(this.getClass());
 
 	@Autowired
@@ -44,7 +42,7 @@ public class OperationTheaterServiceImpl extends BaseOpenmrsService implements O
 	@Autowired
 	private SurgeryDAO surgeryDAO;
 
-	@Resource(name="patientService")
+	@Resource(name = "patientService")
 	private PatientService patientService;
 
 	@Override
@@ -80,16 +78,18 @@ public class OperationTheaterServiceImpl extends BaseOpenmrsService implements O
 
 	@Override
 	public Surgery voidSurgery(Surgery surgery, String reason) {
-		if(surgery == null)
+		if (surgery == null) {
 			return null;
+		}
 
 		return surgeryDAO.saveOrUpdate(surgery);
 	}
 
 	@Override
 	public Surgery unvoidSurgery(Surgery surgery) {
-		if(surgery == null)
+		if (surgery == null) {
 			return null;
+		}
 
 		return surgeryDAO.saveOrUpdate(surgery);
 	}

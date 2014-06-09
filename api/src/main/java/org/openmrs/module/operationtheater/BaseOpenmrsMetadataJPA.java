@@ -17,13 +17,11 @@ import org.openmrs.BaseOpenmrsObject;
 import org.openmrs.OpenmrsMetadata;
 import org.openmrs.User;
 
-import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 import java.util.Date;
-
 
 /**
  * Same class as in {@link org.openmrs.BaseOpenmrsMetadata}, but with JPA annotations
@@ -40,30 +38,30 @@ public abstract class BaseOpenmrsMetadataJPA extends BaseOpenmrsObject implement
 	private String description;
 
 	@ManyToOne
-	@JoinColumn(name="creator", nullable = false)
+	@JoinColumn(name = "creator", nullable = false)
 	private User creator;
 
-	@Column(name="date_created", nullable = false)
+	@Column(name = "date_created", nullable = false)
 	private Date dateCreated;
 
 	@ManyToOne
-	@JoinColumn(name="changed_by")
+	@JoinColumn(name = "changed_by")
 	private User changedBy;
 
-	@Column(name="date_changed")
+	@Column(name = "date_changed")
 	private Date dateChanged;
 
 	@Column(name = "retired", nullable = false, columnDefinition = "BOOLEAN default FALSE")
 	private Boolean retired = Boolean.FALSE;
 
-	@Column(name="date_retired")
+	@Column(name = "date_retired")
 	private Date dateRetired;
 
 	@ManyToOne
-	@JoinColumn(name="retired_by")
+	@JoinColumn(name = "retired_by")
 	private User retiredBy;
 
-	@Column(name="retire_reason")
+	@Column(name = "retire_reason")
 	private String retireReason;
 
 	//***** Constructors *****

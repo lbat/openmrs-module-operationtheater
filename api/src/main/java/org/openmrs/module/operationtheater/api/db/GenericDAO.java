@@ -49,7 +49,7 @@ public interface GenericDAO<T> {
 	 * @return
 	 * @should save new entry if object is not null
 	 * @should not save object if it is null
-	 * @should  update object if it is not null and id already in the db
+	 * @should update object if it is not null and id already in the db
 	 */
 	T saveOrUpdate(T object);
 

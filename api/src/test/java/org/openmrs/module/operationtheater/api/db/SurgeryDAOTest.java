@@ -24,15 +24,15 @@ import static org.junit.Assert.fail;
  */
 public class SurgeryDAOTest extends BaseModuleContextSensitiveTest {
 
+	private static int TOTAL_SURGERIES = 2;
+
 	@Autowired
 	SurgeryDAO surgeryDAO;
 
 	private PatientService service;
 
-	private static int TOTAL_SURGERIES = 2;
-
 	@Before
-	public void setUp() throws Exception{
+	public void setUp() throws Exception {
 		executeDataSet("standardOperationTheaterTestDataset.xml");
 		service = Context.getPatientService();
 	}
@@ -48,10 +48,10 @@ public class SurgeryDAOTest extends BaseModuleContextSensitiveTest {
 		surgery.setPatient(patient);
 
 		Surgery savedSurgery = surgeryDAO.saveOrUpdate(surgery);
-		assertThat(savedSurgery.getId(), is(TOTAL_SURGERIES+1));
+		assertThat(savedSurgery.getId(), is(TOTAL_SURGERIES + 1));
 
 		List<Surgery> surgeryList = surgeryDAO.getAll();
-		assertThat(surgeryList, hasSize(TOTAL_SURGERIES +1));
+		assertThat(surgeryList, hasSize(TOTAL_SURGERIES + 1));
 
 		Surgery actualSurgery = surgeryList.get(TOTAL_SURGERIES);
 		assertThat(actualSurgery.getSurgeryId(), greaterThan(0));
@@ -64,10 +64,12 @@ public class SurgeryDAOTest extends BaseModuleContextSensitiveTest {
 	 */
 	@Test
 	public void saveOrUpdate_shouldNotSaveObjectIfItIsNull() throws Exception {
-		try{
+		try {
 			surgeryDAO.saveOrUpdate(null);
 			fail("Should throw IllegalArgumentException");
-		} catch (IllegalArgumentException e){}
+		}
+		catch (IllegalArgumentException e) {
+		}
 
 		List<Surgery> surgeryList = surgeryDAO.getAll();
 		assertThat(surgeryList, hasSize(TOTAL_SURGERIES));
@@ -91,27 +93,27 @@ public class SurgeryDAOTest extends BaseModuleContextSensitiveTest {
 		List<Surgery> surgeryList = surgeryDAO.getAll();
 		assertThat(surgeryList, hasSize(TOTAL_SURGERIES));
 
-		Surgery actualSurgery = surgeryList.get(id-1);
+		Surgery actualSurgery = surgeryList.get(id - 1);
 		assertEquals(surgery.getSurgeryId(), actualSurgery.getSurgeryId());
 		assertEquals(patient, actualSurgery.getPatient());
 	}
 
 	@Test
-	@Verifies(value="should return all entries in the table", method = "getAll")
-	public void getAll_shouldReturnAllEntriesInTheTable(){
+	@Verifies(value = "should return all entries in the table", method = "getAll")
+	public void getAll_shouldReturnAllEntriesInTheTable() {
 		List<Surgery> surgeryList = surgeryDAO.getAll();
 		assertThat(surgeryList, hasSize(TOTAL_SURGERIES));
 	}
 
 	@Test
-	@Verifies(value="should return the object with the specified uuid", method="getByUuid")
-	public void getByUuid_shouldReturnTheObjectWithTheSpecifiedUuid() throws Exception{
+	@Verifies(value = "should return the object with the specified uuid", method = "getByUuid")
+	public void getByUuid_shouldReturnTheObjectWithTheSpecifiedUuid() throws Exception {
 		String uuid = "ca352fc1-1691-11df-97a5-7038c432aab5";
 		Surgery surgery = surgeryDAO.getByUuid(uuid);
 
 		assertThat(surgery.getId(), is(1));
 		assertThat(surgery.getPatient().getId(), is(1));
-//		assertThat(surgery.getCreator().getId(), is(1));
+		//		assertThat(surgery.getCreator().getId(), is(1));
 	}
 
 }

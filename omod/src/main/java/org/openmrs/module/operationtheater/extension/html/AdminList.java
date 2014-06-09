@@ -13,32 +13,32 @@
  */
 package org.openmrs.module.operationtheater.extension.html;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import org.openmrs.module.Extension;
 import org.openmrs.module.web.extension.AdministrationSectionExt;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 /**
  * This class defines the links that will appear on the administration page under the
- * "operationtheater.title" heading. 
+ * "operationtheater.title" heading.
  */
 public class AdminList extends AdministrationSectionExt {
-	
+
 	/**
 	 * @see AdministrationSectionExt#getMediaType()
 	 */
 	public Extension.MEDIA_TYPE getMediaType() {
 		return Extension.MEDIA_TYPE.html;
 	}
-	
+
 	/**
 	 * @see AdministrationSectionExt#getTitle()
 	 */
 	public String getTitle() {
 		return "operationtheater.title";
 	}
-	
+
 	/**
 	 * @see AdministrationSectionExt#getLinks()
 	 */
@@ -47,5 +47,5 @@ public class AdminList extends AdministrationSectionExt {
 		map.put("/module/operationtheater/manage.form", "operationtheater.manage");
 		return map;
 	}
-	
+
 }

@@ -2,16 +2,20 @@ package org.openmrs.module.operationtheater;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openmrs.BaseOpenmrsData;
 
-import javax.persistence.*;
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 /**
  * Defines a Procedure in the system.
  */
 @Entity
 @Table(name = "procedure")
- public class Procedure extends BaseOpenmrsMetadataJPA{
+public class Procedure extends BaseOpenmrsMetadataJPA {
 
 	private static final Log log = LogFactory.getLog(Procedure.class);
 

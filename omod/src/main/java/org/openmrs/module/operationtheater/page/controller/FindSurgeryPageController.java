@@ -1,8 +1,5 @@
 package org.openmrs.module.operationtheater.page.controller;
 
-import java.text.SimpleDateFormat;
-import java.util.List;
-
 import org.openmrs.Patient;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appframework.domain.AppDescriptor;
@@ -11,6 +8,9 @@ import org.openmrs.module.emrapi.utils.GeneralUtils;
 import org.openmrs.ui.framework.page.PageModel;
 import org.openmrs.util.OpenmrsConstants;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.text.SimpleDateFormat;
+import java.util.List;
 
 /**
  *
@@ -32,7 +32,8 @@ public class FindSurgeryPageController {
 		model.addAttribute("label", app.getConfig().get("label").getTextValue());
 		model.addAttribute("minSearchCharacters",
 				Context.getAdministrationService()
-						.getGlobalProperty(OpenmrsConstants.GLOBAL_PROPERTY_MIN_SEARCH_CHARACTERS, "1"));
+						.getGlobalProperty(OpenmrsConstants.GLOBAL_PROPERTY_MIN_SEARCH_CHARACTERS, "1")
+		);
 
 		model.addAttribute("dateFormatter", new SimpleDateFormat("dd-MMM-yyy", Context.getLocale()));
 
@@ -42,6 +43,5 @@ public class FindSurgeryPageController {
 		}
 		model.addAttribute("showLastViewedPatients", app.getConfig().get("showLastViewedPatients").getBooleanValue());
 	}
-
 
 }

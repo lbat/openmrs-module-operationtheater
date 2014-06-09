@@ -39,7 +39,6 @@ public class SchedulingFragmentController {
 	private final String APPT_TYPE_UUID = "93263567-286d-4567-8596-0611d9800206";
 
 	/**
-	 * @should return scheduled surgeries and available times for all operating theaters
 	 * @param ui
 	 * @param start
 	 * @param end
@@ -47,13 +46,14 @@ public class SchedulingFragmentController {
 	 * @param locationService
 	 * @param appointmentService
 	 * @return
+	 * @should return scheduled surgeries and available times for all operating theaters
 	 */
 	public List<SimpleObject> getEvents(UiUtils ui,
-	                                      @RequestParam("start")  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date start,
-	                                      @RequestParam("end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date end,
-	                                      @RequestParam("resources") List<String> resources,
-	                                      @SpringBean("locationService") LocationService locationService,
-	                                      @SpringBean AppointmentService appointmentService) {
+	                                    @RequestParam("start") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date start,
+	                                    @RequestParam("end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date end,
+	                                    @RequestParam("resources") List<String> resources,
+	                                    @SpringBean("locationService") LocationService locationService,
+	                                    @SpringBean AppointmentService appointmentService) {
 
 		//get operation theaters
 		LocationTag tag = locationService.getLocationTagByUuid(LOCATION_TAG_OPERATION_THEATER_UUID);
@@ -61,7 +61,7 @@ public class SchedulingFragmentController {
 
 		//build string "locationID1, locationID2, ..."
 		String locationsString = buildLocationString(locations);
-		System.err.println("location string: "+locationsString);
+		System.err.println("location string: " + locationsString);
 
 		//get associated appointmentBlocks
 		List<AppointmentBlock> blocks = appointmentService.getAppointmentBlocks(start, end, locationsString, null, null);
@@ -76,18 +76,19 @@ public class SchedulingFragmentController {
 		for (Location location : locations) {
 			for (DateTime startDate = new DateTime(start); startDate.isBefore(endDate); startDate = startDate.plusDays(1)) {
 				AppointmentBlock block = indexedApptBlocks.get(location).get(startDate.withTimeAtStartOfDay());
-				int resourceId = resources.indexOf(location.getName())+1; //convention: resourceId = element array index + 1
+				int resourceId =
+						resources.indexOf(location.getName()) + 1; //convention: resourceId = element array index + 1
 				System.err.printf("%s - %s - %s - %d", startDate.toDate(), block, location.getName(), resourceId);
 				addAvailableTimesToEventList(events, startDate, block, location, resourceId);
 			}
 		}
 
-		return SimpleObject.fromCollection(events, ui, "title", "start", "end", "availableStart", "availableEnd", "resourceId", "allDay", "editable", "annotation", "color");
+		return SimpleObject
+				.fromCollection(events, ui, "title", "start", "end", "availableStart", "availableEnd", "resourceId",
+						"allDay", "editable", "annotation", "color");
 	}
 
 	/**
-	 * @should create appointment block if available times differ from default ones
-	 * @should update appointment block if entry already exists
 	 * @param ui
 	 * @param uuid
 	 * @param available
@@ -96,33 +97,36 @@ public class SchedulingFragmentController {
 	 * @param locationService
 	 * @param appointmentService
 	 * @throws Exception
+	 * @should create appointment block if available times differ from default ones
+	 * @should update appointment block if entry already exists
 	 */
 	public void adjustAvailableTimes(UiUtils ui,
-	                                 @RequestParam("locationUuid")  String uuid,
-	                                 @RequestParam("available")  boolean available,
-	                                 @RequestParam("startTime") @DateTimeFormat(iso= DateTimeFormat.ISO.DATE_TIME) Date start,
-	                                 @RequestParam("endTime") @DateTimeFormat(iso= DateTimeFormat.ISO.DATE_TIME) Date end,
+	                                 @RequestParam("locationUuid") String uuid,
+	                                 @RequestParam("available") boolean available,
+	                                 @RequestParam("startTime") @DateTimeFormat(
+			                                 iso = DateTimeFormat.ISO.DATE_TIME) Date start,
+	                                 @RequestParam("endTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date end,
 	                                 @SpringBean("locationService") LocationService locationService,
 	                                 @SpringBean AppointmentService appointmentService) throws Exception {
 
-		if(new DateTime(start).isAfter(new DateTime(end))){
+		if (new DateTime(start).isAfter(new DateTime(end))) {
 			throw new IllegalArgumentException("start date must be before end date"); //TODO send meaningful error message
 		}
 
 		//TODO sanitize uuid - sql injection
 		Location location = locationService.getLocationByUuid(uuid);
-		if(location == null) {
-			throw new IllegalArgumentException("no location found for uuid: "+uuid); //TODO send meaningful error message
+		if (location == null) {
+			throw new IllegalArgumentException("no location found for uuid: " + uuid); //TODO send meaningful error message
 		}
 
-		DateTime startOfDay =  new DateTime(start).withTimeAtStartOfDay();
+		DateTime startOfDay = new DateTime(start).withTimeAtStartOfDay();
 
 		AppointmentBlock block = getOrCreateAppointmentBlock(appointmentService, location, startOfDay);
 
-		if(!available){
+		if (!available) {
 			block.setStartDate(startOfDay.toDate());
 			block.setEndDate(startOfDay.toDate());
-		}else{
+		} else {
 			block.setStartDate(start);
 			block.setEndDate(end);
 		}
@@ -132,18 +136,22 @@ public class SchedulingFragmentController {
 	private AppointmentBlock getOrCreateAppointmentBlock(AppointmentService appointmentService, Location location,
 	                                                     DateTime midnight) throws Exception {
 		AppointmentBlock block = new AppointmentBlock();
-		List<AppointmentBlock> blocks = appointmentService.getAppointmentBlocks(midnight.toDate(), midnight.plusDays(1).minusSeconds(1).toDate(), String.valueOf(location.getId()), null, null);
-		if(blocks.size() > 1){
+		List<AppointmentBlock> blocks = appointmentService
+				.getAppointmentBlocks(midnight.toDate(), midnight.plusDays(1).minusSeconds(1).toDate(),
+						String.valueOf(location.getId()), null, null);
+		if (blocks.size() > 1) {
 			for (AppointmentBlock block1 : blocks) {
 				System.err.println(block1);
 			}
-			throw new Exception("there should only be one AppointmentBlock per Location and day, but returned " + blocks.size()) ; //TODO find better exception
+			throw new Exception("there should only be one AppointmentBlock per Location and day, but returned " + blocks
+					.size()); //TODO find better exception
 		}
-		if(blocks.size() == 1) {
+		if (blocks.size() == 1) {
 			block = blocks.get(0);
-		}else {
+		} else {
 			block.setLocation(location);
-			AppointmentType type = appointmentService.getAppointmentTypeByUuid(APPT_TYPE_UUID); //TODO what is the appointment type for? - resolve that - just added a random one
+			AppointmentType type = appointmentService.getAppointmentTypeByUuid(
+					APPT_TYPE_UUID); //TODO what is the appointment type for? - resolve that - just added a random one
 			HashSet<AppointmentType> set = new HashSet<AppointmentType>();
 			set.add(type);
 			block.setTypes(set);
@@ -157,19 +165,20 @@ public class SchedulingFragmentController {
 		String endOfDay = dateFormatter.format(startDate.plusHours(24).minusMinutes(1).toDate());
 		String start = "";
 		String end = "";
-		if(appointmentBlock != null) {
+		if (appointmentBlock != null) {
 			start = dateFormatter.format(appointmentBlock.getStartDate());
 			end = dateFormatter.format(appointmentBlock.getEndDate());
 
-		}else{
+		} else {
 			//no appointmentBlock found -> use default value (LocationAttribute)
 			LocationAttribute defaultBegin = getAttributeByUuid(location.getActiveAttributes(),
 					DEFAULT_AVAILABLE_TIME_BEGIN_UUID);
 			LocationAttribute defaultEnd = getAttributeByUuid(location.getActiveAttributes(),
 					DEFAULT_AVAILABLE_TIME_END_UUID);
 
-			if(defaultBegin == null || defaultEnd == null)
+			if (defaultBegin == null || defaultEnd == null) {
 				return;
+			}
 
 			DateTimeFormatter timeFormatter = org.joda.time.format.DateTimeFormat.forPattern("HH:mm");
 			LocalTime beginTime = LocalTime.parse((String) defaultBegin.getValue(), timeFormatter);
@@ -182,12 +191,11 @@ public class SchedulingFragmentController {
 			end = dateFormatter.format(endDate.toDate());
 		}
 
-		if(start.equals(end)){
+		if (start.equals(end)) {
 			//location is not available for this day
 			CalendarEvent event = new CalendarEvent("", beginOfDay, endOfDay, beginOfDay, endOfDay, resourceId, true);
 			events.add(event);
-		}
-		else{
+		} else {
 			CalendarEvent morning = new CalendarEvent("", beginOfDay, start, start, end, resourceId, true);
 			events.add(morning);
 			CalendarEvent evening = new CalendarEvent("", end, endOfDay, start, end, resourceId, true);
@@ -195,19 +203,19 @@ public class SchedulingFragmentController {
 		}
 
 		//TODO remove: just for demo purpose
-//		startDate = startDate.withTime(0, 0, 0, 0);
-//		start = dateFormatter.format(startDate.plusHours(9).toDate());
-//		end = dateFormatter.format(startDate.plusHours(12).toDate());
-//		CalendarEvent surgery = new CalendarEvent("Endoprosthesis of the hip joint", start, end, resourceId);
-//		events.add(surgery);
-
+		//		startDate = startDate.withTime(0, 0, 0, 0);
+		//		start = dateFormatter.format(startDate.plusHours(9).toDate());
+		//		end = dateFormatter.format(startDate.plusHours(12).toDate());
+		//		CalendarEvent surgery = new CalendarEvent("Endoprosthesis of the hip joint", start, end, resourceId);
+		//		events.add(surgery);
 
 	}
 
 	private LocationAttribute getAttributeByUuid(Collection<LocationAttribute> attributes, String uuid) {
-		for(LocationAttribute attribute : attributes){
-			if(attribute.getDescriptor().getUuid().equals(uuid))
+		for (LocationAttribute attribute : attributes) {
+			if (attribute.getDescriptor().getUuid().equals(uuid)) {
 				return attribute;
+			}
 		}
 		return null;
 	}
@@ -221,12 +229,12 @@ public class SchedulingFragmentController {
 	}
 
 	private Map<Location, Map<DateTime, AppointmentBlock>> indexApptBlocks(List<Location> locations,
-	                                                                       List<AppointmentBlock> appointmentBlocks){
+	                                                                       List<AppointmentBlock> appointmentBlocks) {
 		Map<Location, Map<DateTime, AppointmentBlock>> map = new HashMap<Location, Map<DateTime, AppointmentBlock>>();
-		for(Location location : locations){
+		for (Location location : locations) {
 			map.put(location, new HashMap<DateTime, AppointmentBlock>());
 		}
-		for(AppointmentBlock appointmentBlock : appointmentBlocks){
+		for (AppointmentBlock appointmentBlock : appointmentBlocks) {
 			DateTime dateTime = new DateTime(appointmentBlock.getStartDate()).withTimeAtStartOfDay();
 			map.get(appointmentBlock.getLocation()).put(dateTime, appointmentBlock);
 		}
@@ -255,16 +263,20 @@ public class SchedulingFragmentController {
 		 *
 		 */
 		private String availableStart = "";
+
 		private String availableEnd = "";
 
 		private int resourceId;
+
 		private boolean allDay = false;
+
 		private boolean editable = false;
 
 		/**
 		 * if event is related to available time this flag is true
 		 */
 		private boolean annotation;
+
 		private String color = "blue"; //TODO define color as LocationAttribute
 
 		public CalendarEvent(String title, String start, String end, String availableStart, String availableEnd,
@@ -277,8 +289,8 @@ public class SchedulingFragmentController {
 			this.availableEnd = availableEnd;
 			this.resourceId = resourceId;
 			this.annotation = annotation;
-			if(annotation){
-				color="grey";
+			if (annotation) {
+				color = "grey";
 			}
 		}
 
@@ -287,7 +299,7 @@ public class SchedulingFragmentController {
 			this.start = start;
 			this.end = end;
 			this.resourceId = resourceId;
-			annotation=false;
+			annotation = false;
 		}
 
 		public String getAvailableStart() {
@@ -320,10 +332,10 @@ public class SchedulingFragmentController {
 
 		public void setAnnotation(boolean annotation) {
 			this.annotation = annotation;
-			if(annotation){
-				color="grey";
-			}else{
-				color="blue";
+			if (annotation) {
+				color = "grey";
+			} else {
+				color = "blue";
 			}
 
 		}

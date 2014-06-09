@@ -4,7 +4,7 @@ var availableTimesDialog = null;
 var dateFormatted = "";
 var calEvent;
 
-function showAvailableTimesDialog (event) {
+function showAvailableTimesDialog(event) {
     calEvent = event;
 
     dateFormatted = jq.fullCalendar.formatDate(calEvent.start, 'yyyy-MM-dd');
@@ -20,8 +20,8 @@ function showAvailableTimesDialog (event) {
     startOfDay.setHours(0);
     startOfDay.setMinutes(0);
     var tomorrow = new Date(calEvent.start);
-    tomorrow.setDate(tomorrow.getDate()+1);
-    var endOfDay = new Date(tomorrow-60000); //subtract one minute = 60000ms
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    var endOfDay = new Date(tomorrow - 60000); //subtract one minute = 60000ms
 
     jq('#start_time_picker-wrapper').datetimepicker('setStartDate', startOfDay);
     jq('#start_time_picker-wrapper').datetimepicker('setEndDate', endOfDay);
@@ -52,40 +52,40 @@ function createAvailableTimesDialog(patientId) {
     availableTimesDialog = emr.setupConfirmationDialog({
         selector: '#available-times-dialog',
         actions: {
-            confirm: function() {
-                if(!validate())
+            confirm: function () {
+                if (!validate())
                     return;
 
                 var params = {};
                 params.locationUuid = calEvent.resource.uuid//"76d562c4-79d7-45ef-b1c4-8e15c2b01c41";
-                params.available=jq('#is-ot-available').is(':checked');
-                params.startTime = dateFormatted + " " + jq("#start_time_picker-display").val()+":00.0"; //not working on server side if seconds and milliseconds are missing (even with custom pattern)
-                params.endTime = dateFormatted + " " + jq("#end_time_picker-display").val()+":00.0";
+                params.available = jq('#is-ot-available').is(':checked');
+                params.startTime = dateFormatted + " " + jq("#start_time_picker-display").val() + ":00.0"; //not working on server side if seconds and milliseconds are missing (even with custom pattern)
+                params.endTime = dateFormatted + " " + jq("#end_time_picker-display").val() + ":00.0";
                 emr.getFragmentActionWithCallback('operationtheater', 'scheduling', 'adjustAvailableTimes', params
-                    , function(data) {
+                    , function (data) {
                         emr.successMessage("Updated available times"); //Todo message.properties
                         availableTimesDialog.close();
-                        jq('#calendar').fullCalendar( 'refetchEvents' );
+                        jq('#calendar').fullCalendar('refetchEvents');
                     });
             },
-            cancel: function() {
+            cancel: function () {
                 availableTimesDialog.close();
             }
         }
     });
 
     //
-    jq('#is-ot-available').change( function() {
-        if(jq('#is-ot-available').is(':checked')){
+    jq('#is-ot-available').change(function () {
+        if (jq('#is-ot-available').is(':checked')) {
             //enable
             emr.successMessage("enable");
-            jq('#start_time_picker-display').attr("disabled",false);
-            jq('#end_time_picker-display').attr("disabled",false);
-        }else{
+            jq('#start_time_picker-display').attr("disabled", false);
+            jq('#end_time_picker-display').attr("disabled", false);
+        } else {
             //disable
             emr.successMessage("disable");
-            jq('#start_time_picker-display').attr("disabled",true);
-            jq('#end_time_picker-display').attr("disabled",true );
+            jq('#start_time_picker-display').attr("disabled", true);
+            jq('#end_time_picker-display').attr("disabled", true);
             clearFieldError(jq('#start_time_picker-display'), jq('#start_time_picker .field-error'));
             clearFieldError(jq('#end_time_picker-display'), jq('#end_time_picker .field-error'));
 //            jq('#end_time_picker-wrapper .add-on').attr("disabled",true );
@@ -95,11 +95,11 @@ function createAvailableTimesDialog(patientId) {
     });
 
     //add required field validation handlers
-    jq('#start_time_picker-display').attr("onblur","javascript:requires('start_time_picker')");
-    jq('#start_time_picker-display').attr("onChange","javascript:requires('start_time_picker')");
+    jq('#start_time_picker-display').attr("onblur", "javascript:requires('start_time_picker')");
+    jq('#start_time_picker-display').attr("onChange", "javascript:requires('start_time_picker')");
 
-    jq('#end_time_picker-display').attr("onblur","javascript:requires('end_time_picker')");
-    jq('#end_time_picker-display').attr("onChange","javascript:requires('end_time_picker')");
+    jq('#end_time_picker-display').attr("onblur", "javascript:requires('end_time_picker')");
+    jq('#end_time_picker-display').attr("onChange", "javascript:requires('end_time_picker')");
 
 }
 
@@ -116,13 +116,13 @@ function clearFieldError(el, errorEl) {
     errorEl.hide();
 }
 
-function requires(elId){
-    var el = jq('#'+elId+"-display");
-    var errorEl = jq('#'+elId+' .field-error');
+function requires(elId) {
+    var el = jq('#' + elId + "-display");
+    var errorEl = jq('#' + elId + ' .field-error');
 
     clearFieldError(el, errorEl);
 
-    if(jq('#'+elId+"-field").val() == ''){
+    if (jq('#' + elId + "-field").val() == '') {
 
         setFieldError(el, errorEl, "This field is required");
         return true;
@@ -130,32 +130,32 @@ function requires(elId){
     return false;
 }
 
-function validate(){
+function validate() {
     var startTimeId = "start_time_picker";
-    var endTimeId =  "end_time_picker";
+    var endTimeId = "end_time_picker";
     var startTimeEmpty = requires(startTimeId)
     var endTimeEmpty = requires(endTimeId);
 
-    if(!jq('#is-ot-available').is(':checked')){
+    if (!jq('#is-ot-available').is(':checked')) {
         return true;
     }
 
-    if(!startTimeEmpty && !endTimeEmpty){
-        var end = new Date(jq('#'+endTimeId+'-field').val());
-        var start = new Date(jq('#'+startTimeId+'-field').val());
+    if (!startTimeEmpty && !endTimeEmpty) {
+        var end = new Date(jq('#' + endTimeId + '-field').val());
+        var start = new Date(jq('#' + startTimeId + '-field').val());
 
         console.log(start);
         console.log(end);
 
-        if(start >= end){
-            var el = jq('#'+endTimeId+"-display");
-            var errorEl = jq('#'+endTimeId+' .field-error');
+        if (start >= end) {
+            var el = jq('#' + endTimeId + "-display");
+            var errorEl = jq('#' + endTimeId + ' .field-error');
 
             var message = "start time must be before the end time";
 
             setFieldError(el, errorEl, message);
         }
-        else{
+        else {
             return true;
         }
     }

@@ -25,10 +25,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * The main controller.
  */
 @Controller
-public class  OperationTheaterModuleManageController {
-	
+public class OperationTheaterModuleManageController {
+
 	protected final Log log = LogFactory.getLog(getClass());
-	
+
 	@RequestMapping(value = "/module/operationtheater/manage", method = RequestMethod.GET)
 	public void manage(ModelMap model) {
 		model.addAttribute("user", Context.getAuthenticatedUser());

@@ -7,7 +7,6 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.openmrs.test.Verifies;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.text.SimpleDateFormat;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -22,13 +21,13 @@ import static org.junit.Assert.fail;
  */
 public class ProcedureDAOTest extends BaseModuleContextSensitiveTest {
 
+	private static int TOTAL_PROCEDURES = 2;
+
 	@Autowired
 	ProcedureDAO procedureDAO;
 
-	private static int TOTAL_PROCEDURES = 2;
-
 	@Before
-	public void setUp() throws Exception{
+	public void setUp() throws Exception {
 		executeDataSet("standardOperationTheaterTestDataset.xml");
 	}
 
@@ -46,10 +45,10 @@ public class ProcedureDAOTest extends BaseModuleContextSensitiveTest {
 		procedure.setInpatientStay(4);
 
 		Procedure savedProcedure = procedureDAO.saveOrUpdate(procedure);
-		assertThat(savedProcedure.getId(), is(TOTAL_PROCEDURES+1));
+		assertThat(savedProcedure.getId(), is(TOTAL_PROCEDURES + 1));
 
 		List<Procedure> procedureList = procedureDAO.getAll();
-		assertThat(procedureList, hasSize(TOTAL_PROCEDURES+1));
+		assertThat(procedureList, hasSize(TOTAL_PROCEDURES + 1));
 
 		Procedure actualProcedure = procedureList.get(TOTAL_PROCEDURES);
 		assertThat(actualProcedure.getProcedureId(), greaterThan(0));
@@ -66,10 +65,12 @@ public class ProcedureDAOTest extends BaseModuleContextSensitiveTest {
 	 */
 	@Test
 	public void saveOrUpdate_shouldNotSaveObjectIfItIsNull() throws Exception {
-		try{
+		try {
 			procedureDAO.saveOrUpdate(null);
 			fail("Should throw IllegalArgumentException");
-		} catch (IllegalArgumentException e){}
+		}
+		catch (IllegalArgumentException e) {
+		}
 
 		List<Procedure> procedureList = procedureDAO.getAll();
 		assertThat(procedureList, hasSize(TOTAL_PROCEDURES));
@@ -97,7 +98,7 @@ public class ProcedureDAOTest extends BaseModuleContextSensitiveTest {
 		List<Procedure> procedureList = procedureDAO.getAll();
 		assertThat(procedureList, hasSize(TOTAL_PROCEDURES));
 
-		Procedure actualProcedure = procedureList.get(id-1);
+		Procedure actualProcedure = procedureList.get(id - 1);
 		assertEquals(procedure.getProcedureId(), actualProcedure.getProcedureId());
 		assertEquals(procedure.getName(), actualProcedure.getName());
 		assertEquals(procedure.getDescription(), actualProcedure.getDescription());
@@ -107,8 +108,8 @@ public class ProcedureDAOTest extends BaseModuleContextSensitiveTest {
 	}
 
 	@Test
-	@Verifies(value="should return all entries in the table", method = "getAll")
-	public void getAll_shouldReturnAllEntriesInTheTable(){
+	@Verifies(value = "should return all entries in the table", method = "getAll")
+	public void getAll_shouldReturnAllEntriesInTheTable() {
 		List<Procedure> procedureList = procedureDAO.getAll();
 		assertThat(procedureList, hasSize(TOTAL_PROCEDURES));
 	}

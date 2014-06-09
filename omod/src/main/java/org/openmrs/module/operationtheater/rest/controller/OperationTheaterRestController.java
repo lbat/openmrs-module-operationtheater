@@ -13,8 +13,8 @@ public class OperationTheaterRestController extends MainResourceController {
 	public static final String OPERATION_THEATER_REST_NAMESPACE = "/operationtheater";
 
 	/**
-	 * @see org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController#getNamespace()
 	 * @should return v1 slash operationtheater
+	 * @see org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController#getNamespace()
 	 */
 	@Override
 	public String getNamespace() {

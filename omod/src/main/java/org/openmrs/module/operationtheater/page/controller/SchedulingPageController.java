@@ -2,17 +2,11 @@ package org.openmrs.module.operationtheater.page.controller;
 
 import org.openmrs.Location;
 import org.openmrs.LocationTag;
-import org.openmrs.Patient;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.appframework.domain.AppDescriptor;
 import org.openmrs.module.appui.UiSessionContext;
-import org.openmrs.module.emrapi.utils.GeneralUtils;
-import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.ui.framework.page.PageModel;
-import org.openmrs.util.OpenmrsConstants;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -39,11 +33,11 @@ public class SchedulingPageController {
 
 		model.addAttribute("resources", locations);
 
-//		if (app.getConfig().get("showLastViewedPatients").getBooleanValue()) {
-//			List<Patient> patients = GeneralUtils.getLastViewedPatients(sessionContext.getCurrentUser());
-//			model.addAttribute("lastViewedPatients", patients);
-//		}
-//		model.addAttribute("showLastViewedPatients", app.getConfig().get("showLastViewedPatients").getBooleanValue());
+		//		if (app.getConfig().get("showLastViewedPatients").getBooleanValue()) {
+		//			List<Patient> patients = GeneralUtils.getLastViewedPatients(sessionContext.getCurrentUser());
+		//			model.addAttribute("lastViewedPatients", patients);
+		//		}
+		//		model.addAttribute("showLastViewedPatients", app.getConfig().get("showLastViewedPatients").getBooleanValue());
 	}
 
 }

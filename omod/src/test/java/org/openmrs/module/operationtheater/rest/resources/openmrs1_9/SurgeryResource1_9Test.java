@@ -26,6 +26,7 @@ import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResou
 public class SurgeryResource1_9Test extends BaseDelegatingResourceTest<SurgeryResource1_9, Surgery> {
 
 	public static final String VOIDED_SURGERY_UUID = "ca352fc1-1691-11df-97a5-7038c432aab6";
+
 	public static final String SURGERY_UUID = "ca352fc1-1691-11df-97a5-7038c432aab5";
 
 	@Before
@@ -41,7 +42,8 @@ public class SurgeryResource1_9Test extends BaseDelegatingResourceTest<SurgeryRe
 	@Override
 	public void validateRefRepresentation() throws Exception {
 		super.validateRefRepresentation();
-		assertPropEquals("voided", getObject().isVoided()); // note that the voided property is only present if the property is voided
+		assertPropEquals("voided",
+				getObject().isVoided()); // note that the voided property is only present if the property is voided
 	}
 
 	@Override

@@ -25,6 +25,7 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class HibernateSurgeryDAO extends HibernateGenericDAO<Surgery> implements SurgeryDAO {
+
 	protected final Log log = LogFactory.getLog(this.getClass());
 
 	public HibernateSurgeryDAO() {

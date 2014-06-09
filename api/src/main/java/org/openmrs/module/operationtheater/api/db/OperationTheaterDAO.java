@@ -16,7 +16,7 @@ package org.openmrs.module.operationtheater.api.db;
 import org.openmrs.module.operationtheater.api.OperationTheaterService;
 
 /**
- *  Database methods for {@link OperationTheaterService}.
+ * Database methods for {@link OperationTheaterService}.
  */
 public interface OperationTheaterDAO {
 	

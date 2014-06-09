@@ -1,6 +1,5 @@
 package org.openmrs.module.operationtheater.validator;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Matchers;
@@ -9,9 +8,7 @@ import org.openmrs.Patient;
 import org.openmrs.api.PatientService;
 import org.openmrs.module.operationtheater.Surgery;
 import org.springframework.validation.Errors;
-import org.springframework.validation.Validator;
 
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mock;

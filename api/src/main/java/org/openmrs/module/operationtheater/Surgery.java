@@ -1,13 +1,17 @@
 package org.openmrs.module.operationtheater;
 
-import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Patient;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
 /**
  * Defines a Surgery in the system.
- *
  */
 @Entity
 @Table(name = "surgery")
@@ -19,7 +23,7 @@ public class Surgery extends BaseOpenmrsDataJPA {
 	private Integer surgeryId;
 
 	@ManyToOne
-	@JoinColumn(name="patient_id", nullable = false)
+	@JoinColumn(name = "patient_id", nullable = false)
 	private Patient patient;
 
 	public int getSurgeryId() {

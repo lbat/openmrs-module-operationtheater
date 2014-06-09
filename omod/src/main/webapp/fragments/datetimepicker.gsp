@@ -1,7 +1,7 @@
 <%
     ui.includeJavascript("uicommons", "datetimepicker/bootstrap-datetimepicker.min.js")
-    if(org.openmrs.api.context.Context.getLocale() != Locale.ENGLISH){
-        ui.includeJavascript("uicommons", "datetimepicker/locales/bootstrap-datetimepicker.${ org.openmrs.api.context.Context.getLocale() }.js")
+    if (org.openmrs.api.context.Context.getLocale() != Locale.ENGLISH) {
+        ui.includeJavascript("uicommons", "datetimepicker/locales/bootstrap-datetimepicker.${org.openmrs.api.context.Context.getLocale()}.js")
     }
     ui.includeCss("uicommons", "datetimepicker.css")
 
@@ -50,19 +50,22 @@
 %>
 
 <span id="${config.id}"
-    <% if (config.depends) { %> data-bind="visible: ${ config.depends.variable }() == '${ config.depends.value }'" <% } %> >
-    <label for="${ config.id }-display">
-        ${ ui.message(config.label) } <% if (required) { %><span>(${ ui.message("emr.formValidation.messages.requiredField.label") })</span><% } %>
+    <% if (config.depends) { %> data-bind="visible: ${config.depends.variable}() == '${config.depends.value}'" <% } %>>
+    <label for="${config.id}-display">
+        ${ui.message(config.label)} <% if (required) { %><span>(${
+            ui.message("emr.formValidation.messages.requiredField.label")})</span><% } %>
     </label>
-    <span id="${ config.id }-wrapper" class="date">
-        <input type="text" id="${ config.id }-display" value="${ defaultDateString }" size="${config.size}" readonly <% if (config.classes) { %>class="date${(config.useTime) ? ' use-time': ''} ${ config.classes.join(' ')}" <% } %> />
+    <span id="${config.id}-wrapper" class="date">
+        <input type="text" id="${config.id}-display" value="${defaultDateString}" size="${config.size}" readonly
+               <% if (config.classes) { %>class="date${(config.useTime) ? ' use-time' : ''} ${config.classes.join(' ')}" <%
+            } %>/>
         <span class="add-on"><i class="icon-calendar small"></i></span>
     </span>
-    <input type="hidden" id="${ config.id }-field" name="${ config.formFieldName }" value="${ defaultDateISOFormatted }"
-        <% if (config.classes) { %> class="${ config.classes.join(' ') }" <% } %>
-        <% if (config.dependency || required) { %> data-bind="value: ${ config.id }" <% } %> />
+    <input type="hidden" id="${config.id}-field" name="${config.formFieldName}" value="${defaultDateISOFormatted}"
+        <% if (config.classes) { %> class="${config.classes.join(' ')}" <% } %>
+        <% if (config.dependency || required) { %> data-bind="value: ${config.id}" <% } %>/>
 
-    ${ ui.includeFragment("uicommons", "fieldErrors", [ fieldName: config.formFieldName ]) }
+    ${ui.includeFragment("uicommons", "fieldErrors", [fieldName: config.formFieldName])}
 </span>
 
 <script type="text/javascript">
@@ -101,13 +104,13 @@
         <% } %>
     })
             <% if (config.dependency || required) { %>
-            .on('hide', function() {
+            .on('hide', function () {
                 viewModel.${ config.id }(jq('#${ config.id }-field').val());
             });
 
     viewModel.${ config.id } = ko.observable("${ defaultDateISOFormatted }");
     <% if (required) { %>
-    viewModel.validations.push(function() {
+    viewModel.validations.push(function () {
         return viewModel.${ config.id }() ? true : false;
     });
     <% } %>

@@ -16,7 +16,6 @@ package org.openmrs.module.operationtheater.api;
 import org.openmrs.api.APIException;
 import org.openmrs.api.OpenmrsService;
 import org.openmrs.api.PatientService;
-import org.openmrs.api.db.PatientDAO;
 import org.openmrs.module.operationtheater.Procedure;
 import org.openmrs.module.operationtheater.Surgery;
 import org.openmrs.module.operationtheater.api.db.ProcedureDAO;
@@ -27,12 +26,11 @@ import java.util.List;
 
 /**
  * This service exposes module's core functionality. It is a Spring managed bean which is configured in moduleApplicationContext.xml.
- * <p>
  * It can be accessed only via Context:<br>
  * <code>
  * Context.getService(OperationTheaterService.class).someMethod();
  * </code>
- * 
+ *
  * @see org.openmrs.api.context.Context
  */
 @Transactional
@@ -66,8 +64,8 @@ public interface OperationTheaterService extends OpenmrsService {
 	 * Creates or updates the given surgery in the database.
 	 *
 	 * @param surgery surgery to be created
-	 * @throws APIException
 	 * @return created or updated surgery
+	 * @throws APIException
 	 * @should validate surgery object and call surgeryDao saveOrUpdate
 	 */
 	public Surgery saveSurgery(Surgery surgery) throws APIException;
@@ -85,10 +83,9 @@ public interface OperationTheaterService extends OpenmrsService {
 	 * Creates or updates the given surgery in the database.
 	 *
 	 * @param procedure procedure to be created
-	 * @throws org.openmrs.api.APIException
 	 * @return created or updated procedure
+	 * @throws org.openmrs.api.APIException
 	 * @should validate procedure object and call procedureDao saveOrUpdate
-	 *
 	 */
 	public Procedure saveProcedure(Procedure procedure) throws APIException;
 
@@ -113,13 +110,14 @@ public interface OperationTheaterService extends OpenmrsService {
 	 * void the given surgery
 	 *
 	 * @param surgery
-	 * @param reason for the voiding
+	 * @param reason  for the voiding
 	 * @should void the given surgery
 	 */
 	public Surgery voidSurgery(Surgery surgery, String reason);
 
 	/**
 	 * unvoid the given surgery
+	 *
 	 * @param surgery
 	 * @return
 	 * @should unvoid the given surgery

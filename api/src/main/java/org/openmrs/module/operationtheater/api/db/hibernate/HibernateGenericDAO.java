@@ -1,7 +1,5 @@
 package org.openmrs.module.operationtheater.api.db.hibernate;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.MatchMode;
@@ -73,7 +71,9 @@ public class HibernateGenericDAO<T> implements GenericDAO<T> {
 	@Transactional(readOnly = true)
 	public List<T> getAll(boolean includeRetired) {
 		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(mappedClass);
-		return (List<T>) (includeRetired ? criteria.list() : criteria.add(Restrictions.eq("retired", includeRetired)).list());
+		return (List<T>) (includeRetired ?
+				criteria.list() :
+				criteria.add(Restrictions.eq("retired", includeRetired)).list());
 	}
 
 	@SuppressWarnings("unchecked")

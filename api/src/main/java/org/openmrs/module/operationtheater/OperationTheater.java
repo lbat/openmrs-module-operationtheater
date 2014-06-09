@@ -13,9 +13,10 @@
  */
 package org.openmrs.module.operationtheater;
 
-import java.io.Serializable;
-import org.openmrs.BaseOpenmrsObject;
 import org.openmrs.BaseOpenmrsMetadata;
+import org.openmrs.BaseOpenmrsObject;
+
+import java.io.Serializable;
 
 /**
  * It is a model class. It should extend either {@link BaseOpenmrsObject} or {@link BaseOpenmrsMetadata}.
@@ -23,23 +24,21 @@ import org.openmrs.BaseOpenmrsMetadata;
 public class OperationTheater extends BaseOpenmrsObject implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	private Integer id;
 
-    /**
-     *
-     * @return
-     * @should return identifier
-     *
-     */
-    @Override
+	/**
+	 * @return
+	 * @should return identifier
+	 */
+	@Override
 	public Integer getId() {
 		return id;
 	}
-	
+
 	@Override
 	public void setId(Integer id) {
 		this.id = id;
 	}
-	
+
 }

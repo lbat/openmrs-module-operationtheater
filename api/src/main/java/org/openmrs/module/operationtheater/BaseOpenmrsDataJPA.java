@@ -32,30 +32,30 @@ public abstract class BaseOpenmrsDataJPA extends BaseOpenmrsObjectJPA implements
 	//***** Properties *****
 
 	@ManyToOne
-	@JoinColumn(name="creator", nullable = false)
+	@JoinColumn(name = "creator", nullable = false)
 	protected User creator;
 
-	@Column(name="date_created", nullable = false)
+	@Column(name = "date_created", nullable = false)
 	private Date dateCreated;
 
 	@ManyToOne
-	@JoinColumn(name="changed_by")
+	@JoinColumn(name = "changed_by")
 	private User changedBy;
 
-	@Column(name="date_changed")
+	@Column(name = "date_changed")
 	private Date dateChanged;
 
 	@Column(name = "voided", nullable = false, columnDefinition = "BOOLEAN default FALSE")
 	private Boolean voided = Boolean.FALSE;
 
-	@Column(name="date_voided")
+	@Column(name = "date_voided")
 	private Date dateVoided;
 
 	@ManyToOne
-	@JoinColumn(name="voided_by")
+	@JoinColumn(name = "voided_by")
 	private User voidedBy;
 
-	@Column(name="void_reason")
+	@Column(name = "void_reason")
 	private String voidReason;
 
 	//***** Constructors *****
