@@ -38,7 +38,17 @@ public class SchedulingFragmentController {
 
 	private final String APPT_TYPE_UUID = "93263567-286d-4567-8596-0611d9800206";
 
-	public List<SimpleObject> getAvailableTimes(UiUtils ui,
+	/**
+	 * @should return scheduled surgeries and available times for all operating theaters
+	 * @param ui
+	 * @param start
+	 * @param end
+	 * @param resources
+	 * @param locationService
+	 * @param appointmentService
+	 * @return
+	 */
+	public List<SimpleObject> getEvents(UiUtils ui,
 	                                      @RequestParam("start")  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date start,
 	                                      @RequestParam("end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date end,
 	                                      @RequestParam("resources") List<String> resources,
@@ -75,6 +85,18 @@ public class SchedulingFragmentController {
 		return SimpleObject.fromCollection(events, ui, "title", "start", "end", "availableStart", "availableEnd", "resourceId", "allDay", "editable", "annotation", "color");
 	}
 
+	/**
+	 * @should create appointment block if available times differ from default ones
+	 * @should update appointment block if entry already exists
+	 * @param ui
+	 * @param uuid
+	 * @param available
+	 * @param start
+	 * @param end
+	 * @param locationService
+	 * @param appointmentService
+	 * @throws Exception
+	 */
 	public void adjustAvailableTimes(UiUtils ui,
 	                                 @RequestParam("locationUuid")  String uuid,
 	                                 @RequestParam("available")  boolean available,
@@ -173,11 +195,11 @@ public class SchedulingFragmentController {
 		}
 
 		//TODO remove: just for demo purpose
-		startDate = startDate.withTime(0, 0, 0, 0);
-		start = dateFormatter.format(startDate.plusHours(9).toDate());
-		end = dateFormatter.format(startDate.plusHours(12).toDate());
-		CalendarEvent surgery = new CalendarEvent("Endoprosthesis of the hip joint", start, end, resourceId);
-		events.add(surgery);
+//		startDate = startDate.withTime(0, 0, 0, 0);
+//		start = dateFormatter.format(startDate.plusHours(9).toDate());
+//		end = dateFormatter.format(startDate.plusHours(12).toDate());
+//		CalendarEvent surgery = new CalendarEvent("Endoprosthesis of the hip joint", start, end, resourceId);
+//		events.add(surgery);
 
 
 	}
@@ -212,14 +234,36 @@ public class SchedulingFragmentController {
 	}
 
 	public static class CalendarEvent {
+
+		/**
+		 * Title of this event that is displayed in the calendar
+		 * empty if it is an available time entry
+		 */
 		private String title = "";
+
+		/**
+		 * start time of this event
+		 */
 		private String start;
+
+		/**
+		 * end time of this event
+		 */
 		private String end;
+
+		/**
+		 *
+		 */
 		private String availableStart = "";
 		private String availableEnd = "";
+
 		private int resourceId;
 		private boolean allDay = false;
 		private boolean editable = false;
+
+		/**
+		 * if event is related to available time this flag is true
+		 */
 		private boolean annotation;
 		private String color = "blue"; //TODO define color as LocationAttribute
 

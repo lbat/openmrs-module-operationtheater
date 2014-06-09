@@ -61,7 +61,7 @@
                 params.end = jq.fullCalendar.formatDate(end, 'yyyy-MM-dd');
                 params.resources = operationTheaters;
                 jq.ajaxSetup({ scriptCharset: "utf-8" , contentType: "application/json; charset=utf-8"});
-                jq.getJSON('${ ui.actionLink("operationtheater", "scheduling", "getAvailableTimes") }', jq.param(params, true))
+                jq.getJSON('${ ui.actionLink("operationtheater", "scheduling", "getEvents") }', jq.param(params, true))
                         .success(function (data) {
                             callback(data);
                         })

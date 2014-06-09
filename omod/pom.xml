@@ -85,13 +85,15 @@
 
         <dependency>
             <groupId>org.openmrs.module</groupId>
-            <artifactId>appframework-api</artifactId>
+            <artifactId>appui-api</artifactId>
+            <version>${appuiVersion}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
         </dependency>
-
 
         <dependency>
             <groupId>org.openmrs.module</groupId>
-            <artifactId>appui-api</artifactId>
+            <artifactId>appframework-api</artifactId>
         </dependency>
 
         <dependency>
