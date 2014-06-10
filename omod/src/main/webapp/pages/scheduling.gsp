@@ -6,7 +6,7 @@
     ui.includeCss("operationtheater", "bower_components/fullcalendar/fullcalendar.css")
     ui.includeJavascript("operationtheater", "bower_components/fullcalendar/fullcalendar.js")
 
-    ui.includeJavascript("operationtheater", "scheduling.js")
+    ui.includeJavascript("operationtheater", "schedulingAvailableTimesDialog.js")
     ui.includeJavascript("uicommons", "emr.js")
     ui.includeJavascript("uicommons", "moment.min.js")
     ui.includeJavascript("uicommons", "datetimepicker/bootstrap-datetimepicker.min.js")
@@ -27,7 +27,7 @@
         operationTheaters.push("${it.name}")
         <% } %>
 
-        createAvailableTimesDialog(3);
+        availableTimesDialog.createDialog();
 
         jq('#calendar').fullCalendar({
             header: {
@@ -51,7 +51,7 @@
             },
             eventClick: function (calEvent, jsEvent, view) {
                 if (calEvent.annotation) {
-                    showAvailableTimesDialog(calEvent);
+                    availableTimesDialog.show(calEvent);
                 }
             },
             resources: calResources,
