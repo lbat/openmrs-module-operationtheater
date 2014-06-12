@@ -4,8 +4,11 @@ import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.module.operationtheater.Procedure;
+import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.mock;
 
@@ -14,7 +17,7 @@ import static org.powermock.api.mockito.PowerMockito.mock;
  */
 public class ProcedureValidatorTest {
 
-	private final String MESSAGE_PREFIX = "operationtheater.Procedure.";
+	private final String MESSAGE_PREFIX = "operationtheater.procedure.";
 
 	private ProcedureValidator validator;
 
@@ -54,66 +57,70 @@ public class ProcedureValidatorTest {
 	 */
 	@Test
 	public void validate_shouldFailValidationIfNameIsNullEmptyOrWhitespaceOrLongerThan100Chars() throws Exception {
+		String fieldName = "name";
+
 		Procedure procedure = createValidProcedure();
 
 		//null
 		procedure.setName(null);
+		errors = new BindException(procedure, "procedure");
 		validator.validate(procedure, errors);
-		verify(errors).rejectValue("name", MESSAGE_PREFIX + "name.errorMessage", null, null);
+		assertThat(errors.hasErrors(), is(true));
+		assertThat(errors.getFieldErrorCount(), is(1));
+		assertThat(errors.getFieldErrors().get(0).getField(), is(fieldName));
+		assertThat(errors.getFieldErrors().get(0).getCode(), is("error.name"));
 
 		// empty
 		errors = mock(Errors.class);
 		procedure.setName("");
+		errors = new BindException(procedure, "procedure");
 		validator.validate(procedure, errors);
-		verify(errors).rejectValue("name", MESSAGE_PREFIX + "name.errorMessage", null, null);
+		assertThat(errors.hasErrors(), is(true));
+		assertThat(errors.getFieldErrorCount(), is(1));
+		assertThat(errors.getFieldErrors().get(0).getField(), is(fieldName));
+		assertThat(errors.getFieldErrors().get(0).getCode(), is("error.name"));
 
 		//whitespace
 		errors = mock(Errors.class);
 		procedure.setName("   ");
+		errors = new BindException(procedure, "procedure");
 		validator.validate(procedure, errors);
-		verify(errors).rejectValue("name", MESSAGE_PREFIX + "name.errorMessage", null, null);
+		assertThat(errors.hasErrors(), is(true));
+		assertThat(errors.getFieldErrorCount(), is(1));
+		assertThat(errors.getFieldErrors().get(0).getField(), is(fieldName));
+		assertThat(errors.getFieldErrors().get(0).getCode(), is("error.name"));
 
 		//longer than 100 chars
-		errors = mock(Errors.class);
 		String longName = StringUtils.repeat("*", 101);
 		procedure.setName(longName);
+		errors = new BindException(procedure, "procedure");
 		validator.validate(procedure, errors);
-		verify(errors).rejectValue("name", MESSAGE_PREFIX + "name.errorMessage", null, null);
+		assertThat(errors.hasErrors(), is(true));
+		assertThat(errors.getFieldErrorCount(), is(1));
+		assertThat(errors.getFieldErrors().get(0).getField(), is(fieldName));
+		assertThat(errors.getFieldErrors().get(0).getCode(), is(MESSAGE_PREFIX + "longName.errorMessage"));
 	}
 
 	/**
-	 * @verifies fail validation if description is null empty or whitespace or longer than 1024 chars
+	 * @verifies fail validation if description is longer than 1024 chars
 	 * @see ProcedureValidator#validate(Object, org.springframework.validation.Errors)
 	 */
 	@Test
-	public void validate_shouldFailValidationIfDescriptionIsNullEmptyOrWhitespaceOrLongerThan1024Chars() throws Exception {
+	public void validate_shouldFailValidationIfDescriptionIsLongerThan1024Chars() throws Exception {
 		String fieldName = "description";
 		String messageId = MESSAGE_PREFIX + fieldName + ".errorMessage";
 		Procedure procedure = createValidProcedure();
 
-		//null
-		procedure.setDescription(null);
-		validator.validate(procedure, errors);
-		verify(errors).rejectValue(fieldName, messageId, null, null);
-
-		// empty
-		errors = mock(Errors.class);
-		procedure.setDescription("");
-		validator.validate(procedure, errors);
-		verify(errors).rejectValue(fieldName, messageId, null, null);
-
-		//whitespace
-		errors = mock(Errors.class);
-		procedure.setDescription("   ");
-		validator.validate(procedure, errors);
-		verify(errors).rejectValue(fieldName, messageId, null, null);
-
 		//longer than 1024 chars
-		errors = mock(Errors.class);
+		errors = new BindException(procedure, "procedure");
 		String longDescription = StringUtils.repeat("*", 1025);
 		procedure.setDescription(longDescription);
+
 		validator.validate(procedure, errors);
-		verify(errors).rejectValue(fieldName, messageId, null, null);
+
+		assertThat(errors.getFieldErrorCount(), is(1));
+		assertThat(errors.getFieldErrors().get(0).getField(), is(fieldName));
+		assertThat(errors.getFieldErrors().get(0).getCode(), is(messageId));
 	}
 
 	/**
@@ -128,20 +135,31 @@ public class ProcedureValidatorTest {
 
 		//null
 		procedure.setInterventionDuration(null);
+		errors = new BindException(procedure, "procedure");
 		validator.validate(procedure, errors);
-		verify(errors).rejectValue(fieldName, messageId, null, null);
+		assertThat(errors.hasErrors(), is(true));
+		assertThat(errors.getFieldErrorCount(), is(1));
+		assertThat(errors.getFieldErrors().get(0).getField(), is(fieldName));
+		assertThat(errors.getFieldErrors().get(0).getCode(), is(messageId));
 
 		// negative
-		errors = mock(Errors.class);
 		procedure.setInterventionDuration(-1);
+		errors = new BindException(procedure, "procedure");
 		validator.validate(procedure, errors);
-		verify(errors).rejectValue(fieldName, messageId, null, null);
+		assertThat(errors.hasErrors(), is(true));
+		assertThat(errors.getFieldErrorCount(), is(1));
+		assertThat(errors.getFieldErrors().get(0).getField(), is(fieldName));
+		assertThat(errors.getFieldErrors().get(0).getCode(), is(messageId));
 
 		//longer than 24 hours
-		errors = mock(Errors.class);
 		procedure.setInterventionDuration(24 * 60 + 1);
+		errors = new BindException(procedure, "procedure");
 		validator.validate(procedure, errors);
-		verify(errors).rejectValue(fieldName, messageId, null, null);
+		assertThat(errors.hasErrors(), is(true));
+		assertThat(errors.getFieldErrorCount(), is(1));
+		assertThat(errors.getFieldErrors().get(0).getField(), is(fieldName));
+		assertThat(errors.getFieldErrors().get(0).getCode(), is(messageId));
+
 	}
 
 	/**
@@ -156,20 +174,31 @@ public class ProcedureValidatorTest {
 
 		//null
 		procedure.setOtPreparationDuration(null);
+		errors = new BindException(procedure, "procedure");
 		validator.validate(procedure, errors);
-		verify(errors).rejectValue(fieldName, messageId, null, null);
+		assertThat(errors.hasErrors(), is(true));
+		assertThat(errors.getFieldErrorCount(), is(1));
+		assertThat(errors.getFieldErrors().get(0).getField(), is(fieldName));
+		assertThat(errors.getFieldErrors().get(0).getCode(), is(messageId));
 
 		// negative
-		errors = mock(Errors.class);
 		procedure.setOtPreparationDuration(-1);
+		errors = new BindException(procedure, "procedure");
 		validator.validate(procedure, errors);
-		verify(errors).rejectValue(fieldName, messageId, null, null);
+		assertThat(errors.hasErrors(), is(true));
+		assertThat(errors.getFieldErrorCount(), is(1));
+		assertThat(errors.getFieldErrors().get(0).getField(), is(fieldName));
+		assertThat(errors.getFieldErrors().get(0).getCode(), is(messageId));
 
 		//longer than 5 hours
-		errors = mock(Errors.class);
 		procedure.setOtPreparationDuration(5 * 60 + 1);
+		errors = new BindException(procedure, "procedure");
 		validator.validate(procedure, errors);
-		verify(errors).rejectValue(fieldName, messageId, null, null);
+		assertThat(errors.hasErrors(), is(true));
+		assertThat(errors.getFieldErrorCount(), is(1));
+		assertThat(errors.getFieldErrors().get(0).getField(), is(fieldName));
+		assertThat(errors.getFieldErrors().get(0).getCode(), is(messageId));
+
 	}
 
 	/**
@@ -184,20 +213,43 @@ public class ProcedureValidatorTest {
 
 		//null
 		procedure.setOtPreparationDuration(null);
+		errors = new BindException(procedure, "procedure");
 		validator.validate(procedure, errors);
-		verify(errors).rejectValue(fieldName, messageId, null, null);
+		assertThat(errors.hasErrors(), is(true));
+		assertThat(errors.getFieldErrorCount(), is(1));
+		assertThat(errors.getFieldErrors().get(0).getField(), is(fieldName));
+		assertThat(errors.getFieldErrors().get(0).getCode(), is(messageId));
 
 		// negative
-		errors = mock(Errors.class);
 		procedure.setOtPreparationDuration(-1);
+		errors = new BindException(procedure, "procedure");
 		validator.validate(procedure, errors);
-		verify(errors).rejectValue(fieldName, messageId, null, null);
+		assertThat(errors.hasErrors(), is(true));
+		assertThat(errors.getFieldErrorCount(), is(1));
+		assertThat(errors.getFieldErrors().get(0).getField(), is(fieldName));
+		assertThat(errors.getFieldErrors().get(0).getCode(), is(messageId));
 
 		//longer than 5 hours
-		errors = mock(Errors.class);
 		procedure.setOtPreparationDuration(5 * 60 + 1);
+		errors = new BindException(procedure, "procedure");
 		validator.validate(procedure, errors);
-		verify(errors).rejectValue(fieldName, messageId, null, null);
+		assertThat(errors.hasErrors(), is(true));
+		assertThat(errors.getFieldErrorCount(), is(1));
+		assertThat(errors.getFieldErrors().get(0).getField(), is(fieldName));
+		assertThat(errors.getFieldErrors().get(0).getCode(), is(messageId));
 	}
 
+	/**
+	 * @verifies pass validation if all fields are valid
+	 * @see ProcedureValidator#validate(Object, org.springframework.validation.Errors)
+	 */
+	@Test
+	public void validate_shouldPassValidationIfAllFieldsAreValid() throws Exception {
+		Procedure procedure = createValidProcedure();
+		procedure.setDescription(null);
+		errors = new BindException(procedure, "procedure");
+		validator.validate(procedure, errors);
+
+		assertThat(errors.hasErrors(), is(false));
+	}
 }

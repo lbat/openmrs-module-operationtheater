@@ -14,7 +14,7 @@ import javax.persistence.Table;
  * Defines a Procedure in the system.
  */
 @Entity
-@Table(name = "procedure")
+@Table(name = "prozedure") //procedure is a reserved sql word and caused issues
 public class Procedure extends BaseOpenmrsMetadataJPA {
 
 	private static final Log log = LogFactory.getLog(Procedure.class);
@@ -22,7 +22,7 @@ public class Procedure extends BaseOpenmrsMetadataJPA {
 	@Id
 	@GeneratedValue
 	@Column(name = "procedure_id")
-	private int procedureId;
+	private Integer procedureId;
 
 	/**
 	 * average timespan in minutes required to perform this procedure
@@ -47,11 +47,11 @@ public class Procedure extends BaseOpenmrsMetadataJPA {
 	@Column(name = "inpatient_stay", nullable = false)
 	private Integer inpatientStay;
 
-	public int getProcedureId() {
+	public Integer getProcedureId() {
 		return procedureId;
 	}
 
-	public void setProcedureId(int procedureId) {
+	public void setProcedureId(Integer procedureId) {
 		this.procedureId = procedureId;
 	}
 
@@ -81,11 +81,11 @@ public class Procedure extends BaseOpenmrsMetadataJPA {
 		this.otPreparationDuration = otPreparationDuration;
 	}
 
-	public int getInpatientStay() {
+	public Integer getInpatientStay() {
 		return inpatientStay;
 	}
 
-	public void setInpatientStay(int inpatientStay) {
+	public void setInpatientStay(Integer inpatientStay) {
 		this.inpatientStay = inpatientStay;
 	}
 

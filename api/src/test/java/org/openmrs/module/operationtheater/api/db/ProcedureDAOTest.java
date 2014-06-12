@@ -114,4 +114,31 @@ public class ProcedureDAOTest extends BaseModuleContextSensitiveTest {
 		assertThat(procedureList, hasSize(TOTAL_PROCEDURES));
 	}
 
+	@Test
+	@Verifies(value = "should return the object with the specified uuid", method = "getByUuid")
+	public void getByUuid_shouldReturnTheObjectWithTheSpecifiedUuid() throws Exception {
+		String uuid = "abcdefc1-1691-11df-97a5-7038c432aab2";
+		Procedure procedure = procedureDAO.getByUuid(uuid);
+
+		assertThat(procedure.getId(), is(2));
+		assertThat(procedure.getInpatientStay(), is(8));
+		assertThat(procedure.getInterventionDuration(), is(252));
+		assertThat(procedure.getOtPreparationDuration(), is(46));
+	}
+
+	@Test
+	/**
+	 * @verifies return the object with the specified id
+	 * @see GenericDAO#saveOrUpdate(T)
+	 */
+	public void getById_shouldReturnTheObjectWithTheSpecifiedId() throws Exception {
+		Integer id = 2;
+		Procedure procedure = procedureDAO.getById(id);
+
+		assertThat(procedure.getId(), is(id));
+		assertThat(procedure.getInpatientStay(), is(8));
+		assertThat(procedure.getInterventionDuration(), is(252));
+		assertThat(procedure.getOtPreparationDuration(), is(46));
+	}
+
 }

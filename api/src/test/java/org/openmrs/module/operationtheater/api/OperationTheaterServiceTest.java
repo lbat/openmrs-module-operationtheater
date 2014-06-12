@@ -115,12 +115,12 @@ public class OperationTheaterServiceTest { //extends BaseModuleContextSensitiveT
 		when(surgeryDAO.getAllData(true)).thenReturn(surgeryList);
 		List<Surgery> result = service.getAllSurgeries(true);
 		assertEquals(surgeryList, result);
-		//		Mockito.verify(surgeryDAO).getAllData(true);
+		Mockito.verify(surgeryDAO).getAllData(true);
 
 		when(surgeryDAO.getAllData(false)).thenReturn(surgeryList);
 		result = service.getAllSurgeries(false);
 		assertEquals(surgeryList, result);
-		//		Mockito.verify(surgeryDAO).getAllData(false);
+		Mockito.verify(surgeryDAO).getAllData(false);
 	}
 
 	/**
@@ -136,5 +136,57 @@ public class OperationTheaterServiceTest { //extends BaseModuleContextSensitiveT
 		Surgery actualSurgery = service.getSurgeryByUuid(uuid);
 
 		assertEquals(surgery, actualSurgery);
+	}
+
+	/**
+	 * @verifies call procedureDAO getByUuid
+	 * @see OperationTheaterService#getProcedureByUuid(String)
+	 */
+	@Test
+	public void getProcedureByUuid_shouldCallProcedureDAOGetByUuid() throws Exception {
+		String uuid = "random uuid";
+		Procedure procedure = new Procedure();
+		when(procedureDAO.getByUuid(uuid)).thenReturn(procedure);
+
+		Procedure actualProcedure = service.getProcedureByUuid(uuid);
+
+		assertEquals(procedure, actualProcedure);
+	}
+
+	/**
+	 * @verifies return result of procedureDAO getAll method with parameter includeRetired
+	 * @see OperationTheaterService#getAllProcedures(boolean)
+	 */
+	@Test
+	public void getAllProcedures_shouldReturnResultOfProcedureDAOGetAllMethodWithParameterIncludeRetired() throws Exception {
+		List<Procedure> procedureList = new ArrayList<Procedure>();
+		procedureList.add(new Procedure());
+
+		when(procedureDAO.getAll(true)).thenReturn(procedureList);
+		List<Procedure> result = service.getAllProcedures(true);
+		assertEquals(procedureList, result);
+		Mockito.verify(procedureDAO).getAll(true);
+
+		when(procedureDAO.getAll(false)).thenReturn(procedureList);
+		result = service.getAllProcedures(false);
+		assertEquals(procedureList, result);
+		Mockito.verify(procedureDAO).getAll(false);
+	}
+
+	/**
+	 * @verifies call procedureDAO getById
+	 * @see OperationTheaterService#getProcedure(Integer)
+	 */
+	@Test
+	public void getProcedure_shouldCallProcedureDAOGetById() throws Exception {
+
+		Integer id = 1;
+		Procedure procedure = new Procedure();
+
+		when(procedureDAO.getById(id)).thenReturn(procedure);
+
+		Procedure result = service.getProcedure(id);
+
+		assertEquals(procedure, result);
 	}
 }

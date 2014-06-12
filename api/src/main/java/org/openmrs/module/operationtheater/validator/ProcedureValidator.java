@@ -14,11 +14,14 @@ import org.springframework.validation.Validator;
 @Handler(supports = { Procedure.class }, order = 50)
 public class ProcedureValidator implements Validator {
 
-	private static final int MAX_INTERVENTION_DURATION = 24 * 60;
+	//if you change this value also change the corresponding error message in messages.properties
+	public static final int MAX_INTERVENTION_DURATION = 24 * 60;
 
-	private static final int MAX_INPATIENT_STAY = 60;
+	//if you change this value also change the corresponding error message in messages.properties
+	public static final int MAX_INPATIENT_STAY = 60;
 
-	private static final int MAX_OT_PREPARATION_DURATION = 5 * 60;
+	//if you change this value also change the corresponding error message in messages.properties
+	public static final int MAX_OT_PREPARATION_DURATION = 5 * 60;
 
 	/**
 	 * Log for this class and subclasses
@@ -40,10 +43,11 @@ public class ProcedureValidator implements Validator {
 	 *
 	 * @should fail validation if obj is not instance of surgery
 	 * @should fail validation if name is null empty or whitespace or longer than 100 chars
-	 * @should fail validation if description is null empty or whitespace or longer than 1024 chars
+	 * @should fail validation if description is longer than 1024 chars
 	 * @should fail validation if interventionDuration is null negative or greater than 24 hours
 	 * @should fail validation if otPreparationDuration is null negative or greater than 5 hours
 	 * @should fail validation if inpatientStay is null negative or greater than 60 days
+	 * @should pass validation if all fields are valid
 	 * @see org.springframework.validation.Validator#validate(Object,
 	 * org.springframework.validation.Errors)
 	 */
@@ -65,10 +69,11 @@ public class ProcedureValidator implements Validator {
 	}
 
 	private void validateNameField(Errors errors, Procedure procedure) {
-		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "name", "operationtheater.Procedure.name.errorMessage");
-		if (verifyIfNameHasMoreThan100Characters(procedure.getName())) {
-			errors.rejectValue("name", "operationtheater.Procedure.name.errorMessage");
+		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "name", "error.name");
+		if (verifyIfNameHasMoreThan100Characters(procedure.getName())) {//TODO adjust to not longer than 255
+			errors.rejectValue("name", "operationtheater.procedure.longName.errorMessage");
 		}
+		//Todo check for duplicate names as in AppointmentTypeValidator ?!
 	}
 
 	private boolean verifyIfNameHasMoreThan100Characters(String appointmentName) {
@@ -79,10 +84,8 @@ public class ProcedureValidator implements Validator {
 	}
 
 	private void validateDescriptionField(Errors errors, String description) {
-		ValidationUtils
-				.rejectIfEmptyOrWhitespace(errors, "description", "operationtheater.Procedure.description.errorMessage");
 		if (verifyIfDescriptionHasMoreThan1024Characters(description)) {
-			errors.rejectValue("description", "operationtheater.Procedure.description.errorMessage");
+			errors.rejectValue("description", "operationtheater.procedure.description.errorMessage");
 		}
 	}
 
@@ -94,29 +97,24 @@ public class ProcedureValidator implements Validator {
 	}
 
 	private void validateInterventionDurationField(Errors errors, Procedure procedure) {
-		ValidationUtils.rejectIfEmpty(errors, "interventionDuration",
-				"operationtheater.Procedure.interventionDuration.errorMessage");
 		Integer interventionDuration = procedure.getInterventionDuration();
 		if (interventionDuration == null || interventionDuration <= 0 || interventionDuration > MAX_INTERVENTION_DURATION) {
-			errors.rejectValue("interventionDuration", "operationtheater.Procedure.interventionDuration.errorMessage");
+			errors.rejectValue("interventionDuration", "operationtheater.procedure.interventionDuration.errorMessage");
 		}
 	}
 
 	private void validateOtPreparationDurationField(Errors errors, Procedure procedure) {
-		ValidationUtils.rejectIfEmpty(errors, "otPreparationDuration",
-				"operationtheater.Procedure.otPreparationDuration.errorMessage");
 		Integer otPreparationDuration = procedure.getOtPreparationDuration();
 		if (otPreparationDuration == null || otPreparationDuration <= 0
 				|| otPreparationDuration > MAX_OT_PREPARATION_DURATION) {
-			errors.rejectValue("otPreparationDuration", "operationtheater.Procedure.otPreparationDuration.errorMessage");
+			errors.rejectValue("otPreparationDuration", "operationtheater.procedure.otPreparationDuration.errorMessage");
 		}
 	}
 
 	private void validateInpatientStayField(Errors errors, Procedure procedure) {
-		ValidationUtils.rejectIfEmpty(errors, "inpatientStay", "operationtheater.Procedure.inpatientStay.errorMessage");
 		Integer inpatientStay = procedure.getInpatientStay();
 		if (inpatientStay == null || inpatientStay <= 0 || inpatientStay > MAX_INPATIENT_STAY) {
-			errors.rejectValue("inpatientStay", "operationtheater.Procedure.inpatientStay.errorMessage");
+			errors.rejectValue("inpatientStay", "operationtheater.procedure.inpatientStay.errorMessage");
 		}
 	}
 	//TODO add error message strings to messages.properties

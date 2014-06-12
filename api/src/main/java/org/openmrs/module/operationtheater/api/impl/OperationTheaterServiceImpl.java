@@ -95,14 +95,33 @@ public class OperationTheaterServiceImpl extends BaseOpenmrsService implements O
 	}
 
 	@Override
+	public Procedure retireProcedure(Procedure procedureToRetire, String reason) {
+		if (procedureToRetire != null) {
+			return null;
+		}
+
+		return procedureDAO.saveOrUpdate(procedureToRetire);
+	}
+
+	@Override
+	public Procedure getProcedureByUuid(String uuid) {
+		return procedureDAO.getByUuid(uuid);
+	}
+
+	@Override
+	public Procedure getProcedure(Integer id) {
+		return procedureDAO.getById(id);
+	}
+
+	@Override
 	public Procedure saveProcedure(Procedure procedure) throws APIException {
 		ValidateUtil.validate(procedure);
 		return procedureDAO.saveOrUpdate(procedure);
 	}
 
 	@Override
-	public List<Procedure> getAllProcedures() throws APIException {
-		return procedureDAO.getAll();
+	public List<Procedure> getAllProcedures(boolean includeRetired) throws APIException {
+		return procedureDAO.getAll(includeRetired);
 	}
 
 }

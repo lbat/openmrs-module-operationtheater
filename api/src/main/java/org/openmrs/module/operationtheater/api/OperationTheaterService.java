@@ -80,6 +80,24 @@ public interface OperationTheaterService extends OpenmrsService {
 	public List<Surgery> getAllSurgeries(boolean includeVoided);
 
 	/**
+	 * Get procedure with the specified uuid
+	 *
+	 * @param uuid
+	 * @return procedure with given uuid
+	 * @should call procedureDAO getByUuid
+	 */
+	public Procedure getProcedureByUuid(String uuid);
+
+	/**
+	 * Get procedure with the specified id
+	 *
+	 * @param id
+	 * @return procedure with given id
+	 * @should call procedureDAO getById
+	 */
+	public Procedure getProcedure(Integer id);
+
+	/**
 	 * Creates or updates the given surgery in the database.
 	 *
 	 * @param procedure procedure to be created
@@ -92,10 +110,12 @@ public interface OperationTheaterService extends OpenmrsService {
 	/**
 	 * gets list of all Procedures in the database
 	 *
+	 * @param includeRetired
 	 * @return
 	 * @throws org.openmrs.api.APIException
+	 * @should return result of procedureDAO getAll method with parameter includeRetired
 	 */
-	public List<Procedure> getAllProcedures() throws APIException;
+	public List<Procedure> getAllProcedures(boolean includeRetired) throws APIException;
 
 	/**
 	 * Get the surgery with the specified uuid
@@ -123,4 +143,13 @@ public interface OperationTheaterService extends OpenmrsService {
 	 * @should unvoid the given surgery
 	 */
 	public Surgery unvoidSurgery(Surgery surgery);
+
+	/**
+	 * retire the given procedure
+	 *
+	 * @param procedureToRetire
+	 * @param reason
+	 * @should retire the given procedure
+	 */
+	public Procedure retireProcedure(Procedure procedureToRetire, String reason);
 }

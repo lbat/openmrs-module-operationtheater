@@ -13,7 +13,6 @@ package org.openmrs.module.operationtheater;
  * Copyright (C) OpenMRS, LLC.  All Rights Reserved.
  */
 
-import org.openmrs.BaseOpenmrsObject;
 import org.openmrs.OpenmrsMetadata;
 import org.openmrs.User;
 
@@ -26,8 +25,9 @@ import java.util.Date;
 /**
  * Same class as in {@link org.openmrs.BaseOpenmrsMetadata}, but with JPA annotations
  */
+//TODO replace with openmrs-core version if jpa annotations are added in a future release
 @MappedSuperclass
-public abstract class BaseOpenmrsMetadataJPA extends BaseOpenmrsObject implements OpenmrsMetadata {
+public abstract class BaseOpenmrsMetadataJPA extends BaseOpenmrsObjectJPA implements OpenmrsMetadata {
 
 	//***** Properties *****
 

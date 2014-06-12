@@ -10,6 +10,13 @@ import java.util.List;
 @Repository
 public interface GenericDAO<T> {
 
+	/**
+	 * get the object with the specified id
+	 *
+	 * @param id
+	 * @return the object with the specified id
+	 * @should return the object with the specified id
+	 */
 	T getById(Integer id);
 
 	/**

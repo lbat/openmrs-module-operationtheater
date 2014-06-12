@@ -1,0 +1,18 @@
+[
+    {
+        "id": "operationtheater.manageProcedures",
+        "description": "Opens page to manage procedures",
+        "order": 2,
+        "extensions": [
+            {
+                "id": "coreapps.activeVisitsHomepageLink",
+                "extensionPointId": "org.openmrs.referenceapplication.homepageLink",
+                "type": "link",
+                "label": "${project.parent.artifactId}.manageprocedures.app.button.label",
+                "url": "${project.parent.artifactId}/manageProcedures.page",
+                "icon": "icon-edit",
+                "requiredPrivilege": "App: coreapps.findPatient" //TODO edit
+            }
+        ]
+    }
+]

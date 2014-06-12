@@ -173,13 +173,13 @@
                 <p>
                     <label for="start_time_picker-display">start time:</label>
                     <!--<input id="startTime" name="startTime" placeholder="e.g. 08:00" type="text"></input>-->
-                    ${ui.includeFragment("operationtheater", "datetimepicker", [id: 'start_time_picker', label: '', formFieldName: 'start time picker', useTime: true])}
+                    ${ui.includeFragment("operationtheater", "field/datetimepicker", [id: 'start_time_picker', label: '', formFieldName: 'start time picker', useTime: true])}
                 </p>
 
                 <p>
                     <label for="end_time_picker-display">end time:</label>
                     <!--<input id="endTime" name="endTime" placeholder="e.g. 17:00" type="text"></input>-->
-                    ${ui.includeFragment("operationtheater", "datetimepicker", [id: 'end_time_picker', label: '', formFieldName: 'end time picker', useTime: true])}
+                    ${ui.includeFragment("operationtheater", "field/datetimepicker", [id: 'end_time_picker', label: '', formFieldName: 'end time picker', useTime: true])}
                 </p>
 
             </form>

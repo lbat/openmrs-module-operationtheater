@@ -62,17 +62,21 @@
     <changeSet author="Lukas Breitwieser" id="operationtheater-201405281149">
         <preConditions onFail="MARK_RAN">
             <not>
-                <tableExists tableName="procedure"/>
+                <tableExists tableName="prozedure"/>
             </not>
         </preConditions>
         <comment>
             Create the procedure table
         </comment>
-        <createTable tableName="procedure">
+        <createTable tableName="prozedure">
 
             <column name="procedure_id" type="integer" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(255)"/>
             <column name="intervention_duration" type="integer">
                 <constraints nullable="false"/>
             </column>
@@ -99,17 +103,17 @@
             </column>
             <column name="retired_by" type="int"/>
             <column name="date_retired" type="datetime"/>
-            <column name="retire_reason" type="varchar(255)" defaultValue="null"/>
+            <column name="retire_reason" type="varchar(255)"/>
         </createTable>
 
         <addForeignKeyConstraint constraintName="procedure_creator"
-                                 baseTableName="procedure" baseColumnNames="creator"
+                                 baseTableName="prozedure" baseColumnNames="creator"
                                  referencedTableName="users" referencedColumnNames="user_id"/>
         <addForeignKeyConstraint constraintName="procedure_changed_by"
-                                 baseTableName="procedure" baseColumnNames="changed_by"
+                                 baseTableName="prozedure" baseColumnNames="changed_by"
                                  referencedTableName="users" referencedColumnNames="user_id"/>
         <addForeignKeyConstraint constraintName="procedure_retired_by"
-                                 baseTableName="procedure" baseColumnNames="retired_by"
+                                 baseTableName="prozedure" baseColumnNames="retired_by"
                                  referencedTableName="users" referencedColumnNames="user_id"/>
     </changeSet>
 
