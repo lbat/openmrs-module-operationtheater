@@ -119,6 +119,11 @@
 
         <dependency>
             <groupId>org.openmrs.module</groupId>
+            <artifactId>coreapps-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.openmrs.module</groupId>
             <artifactId>appointmentscheduling-api</artifactId>
         </dependency>
 

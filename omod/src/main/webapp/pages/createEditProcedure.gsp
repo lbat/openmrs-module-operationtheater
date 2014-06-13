@@ -9,6 +9,7 @@
 <!-- TODO create css with compass -->
 <style type='text/css'>
 input.error {
+    border: 2px solid;
     border-color: #ff6666;
 }
 </style>
