@@ -60,6 +60,28 @@
 
         <!-- End OpenMRS core -->
 
+        <dependency>
+            <groupId>com.sourceforge</groupId>
+            <artifactId>lpsolve</artifactId>
+            <version>5.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.sourceforge</groupId>
+            <artifactId>liblpsolve</artifactId>
+            <version>5.5</version>
+            <type>so</type>
+            <classifier>linux-x86_64</classifier>
+        </dependency>
+
+        <dependency>
+            <groupId>com.sourceforge</groupId>
+            <artifactId>liblpsolvej</artifactId>
+            <version>5.5</version>
+            <type>so</type>
+            <classifier>linux-x86_64</classifier>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -85,5 +107,13 @@
             </plugin>
         </plugins>
     </build>
+
+    <repositories>
+        <repository>
+            <id>project.local</id>
+            <name>project</name>
+            <url>file:${project.basedir}/local_mvn_repo/</url>
+        </repository>
+    </repositories>
 
 </project>
