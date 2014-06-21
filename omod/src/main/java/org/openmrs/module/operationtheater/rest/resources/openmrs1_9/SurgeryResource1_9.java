@@ -20,6 +20,7 @@ import org.openmrs.module.webservices.rest.web.response.ResponseException;
 		supportedClass = Surgery.class, supportedOpenmrsVersions = "1.9.*")
 public class SurgeryResource1_9 extends DataDelegatingCrudResource<Surgery> {
 
+	//FIXME not all attributes are covered anymore
 	@Override
 	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
 		if (rep instanceof DefaultRepresentation) {

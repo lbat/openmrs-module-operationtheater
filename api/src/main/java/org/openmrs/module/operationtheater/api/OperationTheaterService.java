@@ -13,6 +13,7 @@
  */
 package org.openmrs.module.operationtheater.api;
 
+import org.openmrs.Patient;
 import org.openmrs.api.APIException;
 import org.openmrs.api.OpenmrsService;
 import org.openmrs.api.PatientService;
@@ -145,6 +146,16 @@ public interface OperationTheaterService extends OpenmrsService {
 	public Surgery unvoidSurgery(Surgery surgery);
 
 	/**
+	 * get all unvoided surgeries that are associated with the given patient
+	 *
+	 * @param patient
+	 * @return all unvoided surgeries that are associated with the given patient
+	 * @should call surgeryDAO getSurgeriesByPatient
+	 * @should do nothing if patient is null
+	 */
+	public List<Surgery> getSurgeriesByPatient(Patient patient);
+
+	/**
 	 * retire the given procedure
 	 *
 	 * @param procedureToRetire
@@ -152,4 +163,13 @@ public interface OperationTheaterService extends OpenmrsService {
 	 * @should retire the given procedure
 	 */
 	public Procedure retireProcedure(Procedure procedureToRetire, String reason);
+
+	/**
+	 * Get Surgery with the specified id
+	 *
+	 * @param id
+	 * @return surgery with given id
+	 * @should call surgeryDAO getById
+	 */
+	public Surgery getSurgery(Integer id);
 }

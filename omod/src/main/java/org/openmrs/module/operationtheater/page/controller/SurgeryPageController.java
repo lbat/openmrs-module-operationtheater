@@ -13,69 +13,186 @@
  */
 package org.openmrs.module.operationtheater.page.controller;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.openmrs.Location;
+import org.openmrs.Patient;
+import org.openmrs.module.appframework.context.AppContextModel;
+import org.openmrs.module.appui.UiSessionContext;
+import org.openmrs.module.emrapi.adt.AdtService;
+import org.openmrs.module.emrapi.event.ApplicationEventService;
+import org.openmrs.module.emrapi.patient.PatientDomainWrapper;
+import org.openmrs.module.emrapi.visit.VisitDomainWrapper;
+import org.openmrs.module.operationtheater.Procedure;
+import org.openmrs.module.operationtheater.Surgery;
+import org.openmrs.module.operationtheater.api.OperationTheaterService;
+import org.openmrs.ui.framework.annotation.InjectBeans;
+import org.openmrs.ui.framework.annotation.SpringBean;
+import org.openmrs.ui.framework.page.PageModel;
+import org.openmrs.ui.framework.page.Redirect;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
+
 //import org.openmrs.module.coreapps.contextmodel.VisitContextModel;
 
 public class SurgeryPageController {
 
-	//	public Object controller(@RequestParam("patientId") Patient patient, PageModel model,
-	//	                         @InjectBeans PatientDomainWrapper patientDomainWrapper,
-	//	                         @SpringBean("adtService") AdtService adtService,
-	//	                         @SpringBean("visitService") VisitService visitService,
-	//	                         @SpringBean("encounterService") EncounterService encounterService,
-	//	                         @SpringBean("emrApiProperties") EmrApiProperties emrApiProperties,
-	//	                         @SpringBean("appFrameworkService") AppFrameworkService appFrameworkService,
-	//	                         @SpringBean("applicationEventService") ApplicationEventService applicationEventService,
-	//	                         UiSessionContext sessionContext) {
-	//
-	//		if (patient.isVoided() || patient.isPersonVoided()) {
-	//			return new Redirect("coreapps", "patientdashboard/deletedPatient", "patientId=" + patient.getId());
-	//		}
-	//
-	//		patientDomainWrapper.setPatient(patient);
-	//		model.addAttribute("patient", patientDomainWrapper);
-	//
-	//		Location visitLocation = null;
-	//		try {
-	//			visitLocation = adtService.getLocationThatSupportsVisits(sessionContext.getSessionLocation());
-	//		}
-	//		catch (IllegalArgumentException ex) {
-	//			// location does not support visits
-	//		}
-	//
-	//		VisitDomainWrapper activeVisit = null;
-	//		if (visitLocation != null) {
-	//			activeVisit = adtService.getActiveVisit(patient, visitLocation);
-	//		}
-	//		model.addAttribute("activeVisit", activeVisit);
-	//
-	//		AppContextModel contextModel = sessionContext.generateAppContextModel();
-	//		contextModel.put("patientId", patient.getId());
-	//		contextModel.put("patientDead", patient.isDead());
-	//		contextModel.put("visit", activeVisit == null ? null : new VisitContextModel(activeVisit));
-	//
-	//		List<Extension> overallActions = appFrameworkService.getExtensionsForCurrentUser("patientDashboard.overallActions", contextModel);
-	//		Collections.sort(overallActions);
-	//		model.addAttribute("overallActions", overallActions);
-	//
-	//		List<Extension> visitActions = appFrameworkService.getExtensionsForCurrentUser("patientDashboard.visitActions", contextModel);
-	//		Collections.sort(visitActions);
-	//		model.addAttribute("visitActions", visitActions);
-	//
-	//		List<Extension> includeFragments = appFrameworkService.getExtensionsForCurrentUser("patientDashboard.includeFragments");
-	//		Collections.sort(includeFragments);
-	//		model.addAttribute("includeFragments", includeFragments);
-	//
-	//		List<Extension> otherActions = appFrameworkService.getExtensionsForCurrentUser(
-	//				"clinicianFacingPatientDashboard.otherActions", contextModel);
-	//		Collections.sort(otherActions);
-	//		model.addAttribute("otherActions", otherActions);
-	//
-	//		applicationEventService.patientViewed(patient, sessionContext.getCurrentUser());
-	//
-	//		return null;
-	//	}
+	protected final Log log = LogFactory.getLog(getClass());
+
+	public Object controller(@RequestParam("patientId") Patient patient, PageModel model,
+	                         @RequestParam(value = "surgeryId", required = false) Integer surgeryId,
+	                         @InjectBeans PatientDomainWrapper patientDomainWrapper,
+	                         @SpringBean OperationTheaterService otService,
+	                         @SpringBean("adtService") AdtService adtService,
+	                         //		                         @SpringBean("visitService") VisitService visitService,
+	                         //		                         @SpringBean("encounterService") EncounterService encounterService,
+	                         //		                         @SpringBean("emrApiProperties") EmrApiProperties emrApiProperties,
+	                         //		                         @SpringBean("appFrameworkService") AppFrameworkService appFrameworkService,
+	                         @SpringBean("applicationEventService") ApplicationEventService applicationEventService,
+	                         UiSessionContext sessionContext) {
+
+		if (patient.isVoided() || patient.isPersonVoided()) {
+			return new Redirect("coreapps", "patientdashboard/deletedPatient", "patientId=" + patient.getId());
+		}
+
+		//TODO is there a way to do this automatically - how is that done with patients - https://wiki.openmrs.org/display/docs/Flexible+Method+Signatures+for+UI+Framework+Controller+and+Action+Methods
+		Surgery surgery = new Surgery();
+		Procedure procedure = new Procedure();
+		surgery.setProcedure(procedure);
+		if (surgeryId != null) {
+			surgery = otService.getSurgery(surgeryId);
+		}
+		model.addAttribute("surgery", surgery);
+
+		List<Procedure> procedureList = otService.getAllProcedures(false);
+		model.addAttribute("procedureList", procedureList);
+
+		patientDomainWrapper.setPatient(patient);
+		model.addAttribute("patient", patientDomainWrapper);
+
+		Location visitLocation = null;
+		try {
+			visitLocation = adtService.getLocationThatSupportsVisits(sessionContext.getSessionLocation());
+		}
+		catch (IllegalArgumentException ex) {
+			// location does not support visits
+		}
+
+		VisitDomainWrapper activeVisit = null;
+		if (visitLocation != null) {
+			activeVisit = adtService.getActiveVisit(patient, visitLocation);
+		}
+		model.addAttribute("activeVisit", activeVisit);
+
+		AppContextModel contextModel = sessionContext.generateAppContextModel();
+		contextModel.put("patientId", patient.getId());
+		contextModel.put("patientDead", patient.isDead());
+		//			contextModel.put("visit", activeVisit == null ? null : new VisitContextModel(activeVisit));
+
+		//			List<Extension> overallActions = appFrameworkService.getExtensionsForCurrentUser("patientDashboard.overallActions", contextModel);
+		//			Collections.sort(overallActions);
+		//			model.addAttribute("overallActions", overallActions);
+		//
+		//			List<Extension> visitActions = appFrameworkService.getExtensionsForCurrentUser("patientDashboard.visitActions", contextModel);
+		//			Collections.sort(visitActions);
+		//			model.addAttribute("visitActions", visitActions);
+
+		//			List<Extension> includeFragments = appFrameworkService.getExtensionsForCurrentUser("patientDashboard.includeFragments");
+		//			Collections.sort(includeFragments);
+		//			model.addAttribute("includeFragments", includeFragments);
+		//
+		//			List<Extension> otherActions = appFrameworkService.getExtensionsForCurrentUser(
+		//					"clinicianFacingPatientDashboard.otherActions", contextModel);
+		//			Collections.sort(otherActions);
+		//			model.addAttribute("otherActions", otherActions);
+
+		applicationEventService.patientViewed(patient, sessionContext.getCurrentUser());
+
+		return null;
+	}
 
 	public void controller() {
+
+	}
+
+	public String post(PageModel model,
+	                   @RequestParam("patientId") Patient patient,
+	                   @RequestParam("surgeryUuid") String surgeryUuid,
+	                   @RequestParam("procedureUuid") String procedureUuid,
+	                   @InjectBeans PatientDomainWrapper patientDomainWrapper,
+	                   @SpringBean OperationTheaterService otService,
+	                   @SpringBean("adtService") AdtService adtService,
+	                   @SpringBean("applicationEventService") ApplicationEventService applicationEventService,
+	                   UiSessionContext sessionContext) {
+
+		//		Errors newErrors = new BindException(procedure, "procedure");
+		//		procedureValidator.validate(procedure, newErrors);
+		//		if (!newErrors.hasErrors()) {
+		//			System.err.println("HAS NO ERRORS");
+		//			try {
+		//				service.saveProcedure(procedure);
+		//				System.err.println("saved successfully: redirecting");
+		//				return "redirect:/operationtheater/manageProcedures.page";
+		//			}
+		//			catch (Exception e) {
+		//				log.warn("Some error occurred while saving surgery details:", e);
+		//			}
+		//		}
+		//
+		//		System.err.println("NOT saved successfully");
+		//		for (ObjectError error : newErrors.getAllErrors()) {
+		//			System.err.println(error.toString());
+		//			for (String e : error.getCodes()) {
+		//				System.err.println("    " + e);
+		//			}
+		//		}
+
+		//		model.addAttribute("errors", newErrors);
+
+		Surgery surgery = otService.getSurgeryByUuid(surgeryUuid);
+		Procedure procedure = otService.getProcedureByUuid(procedureUuid);
+
+		//FIXME validate and check input params
+		if (surgery == null) {
+			surgery = new Surgery();
+			surgery.setPatient(patient);
+		} else {
+			patient = surgery.getPatient();
+		}
+
+		surgery.setProcedure(procedure);
+		surgery = otService.saveSurgery(surgery);
+
+		model.addAttribute("surgery", surgery);
+
+		List<Procedure> procedureList = otService.getAllProcedures(false);
+		model.addAttribute("procedureList", procedureList);
+
+		patientDomainWrapper.setPatient(patient);
+		model.addAttribute("patient", patientDomainWrapper);
+
+		Location visitLocation = null;
+		try {
+			visitLocation = adtService.getLocationThatSupportsVisits(sessionContext.getSessionLocation());
+		}
+		catch (IllegalArgumentException ex) {
+			// location does not support visits
+		}
+
+		VisitDomainWrapper activeVisit = null;
+		if (visitLocation != null) {
+			activeVisit = adtService.getActiveVisit(patient, visitLocation);
+		}
+		model.addAttribute("activeVisit", activeVisit);
+
+		AppContextModel contextModel = sessionContext.generateAppContextModel();
+		contextModel.put("patientId", patient.getId());
+		contextModel.put("patientDead", patient.isDead());
+
+		applicationEventService.patientViewed(patient, sessionContext.getCurrentUser());
+
+		return "surgery";
 
 	}
 

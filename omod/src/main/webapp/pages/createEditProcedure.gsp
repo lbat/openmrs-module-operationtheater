@@ -86,6 +86,7 @@ input.error {
 
 <form class="simple-form-ui" method="post" id="procedureForm">
 
+    <!-- TODO maxlength should be managed centrally in the POJO-->
     ${ui.includeFragment("uicommons", "field/text", [
             label        : ui.message("general.name"),
             formFieldName: "name",

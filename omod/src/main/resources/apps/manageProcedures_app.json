@@ -5,7 +5,7 @@
         "order": 2,
         "extensions": [
             {
-                "id": "coreapps.activeVisitsHomepageLink",
+                "id": "operationtheater.manageProceduresHomepageLink",
                 "extensionPointId": "org.openmrs.referenceapplication.homepageLink",
                 "type": "link",
                 "label": "${project.parent.artifactId}.manageprocedures.app.button.label",

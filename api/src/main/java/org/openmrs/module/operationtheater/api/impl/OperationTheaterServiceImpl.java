@@ -15,6 +15,7 @@ package org.openmrs.module.operationtheater.api.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.Patient;
 import org.openmrs.api.APIException;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.impl.BaseOpenmrsService;
@@ -95,12 +96,28 @@ public class OperationTheaterServiceImpl extends BaseOpenmrsService implements O
 	}
 
 	@Override
+	public List<Surgery> getSurgeriesByPatient(Patient patient) {
+		if (patient == null) {
+			return null;
+		}
+		return surgeryDAO.getSurgeriesByPatient(patient);
+	}
+
+	@Override
 	public Procedure retireProcedure(Procedure procedureToRetire, String reason) {
 		if (procedureToRetire != null) {
 			return null;
 		}
 
 		return procedureDAO.saveOrUpdate(procedureToRetire);
+	}
+
+	@Override
+	public Surgery getSurgery(Integer id) {
+		if (id == null) {
+			return null;
+		}
+		return surgeryDAO.getById(id);
 	}
 
 	@Override

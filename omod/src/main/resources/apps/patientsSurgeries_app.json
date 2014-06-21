@@ -1,0 +1,18 @@
+[
+    {
+        "id": "operationtheater.patientsSurgeries",
+        "description": "Opens page to display all surgeries for this patient",
+        "order": 2,
+        "extensions": [
+            {
+                "id": "operationtheater.patientsSurgeriesPatientDashboardLink",
+                "extensionPointId": "patientDashboard.overallActions",
+                "type": "link",
+                "label": "${project.parent.artifactId}.patientssurgeries.app.button.label",
+                "url": "${project.parent.artifactId}/patientsSurgeries.page?patientId={{patientId}}",
+                "icon": "icon-folder-open",
+                "requiredPrivilege": "App: coreapps.findPatient" //TODO edit
+            }
+        ]
+    }
+]

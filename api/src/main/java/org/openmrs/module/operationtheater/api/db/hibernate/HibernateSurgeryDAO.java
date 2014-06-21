@@ -15,10 +15,14 @@ package org.openmrs.module.operationtheater.api.db.hibernate;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.Patient;
 import org.openmrs.module.operationtheater.Surgery;
 import org.openmrs.module.operationtheater.api.db.OperationTheaterDAO;
 import org.openmrs.module.operationtheater.api.db.SurgeryDAO;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * It is a default implementation of  {@link OperationTheaterDAO}.
@@ -32,4 +36,15 @@ public class HibernateSurgeryDAO extends HibernateGenericDAO<Surgery> implements
 		super(Surgery.class);
 	}
 
+	@Override
+	@Transactional(readOnly = true)
+	public List<Surgery> getSurgeriesByPatient(Patient patient) {
+		return super.sessionFactory
+				.getCurrentSession()
+				.createQuery(
+						"from " + mappedClass.getSimpleName()
+								+ " at where at.patient = :patient and at.voided=false"
+				)
+				.setParameter("patient", patient).list();
+	}
 }

@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.openmrs.Patient;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.operationtheater.Procedure;
 import org.openmrs.module.operationtheater.Surgery;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.openmrs.test.Verifies;
@@ -24,7 +25,7 @@ import static org.junit.Assert.fail;
  */
 public class SurgeryDAOTest extends BaseModuleContextSensitiveTest {
 
-	private static int TOTAL_SURGERIES = 2;
+	public static final int TOTAL_SURGERIES = 3;
 
 	@Autowired
 	SurgeryDAO surgeryDAO;
@@ -46,6 +47,9 @@ public class SurgeryDAOTest extends BaseModuleContextSensitiveTest {
 		Surgery surgery = new Surgery();
 		Patient patient = service.getPatient(1);
 		surgery.setPatient(patient);
+		Procedure procedure = new Procedure();
+		procedure.setId(1);
+		surgery.setProcedure(procedure);
 
 		Surgery savedSurgery = surgeryDAO.saveOrUpdate(surgery);
 		assertThat(savedSurgery.getId(), is(TOTAL_SURGERIES + 1));
@@ -56,6 +60,7 @@ public class SurgeryDAOTest extends BaseModuleContextSensitiveTest {
 		Surgery actualSurgery = surgeryList.get(TOTAL_SURGERIES);
 		assertThat(actualSurgery.getSurgeryId(), greaterThan(0));
 		assertEquals(patient, actualSurgery.getPatient());
+		assertEquals(procedure, actualSurgery.getProcedure());
 	}
 
 	/**
@@ -84,6 +89,9 @@ public class SurgeryDAOTest extends BaseModuleContextSensitiveTest {
 		Surgery surgery = new Surgery();
 		int id = 1;
 		surgery.setSurgeryId(id);
+		Procedure procedure = new Procedure();
+		procedure.setId(1);
+		surgery.setProcedure(procedure);
 
 		Patient patient = service.getPatient(2);
 		surgery.setPatient(patient);
@@ -96,6 +104,7 @@ public class SurgeryDAOTest extends BaseModuleContextSensitiveTest {
 		Surgery actualSurgery = surgeryList.get(id - 1);
 		assertEquals(surgery.getSurgeryId(), actualSurgery.getSurgeryId());
 		assertEquals(patient, actualSurgery.getPatient());
+		assertEquals(procedure, actualSurgery.getProcedure());
 	}
 
 	@Test
@@ -116,4 +125,18 @@ public class SurgeryDAOTest extends BaseModuleContextSensitiveTest {
 		//		assertThat(surgery.getCreator().getId(), is(1));
 	}
 
+	/**
+	 * @verifies return all unvoided surgery entries for this patient
+	 * @see SurgeryDAO#getSurgeriesByPatient(org.openmrs.Patient)
+	 */
+	@Test
+	public void getSurgeriesByPatient_shouldReturnAllUnvoidedSurgeryEntriesForThisPatient() throws Exception {
+		Patient patient = new Patient();
+		patient.setId(1);
+		List<Surgery> surgeryList = surgeryDAO.getSurgeriesByPatient(patient);
+
+		assertThat(surgeryList, hasSize(1));
+		assertThat(surgeryList.get(0).getPatient().getId(), is(1));
+		assertThat(surgeryList.get(0).getSurgeryId(), is(1));
+	}
 }

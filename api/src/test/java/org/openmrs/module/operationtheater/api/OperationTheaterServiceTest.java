@@ -18,6 +18,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.openmrs.Patient;
 import org.openmrs.module.operationtheater.Procedure;
 import org.openmrs.module.operationtheater.Surgery;
 import org.openmrs.module.operationtheater.api.db.ProcedureDAO;
@@ -35,7 +36,9 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 
 /**
@@ -188,5 +191,48 @@ public class OperationTheaterServiceTest { //extends BaseModuleContextSensitiveT
 		Procedure result = service.getProcedure(id);
 
 		assertEquals(procedure, result);
+	}
+
+	/**
+	 * @verifies call surgeryDAO getSurgeriesByPatient
+	 * @see OperationTheaterService#getSurgeriesByPatient(org.openmrs.Patient)
+	 */
+	@Test
+	public void getSurgeriesByPatient_shouldCallSurgeryDAOGetSurgeriesByPatient() throws Exception {
+
+		Patient patient = new Patient();
+
+		List<Surgery> expected = new ArrayList<Surgery>();
+		when(surgeryDAO.getSurgeriesByPatient(patient)).thenReturn(expected);
+
+		List<Surgery> result = service.getSurgeriesByPatient(patient);
+
+		assertThat(result, is(expected));
+	}
+
+	/**
+	 * @verifies do nothing if patient is null
+	 * @see OperationTheaterService#getSurgeriesByPatient(org.openmrs.Patient)
+	 */
+	@Test
+	public void getSurgeriesByPatient_shouldDoNothingIfPatientIsNull() throws Exception {
+		List<Surgery> result = service.getSurgeriesByPatient(null);
+		assertNull(result);
+		Mockito.verifyZeroInteractions(surgeryDAO);
+	}
+
+	/**
+	 * @verifies call surgeryDAO getById
+	 * @see OperationTheaterService#getSurgery(Integer)
+	 */
+	@Test
+	public void getSurgery_shouldCallSurgeryDAOGetById() throws Exception {
+		int id = 1;
+		Surgery surgery = new Surgery();
+		when(surgeryDAO.getById(id)).thenReturn(surgery);
+
+		Surgery result = service.getSurgery(id);
+
+		assertThat(result, is(surgery));
 	}
 }

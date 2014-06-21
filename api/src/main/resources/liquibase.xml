@@ -8,57 +8,6 @@
         See http://www.liquibase.org/manual/home#available_database_refactorings
         for a list of supported elements and attributes
     -->
-    <changeSet author="Lukas Breitwieser" id="operationtheater-201405231149">
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <tableExists tableName="surgery"/>
-            </not>
-        </preConditions>
-        <comment>
-            Create the surgery table
-        </comment>
-        <createTable tableName="surgery">
-
-            <column name="surgery_id" type="integer" autoIncrement="true">
-                <constraints nullable="false" primaryKey="true"/>
-            </column>
-            <column name="patient_id" type="integer">
-                <constraints nullable="false"/>
-            </column>
-
-            <column name="uuid" type="char(38)">
-                <constraints nullable="false" unique="true"/>
-            </column>
-            <column name="creator" type="int">
-                <constraints nullable="false"/>
-            </column>
-            <column name="date_created" type="datetime">
-                <constraints nullable="false"/>
-            </column>
-            <column name="changed_by" type="int"/>
-            <column name="date_changed" type="datetime"/>
-            <column name="voided" type="tinyint" defaultValueNumeric="0">
-                <constraints nullable="false"/>
-            </column>
-            <column name="voided_by" type="int"/>
-            <column name="date_voided" type="datetime"/>
-            <column name="void_reason" type="varchar(255)" defaultValue="null"/>
-        </createTable>
-
-        <addForeignKeyConstraint constraintName="surgery_patient_fk"
-                                 baseTableName="surgery" baseColumnNames="patient_id" referencedTableName="patient"
-                                 referencedColumnNames="patient_id"/>
-        <addForeignKeyConstraint constraintName="surgery_creator"
-                                 baseTableName="surgery" baseColumnNames="creator"
-                                 referencedTableName="users" referencedColumnNames="user_id"/>
-        <addForeignKeyConstraint constraintName="surgery_changed_by"
-                                 baseTableName="surgery" baseColumnNames="changed_by"
-                                 referencedTableName="users" referencedColumnNames="user_id"/>
-        <addForeignKeyConstraint constraintName="surgery_retired_by"
-                                 baseTableName="surgery" baseColumnNames="voided_by"
-                                 referencedTableName="users" referencedColumnNames="user_id"/>
-    </changeSet>
-
     <changeSet author="Lukas Breitwieser" id="operationtheater-201405281149">
         <preConditions onFail="MARK_RAN">
             <not>
@@ -117,4 +66,60 @@
                                  referencedTableName="users" referencedColumnNames="user_id"/>
     </changeSet>
 
+    <changeSet author="Lukas Breitwieser" id="operationtheater-201405231149">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="surgery"/>
+            </not>
+        </preConditions>
+        <comment>
+            Create the surgery table
+        </comment>
+        <createTable tableName="surgery">
+
+            <column name="surgery_id" type="integer" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="patient_id" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="procedure_id" type="integer">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="uuid" type="char(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column name="voided" type="tinyint" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="voided_by" type="int"/>
+            <column name="date_voided" type="datetime"/>
+            <column name="void_reason" type="varchar(255)" defaultValue="null"/>
+        </createTable>
+
+        <addForeignKeyConstraint constraintName="surgery_patient_fk"
+                                 baseTableName="surgery" baseColumnNames="patient_id" referencedTableName="patient"
+                                 referencedColumnNames="patient_id"/>
+        <addForeignKeyConstraint constraintName="surgery_procedure_fk"
+                                 baseTableName="surgery" baseColumnNames="procedure_id" referencedTableName="prozedure"
+                                 referencedColumnNames="procedure_id"/>
+        <addForeignKeyConstraint constraintName="surgery_creator"
+                                 baseTableName="surgery" baseColumnNames="creator"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="surgery_changed_by"
+                                 baseTableName="surgery" baseColumnNames="changed_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="surgery_retired_by"
+                                 baseTableName="surgery" baseColumnNames="voided_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+    </changeSet>
 </databaseChangeLog>

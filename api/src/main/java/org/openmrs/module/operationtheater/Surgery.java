@@ -26,6 +26,10 @@ public class Surgery extends BaseOpenmrsDataJPA {
 	@JoinColumn(name = "patient_id", nullable = false)
 	private Patient patient;
 
+	@ManyToOne
+	@JoinColumn(name = "procedure_id", nullable = false)
+	private Procedure procedure;
+
 	public int getSurgeryId() {
 		return surgeryId;
 	}
@@ -50,5 +54,13 @@ public class Surgery extends BaseOpenmrsDataJPA {
 
 	public void setPatient(Patient patient) {
 		this.patient = patient;
+	}
+
+	public Procedure getProcedure() {
+		return procedure;
+	}
+
+	public void setProcedure(Procedure procedure) {
+		this.procedure = procedure;
 	}
 }

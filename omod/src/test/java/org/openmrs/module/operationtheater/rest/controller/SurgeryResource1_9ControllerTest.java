@@ -25,6 +25,8 @@ import static org.junit.Assert.assertNotNull;
  */
 public class SurgeryResource1_9ControllerTest extends MainResourceControllerTest {
 
+	public static final int TOTAL_SURGERIES = 3;
+
 	private OperationTheaterService operationTheaterService;
 
 	@Before
@@ -58,7 +60,7 @@ public class SurgeryResource1_9ControllerTest extends MainResourceControllerTest
 				RestConstants.REQUEST_PROPERTY_FOR_INCLUDE_ALL, "true"));
 		SimpleObject result = deserialize(handle(req));
 
-		assertEquals(2, Util.getResultsSize(result));
+		assertEquals(TOTAL_SURGERIES, Util.getResultsSize(result));
 		assertEquals(SurgeryResource1_9Test.SURGERY_UUID,
 				PropertyUtils.getProperty(Util.getResultsList(result).get(0), "uuid"));
 		assertEquals(getUuid(), PropertyUtils.getProperty(Util.getResultsList(result).get(1), "uuid"));
@@ -110,7 +112,7 @@ public class SurgeryResource1_9ControllerTest extends MainResourceControllerTest
 
 	@Override
 	public long getAllCount() {
-		return 1;
+		return 2;
 	}
 
 }

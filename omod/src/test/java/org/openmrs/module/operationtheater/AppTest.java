@@ -57,4 +57,35 @@ public class AppTest {
 		//TODO priviledge
 		//assertThat(app.getExtensions().get(0).getRequiredPrivilege(), is());
 	}
+
+	@Test
+	public void testManageProcedureAppIsLoaded() throws Exception {
+		AppDescriptor app = AppTestUtil.getAppDescriptor("operationtheater.manageProcedures");
+		assertThat(app.getOrder(), is(2));
+		assertThat(app.getExtensions(), hasSize(1));
+		assertThat(app.getExtensions().get(0).getExtensionPointId(), is("org.openmrs.referenceapplication.homepageLink"));
+		assertThat(app.getExtensions().get(0).getId(), is("operationtheater.manageProceduresHomepageLink"));
+		assertThat(app.getExtensions().get(0).getExtensionPointId(), is("org.openmrs.referenceapplication.homepageLink"));
+		assertThat(app.getExtensions().get(0).getType(), is("link"));
+		assertThat(app.getExtensions().get(0).getLabel(), is("operationtheater.manageprocedures.app.button.label"));
+		assertThat(app.getExtensions().get(0).getUrl(), is("operationtheater/manageProcedures.page"));
+		assertThat(app.getExtensions().get(0).getIcon(), is("icon-edit"));
+		//TODO priviledge
+		//assertThat(app.getExtensions().get(0).getRequiredPrivilege(), is());
+	}
+
+	@Test
+	public void testPatientsSurgeriesAppIsLoaded() throws Exception {
+		AppDescriptor app = AppTestUtil.getAppDescriptor("operationtheater.patientsSurgeries");
+		assertThat(app.getOrder(), is(2));
+		assertThat(app.getExtensions(), hasSize(1));
+		assertThat(app.getExtensions().get(0).getExtensionPointId(), is("patientDashboard.overallActions"));
+		assertThat(app.getExtensions().get(0).getId(), is("operationtheater.patientsSurgeriesPatientDashboardLink"));
+		assertThat(app.getExtensions().get(0).getExtensionPointId(), is("patientDashboard.overallActions"));
+		assertThat(app.getExtensions().get(0).getType(), is("link"));
+		assertThat(app.getExtensions().get(0).getLabel(), is("operationtheater.patientssurgeries.app.button.label"));
+		assertThat(app.getExtensions().get(0).getUrl(),
+				is("operationtheater/patientsSurgeries.page?patientId={{patientId}}"));
+		assertThat(app.getExtensions().get(0).getIcon(), is("icon-folder-open"));
+	}
 }
