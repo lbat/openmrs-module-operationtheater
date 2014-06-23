@@ -209,12 +209,12 @@
         <!-- End Test specific dependencies -->
 
         <!-- Compass sass-->
-        <dependency>
+        <!--<dependency>
             <groupId>rubygems</groupId>
             <artifactId>compass</artifactId>
             <version>0.11.7</version>
             <type>gem</type>
-        </dependency>
+        </dependency>-->
 
     </dependencies>
 
@@ -343,7 +343,7 @@
                 </executions>
             </plugin>
             <!-- compass sass-->
-            <plugin>
+            <!--<plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
@@ -385,7 +385,7 @@
                     <jrubyVersion>1.7.10</jrubyVersion>
                     <execArgs>${project.build.directory}/rubygems/bin/compass compile ${basedir}/src/main/compass</execArgs>
                 </configuration>
-            </plugin>
+            </plugin>-->
 
             <!-- Jacoco Code Coverage -->
             <plugin>
@@ -417,7 +417,7 @@
     </build>
 
     <!-- compass sass -->
-    <profiles>
+    <!--<profiles>
         <profile>
             <id>watch-sass</id>
             <build>
@@ -436,13 +436,12 @@
                         </executions>
                         <configuration>
                             <jrubyVersion>1.7.10</jrubyVersion>
-                            <execArgs>${project.build.directory}/rubygems/bin/compass watch ${basedir}/src/main/compass
-                            </execArgs>
+                            <execArgs>${project.build.directory}/rubygems/bin/compass watch ${basedir}/src/main/compass</execArgs>
                         </configuration>
                     </plugin>
                 </plugins>
             </build>
         </profile>
-    </profiles>
+    </profiles>-->
 
 </project>
