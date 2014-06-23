@@ -84,7 +84,7 @@ input.error {
     ${ui.message("operationtheater.procedure.title")}
 </h1>
 
-<form class="simple-form-ui" method="post" id="procedureForm">
+<form class="simple-form-ui" method="post" id="procedureForm" autocomplete="off">
 
     <!-- TODO maxlength should be managed centrally in the POJO-->
     ${ui.includeFragment("uicommons", "field/text", [

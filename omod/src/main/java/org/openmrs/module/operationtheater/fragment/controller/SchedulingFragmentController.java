@@ -203,12 +203,13 @@ public class SchedulingFragmentController {
 		}
 
 		//TODO remove: just for demo purpose
-		//		startDate = startDate.withTime(0, 0, 0, 0);
-		//		start = dateFormatter.format(startDate.plusHours(9).toDate());
-		//		end = dateFormatter.format(startDate.plusHours(12).toDate());
-		//		CalendarEvent surgery = new CalendarEvent("Endoprosthesis of the hip joint", start, end, resourceId);
-		//		events.add(surgery);
-
+		if(location.getName().equals("OT 1") && startDate.getDayOfMonth()==23) {
+			startDate = startDate.withTime(0, 0, 0, 0);
+			start = dateFormatter.format(startDate.plusHours(13).toDate());
+			end = dateFormatter.format(startDate.plusHours(14).toDate());
+			CalendarEvent surgery = new CalendarEvent("Appendectomy - Carter, Partricia", start, end, resourceId);
+			events.add(surgery);
+		}
 	}
 
 	private LocationAttribute getAttributeByUuid(Collection<LocationAttribute> attributes, String uuid) {

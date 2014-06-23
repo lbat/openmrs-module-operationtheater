@@ -52,6 +52,9 @@
             eventClick: function (calEvent, jsEvent, view) {
                 if (calEvent.annotation) {
                     availableTimesDialog.show(calEvent);
+                }else{
+                    //FIXME remove this hack - just for demonstration purpose
+                    window.location.href='${ui.pageLink("operationtheater", "surgery", [surgeryId:2, patientId:6])}';
                 }
             },
             resources: calResources,

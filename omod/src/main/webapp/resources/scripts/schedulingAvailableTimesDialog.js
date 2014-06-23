@@ -82,12 +82,10 @@
         jq('#is-ot-available').change(function () {
             if (jq('#is-ot-available').is(':checked')) {
                 //enable
-                emr.successMessage("enable");
                 jq('#start_time_picker-display').attr("disabled", false);
                 jq('#end_time_picker-display').attr("disabled", false);
             } else {
                 //disable
-                emr.successMessage("disable");
                 jq('#start_time_picker-display').attr("disabled", true);
                 jq('#end_time_picker-display').attr("disabled", true);
                 availableTimesDialog.clearFieldError(jq('#start_time_picker-display'), jq('#start_time_picker .field-error'));
