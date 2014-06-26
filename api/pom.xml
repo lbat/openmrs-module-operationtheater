@@ -116,13 +116,4 @@
         </plugins>
     </build>
 
-    <!--TODO remove - belongs to lpsolve that was replaced by optaplanner -->
-    <repositories>
-        <repository>
-            <id>project.local</id>
-            <name>project</name>
-            <url>file:${project.basedir}/local_mvn_repo/</url>
-        </repository>
-    </repositories>
-
 </project>
