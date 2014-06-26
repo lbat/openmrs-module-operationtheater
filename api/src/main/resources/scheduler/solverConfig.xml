@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<solver>
+    <!--Todo set mode to production and change it in unit tests dynamically -->
+    <environmentMode>FAST_ASSERT</environmentMode>
+
+    <!-- model definition -->
+    <solutionClass>org.openmrs.module.operationtheater.scheduler.domain.Timetable</solutionClass>
+    <planningEntityClass>org.openmrs.module.operationtheater.scheduler.domain.PlannedSurgery</planningEntityClass>
+
+    <!-- score function definition -->
+    <scoreDirectorFactory>
+        <scoreDefinitionType>HARD_SOFT</scoreDefinitionType>
+        <scoreDrl>/scheduler/scoreRules.drl</scoreDrl>
+    </scoreDirectorFactory>
+
+    <!-- configuration of the optimization algorithm(s) -->
+    <termination>
+        <maximumSecondsSpend>60</maximumSecondsSpend>
+        <scoreAttained>-0hard/-999999soft</scoreAttained>
+    </termination>
+    <constructionHeuristic>
+        <constructionHeuristicType>FIRST_FIT</constructionHeuristicType>
+        <!--<forager>-->
+        <!--<pickEarlyType>FIRST_NON_DETERIORATING_SCORE</pickEarlyType>-->
+        <!--</forager>-->
+    </constructionHeuristic>
+    <localSearch>
+        <unionMoveSelector>
+            <changeMoveSelector>
+                <valueSelector>
+                    <variableName>location</variableName>
+                </valueSelector>
+            </changeMoveSelector>
+            <changeMoveSelector>
+                <valueSelector>
+                    <variableName>start</variableName>
+                </valueSelector>
+            </changeMoveSelector>
+        </unionMoveSelector>
+
+        <acceptor>
+            <lateAcceptanceSize>600</lateAcceptanceSize>
+        </acceptor>
+        <forager>
+            <acceptedCountLimit>4</acceptedCountLimit>
+        </forager>
+    </localSearch>
+</solver>

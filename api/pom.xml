@@ -64,14 +64,23 @@
         <dependency>
             <groupId>org.optaplanner</groupId>
             <artifactId>optaplanner-core</artifactId>
-            <version>${optaplannerVersion}</version>
-            <type>jar</type>
         </dependency>
+
         <dependency>
             <groupId>org.optaplanner</groupId>
             <artifactId>optaplanner-benchmark</artifactId>
-            <version>${optaplannerVersion}</version>
-            <type>jar</type>
+        </dependency>
+
+        <dependency>
+            <groupId>org.drools</groupId>
+            <artifactId>drools-compiler</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- joda time -->
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
         </dependency>
 
     </dependencies>
@@ -96,10 +105,18 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <!-- jacoco can't instrument org/drools/compiler/lang/DRL6Lexer because it is too long -->
+                        <!--https://stackoverflow.com/questions/14559117/how-do-i-disable-jacoco-agent-after-jacocoreport-->
+                        <exclude>**org.drools*</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
         </plugins>
     </build>
 
+    <!--TODO remove - belongs to lpsolve that was replaced by optaplanner -->
     <repositories>
         <repository>
             <id>project.local</id>

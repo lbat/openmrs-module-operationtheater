@@ -9,6 +9,20 @@
     <person person_id="2" voided="false" date_created="2005-01-01 00:00:00.0" uuid="31e09960-8f52-11e3-baa8-0800200c9a66"
             creator="1"/>
 
+    <location_tag location_tag_id="1" name="Operation Theater" description="" creator="1"
+                  date_created="2005-01-01 00:00:00.0" retired="false" uuid="af3e9ed5-2de2-4a10-9956-9cb2ad5f84f2"/>
+
+    <location location_id="1" name="OT 1" description="" address1="800 Boylston Street" address2="" city_village="Boston"
+              state_province="MA" postal_code="02115" country="USA" latitude="" longitude="" creator="1"
+              date_created="2008-08-15 13:46:50.0" retired="false" uuid="9356400c-a5a2-4532-8f2b-2361b3446eb1"/>
+    <location location_id="2" name="OT 2" description="" address1="800 Boylston Street" address2="" city_village="Boston"
+              state_province="MA" postal_code="02115" country="USA" latitude="" longitude="" creator="1"
+              date_created="2008-08-15 13:46:50.0" retired="false" uuid="9356400c-a5a2-4532-8f2b-2361b3446eb2"/>
+
+    <location_tag_map location_tag_id="1" location_id="1"/>
+    <location_tag_map location_tag_id="1" location_id="2"/>
+
+
     <!-- Operation Theather Module -->
     <prozedure procedure_id="1" name="Procedure Name" description="procedure description" intervention_duration="122"
                ot_preparation_duration="23" inpatient_stay="4" creator="1" date_created="2005-01-01 00:00:00.0"

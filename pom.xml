@@ -55,7 +55,11 @@
         <paperrecordVersion>1.0-SNAPSHOT</paperrecordVersion>
         <calculationVersion>1.0</calculationVersion>
         <serializationxstreamVersion>0.2.7</serializationxstreamVersion>
+
         <optaplannerVersion>6.0.1.Final</optaplannerVersion>
+        <jodatimeVersion>2.2</jodatimeVersion>
+
+        <droolsCompilerVersion>6.0.1.Final</droolsCompilerVersion>
     </properties>
 
     <dependencyManagement>
@@ -190,18 +194,36 @@
             <!-- End OpenMRS modules -->
 
             <!-- drools optaplanner -->
-            <!--<dependency>
+            <dependency>
                 <groupId>org.optaplanner</groupId>
                 <artifactId>optaplanner-core</artifactId>
                 <version>${optaplannerVersion}</version>
+                <type>jar</type>
             </dependency>
+
             <dependency>
                 <groupId>org.optaplanner</groupId>
                 <artifactId>optaplanner-benchmark</artifactId>
                 <version>${optaplannerVersion}</version>
+                <type>jar</type>
             </dependency>
 
             <dependency>
+                <groupId>org.drools</groupId>
+                <artifactId>drools-compiler</artifactId>
+                <scope>test</scope>
+                <version>${droolsCompilerVersion}</version>
+                <type>jar</type>
+            </dependency>
+
+            <!-- joda time -->
+            <dependency>
+                <groupId>joda-time</groupId>
+                <artifactId>joda-time</artifactId>
+                <version>${jodatimeVersion}</version>
+            </dependency>
+
+            <!--<dependency>
                 <groupId>rubygems</groupId>
                 <artifactId>sass</artifactId>
                 <version>3.2.5</version>
