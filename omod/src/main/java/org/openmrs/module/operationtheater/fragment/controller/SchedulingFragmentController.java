@@ -11,6 +11,9 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.appointmentscheduling.AppointmentBlock;
 import org.openmrs.module.appointmentscheduling.AppointmentType;
 import org.openmrs.module.appointmentscheduling.api.AppointmentService;
+import org.openmrs.module.operationtheater.Surgery;
+import org.openmrs.module.operationtheater.api.OperationTheaterService;
+import org.openmrs.module.operationtheater.scheduler.Scheduler;
 import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.ui.framework.annotation.SpringBean;
@@ -30,6 +33,7 @@ public class SchedulingFragmentController {
 
 	private final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm", Context.getLocale());
 
+	//TODO move to OTMMetadata class
 	private final String DEFAULT_AVAILABLE_TIME_BEGIN_UUID = "4e051aeb-a19d-49e0-820f-51ae591ec41f";
 
 	private final String DEFAULT_AVAILABLE_TIME_END_UUID = "a9d9ec55-e992-4d04-aebe-808be50aa87a";
@@ -53,7 +57,15 @@ public class SchedulingFragmentController {
 	                                    @RequestParam("end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date end,
 	                                    @RequestParam("resources") List<String> resources,
 	                                    @SpringBean("locationService") LocationService locationService,
-	                                    @SpringBean AppointmentService appointmentService) {
+	                                    @SpringBean AppointmentService appointmentService,
+	                                    @SpringBean OperationTheaterService otService) {
+
+		//Todo remove - used to determine where the class is loaded from - resolving dependency issues
+		//		Class klass = DateTime.class;
+		//		URL loc= klass.getResource('/' + klass.getName().replace('.', '/') + ".class");
+		//		System.err.println(loc);
+		//		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		//		System.err.println(classLoader);
 
 		//get operation theaters
 		LocationTag tag = locationService.getLocationTagByUuid(LOCATION_TAG_OPERATION_THEATER_UUID);
@@ -61,11 +73,11 @@ public class SchedulingFragmentController {
 
 		//build string "locationID1, locationID2, ..."
 		String locationsString = buildLocationString(locations);
-		System.err.println("location string: " + locationsString);
+		//		System.err.println("location string: " + locationsString);
 
 		//get associated appointmentBlocks
 		List<AppointmentBlock> blocks = appointmentService.getAppointmentBlocks(start, end, locationsString, null, null);
-		System.err.println("# of Appt Blocks: " + blocks.size());
+		//		System.err.println("# of Appt Blocks: " + blocks.size());
 
 		//build an index to find appointmentBlock with location and startDate
 		Map<Location, Map<DateTime, AppointmentBlock>> indexedApptBlocks = indexApptBlocks(locations, blocks);
@@ -83,9 +95,35 @@ public class SchedulingFragmentController {
 			}
 		}
 
+		//add surgeries
+		List<Surgery> surgeryList = otService.getAllSurgeries(false); //FIXME change to get surgery within start-end period
+		for (Surgery surgery : surgeryList) {
+			if (surgery.getDatePlannedBegin() == null || surgery.getDatePlannedFinish() == null) {
+				continue;
+			}
+			String startStr = dateFormatter.format(surgery.getDatePlannedBegin().toDate());
+			String endStr = dateFormatter.format(surgery.getDatePlannedFinish().toDate());
+			String patientName = surgery.getPatient().getFamilyName() + " " + surgery.getPatient().getGivenName();
+			String procedure = surgery.getProcedure().getName();
+			int resourceId =
+					resources.indexOf(surgery.getPlannedLocation().getName())
+							+ 1; //convention: resourceId = element array index + 1
+			CalendarEvent event = new CalendarEvent(procedure + " - " + patientName, startStr, endStr, resourceId);
+			System.err.println(event);
+			events.add(event);
+		}
+
 		return SimpleObject
 				.fromCollection(events, ui, "title", "start", "end", "availableStart", "availableEnd", "resourceId",
 						"allDay", "editable", "annotation", "color");
+	}
+
+	/**
+	 * @should schedule surgeries
+	 */
+	public void schedule() {
+		System.err.println("start scheduler");
+		new Scheduler().solve();
 	}
 
 	/**
@@ -200,15 +238,6 @@ public class SchedulingFragmentController {
 			events.add(morning);
 			CalendarEvent evening = new CalendarEvent("", end, endOfDay, start, end, resourceId, true);
 			events.add(evening);
-		}
-
-		//TODO remove: just for demo purpose
-		if(location.getName().equals("OT 1") && startDate.getDayOfMonth()==23) {
-			startDate = startDate.withTime(0, 0, 0, 0);
-			start = dateFormatter.format(startDate.plusHours(13).toDate());
-			end = dateFormatter.format(startDate.plusHours(14).toDate());
-			CalendarEvent surgery = new CalendarEvent("Appendectomy - Carter, Partricia", start, end, resourceId);
-			events.add(surgery);
 		}
 	}
 
@@ -387,6 +416,22 @@ public class SchedulingFragmentController {
 
 		public void setResourceId(int resourceId) {
 			this.resourceId = resourceId;
+		}
+
+		@Override
+		public String toString() {
+			return "CalendarEvent{" +
+					"title='" + title + '\'' +
+					", start='" + start + '\'' +
+					", end='" + end + '\'' +
+					", availableStart='" + availableStart + '\'' +
+					", availableEnd='" + availableEnd + '\'' +
+					", resourceId=" + resourceId +
+					", allDay=" + allDay +
+					", editable=" + editable +
+					", annotation=" + annotation +
+					", color='" + color + '\'' +
+					'}';
 		}
 	}
 }

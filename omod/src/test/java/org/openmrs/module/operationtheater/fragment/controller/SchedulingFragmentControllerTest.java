@@ -1,6 +1,7 @@
 package org.openmrs.module.operationtheater.fragment.controller;
 
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
@@ -9,12 +10,16 @@ import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
 import org.openmrs.LocationAttributeType;
 import org.openmrs.LocationTag;
+import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.api.LocationService;
 import org.openmrs.module.appointmentscheduling.AppointmentBlock;
 import org.openmrs.module.appointmentscheduling.AppointmentType;
 import org.openmrs.module.appointmentscheduling.api.AppointmentService;
 import org.openmrs.module.appui.TestUiUtils;
+import org.openmrs.module.operationtheater.Procedure;
+import org.openmrs.module.operationtheater.Surgery;
+import org.openmrs.module.operationtheater.api.OperationTheaterService;
 import org.openmrs.ui.framework.SimpleObject;
 
 import java.util.ArrayList;
@@ -50,6 +55,8 @@ public class SchedulingFragmentControllerTest {
 	 */
 	@Test
 	public void getEvents_shouldReturnScheduledSurgeriesAndAvailableTimesForAllOperatingTheaters() throws Exception {
+		//FIXME refactor this test and use dbunit!!
+
 		//prepare parameters
 		Date start = new DateTime(2014, 6, 9, 0, 0).toDate();
 		Date end = new DateTime(2014, 6, 9, 23, 59).toDate();
@@ -113,24 +120,44 @@ public class SchedulingFragmentControllerTest {
 		blockOt3.setEndDate(blockStartDate.toDate());
 		blocks.add(blockOt3);
 
+		List<Surgery> surgeries = new ArrayList<Surgery>();
+		Surgery surgery = new Surgery();
+		Procedure procedure = new Procedure();
+		procedure.setName("Procedure Name");
+		Patient patient = Mockito.mock(Patient.class);
+		when(patient.getFamilyName()).thenReturn("family name");
+		when(patient.getGivenName()).thenReturn("given name");
+		String pattern = "yyyy-MM-dd HH:mm";
+		DateTime begin = DateTime.parse("2014-06-09 12:00", DateTimeFormat.forPattern(pattern));
+		DateTime finish = DateTime.parse("2014-06-09 13:30", DateTimeFormat.forPattern(pattern));
+
+		surgery.setPlannedLocation(ot1);
+		surgery.setProcedure(procedure);
+		surgery.setPatient(patient);
+		surgery.setDatePlannedBegin(begin);
+		surgery.setDatePlannedFinish(finish);
+		surgeries.add(surgery);
+
 		//mock service layer
 		LocationService locationService = Mockito.mock(LocationService.class);
 		AppointmentService appointmentService = Mockito.mock(AppointmentService.class);
+		OperationTheaterService otService = Mockito.mock(OperationTheaterService.class);
 
 		doReturn(tag).when(locationService).getLocationTagByUuid(LOCATION_TAG_OPERATION_THEATER_UUID);
 		doReturn(locations).when(locationService).getLocationsByTag(tag);
 		doReturn(blocks).when(appointmentService).getAppointmentBlocks(start, end, "1,2,3,", null, null);
+		doReturn(surgeries).when(otService).getAllSurgeries(false);
 
 		//call function under test
 		List<SimpleObject> result = new SchedulingFragmentController().getEvents(new TestUiUtils(),
-				start, end, resources, locationService, appointmentService);
+				start, end, resources, locationService, appointmentService, otService);
 
 		//verify
 		for (SimpleObject o : result) {
 			System.err.println(o.toJson());
 		}
 
-		assertThat(result, hasSize(5));
+		assertThat(result, hasSize(6));
 		assertThat(result.get(0).toJson(),
 				is("{\"title\":\"\",\"start\":\"2014-06-09 00:00\",\"end\":\"2014-06-09 08:45\",\"availableStart\":\"2014-06-09 08:45\",\"availableEnd\":\"2014-06-09 19:16\",\"resourceId\":1,\"allDay\":false,\"editable\":false,\"annotation\":true,\"color\":\"grey\"}"));
 		assertThat(result.get(1).toJson(), is(
@@ -143,6 +170,9 @@ public class SchedulingFragmentControllerTest {
 
 		assertThat(result.get(4).toJson(), is(
 				"{\"title\":\"\",\"start\":\"2014-06-09 00:00\",\"end\":\"2014-06-09 23:59\",\"availableStart\":\"2014-06-09 00:00\",\"availableEnd\":\"2014-06-09 23:59\",\"resourceId\":3,\"allDay\":false,\"editable\":false,\"annotation\":true,\"color\":\"grey\"}"));
+
+		assertThat(result.get(5).toJson(), is(
+				"{\"title\":\"Procedure Name - family name given name\",\"start\":\"2014-06-09 12:00\",\"end\":\"2014-06-09 13:30\",\"availableStart\":\"\",\"availableEnd\":\"\",\"resourceId\":1,\"allDay\":false,\"editable\":false,\"annotation\":false,\"color\":\"blue\"}"));
 	}
 
 	/**

@@ -25,7 +25,7 @@ import static org.junit.Assert.assertNotNull;
  */
 public class SurgeryResource1_9ControllerTest extends MainResourceControllerTest {
 
-	public static final int TOTAL_SURGERIES = 3;
+	public static final int TOTAL_SURGERIES = 4;
 
 	private OperationTheaterService operationTheaterService;
 
@@ -112,7 +112,7 @@ public class SurgeryResource1_9ControllerTest extends MainResourceControllerTest
 
 	@Override
 	public long getAllCount() {
-		return 2;
+		return 3;
 	}
 
 }

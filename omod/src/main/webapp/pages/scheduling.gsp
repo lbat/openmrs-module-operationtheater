@@ -31,9 +31,9 @@
 
         jq('#calendar').fullCalendar({
             header: {
-                left: 'prev,next today',
+                left: 'prev,next today, resourceDay, resourceWeek',
                 center: 'title',
-                right: 'This is a button <a href="javascript:void(0)" onClick="addRes();">Add resource</a>'
+                right: ''
             },
             defaultView: "resourceDay",
             allDaySlot: false,
@@ -52,9 +52,9 @@
             eventClick: function (calEvent, jsEvent, view) {
                 if (calEvent.annotation) {
                     availableTimesDialog.show(calEvent);
-                }else{
+                } else {
                     //FIXME remove this hack - just for demonstration purpose
-                    window.location.href='${ui.pageLink("operationtheater", "surgery", [surgeryId:2, patientId:6])}';
+                    window.location.href = '${ui.pageLink("operationtheater", "surgery", [surgeryId:2, patientId:6])}';
                 }
             },
             resources: calResources,
@@ -117,21 +117,51 @@
                 '</span>' +
                 '<ul>' +
                 '    <li>' +
+                '        <a href="#" id="schedule-action" ><i class="icon-calendar"></i>Schedule</a>' +
+                '    </li>' +
+                '    <li>' +
                 '        <a href="#"><i class="icon-filter"></i>Filter</a>' +
                 '    </li>' +
                 '</ul>' +
                 '</div>');
 
 
+        jq('#schedule-action').click(function () {
+            jq.getJSON('${ ui.actionLink("operationtheater", "scheduling", "schedule") }', null)
+                    .success(function (data) {
+                        emr.successMessage("scheduled successfully: " + data);
+                    })
+                    .error(function (xhr, status, err) {
+                        emr.handleError(xhr);
+                        //emr.errorAlert("AJAX error " + err, null); //TODO message.properties
+                    })
+        });
+
         //remove border from header table
         jq("table.fc-header tr").css("border-collapse", "collapse");
         jq("table.fc-header tr").css("border", "0");
         jq("table.fc-header td").css("border-collapse", "collapse");
         jq("table.fc-header td").css("border", "0");
+
+        //todo weekly view adjust header - add row
+//        <tr class="fc-first fc-last"><th class="fc-agenda-axis fc-widget-header fc-first" style="width: 50px;">&nbsp;</th>
+//        <th colspan="3" class="fc-sun fc-col0 fc-widget-header">Monday</th>
+//        <th colspan="3" class="fc-sun fc-col0 fc-widget-header">Tuesday</th>
+//        <th colspan="3" class="fc-sun fc-col0 fc-widget-header">Wednesday</th>
+//        <th colspan="3" class="fc-sun fc-col0 fc-widget-header">Thursday</th>
+//        <th colspan="3" class="fc-sun fc-col0 fc-widget-header">Friday</th>
+//        <th colspan="3" class="fc-sun fc-col0 fc-widget-header">Saturday</th>
+//        <th colspan="3" class="fc-sat fc-col20 fc-widget-header">Sunday</th>
+//        <th class="fc-agenda-gutter fc-widget-header fc-last" style="width: 13px;">&nbsp;</th></tr>
     });
 
 </script>
 <style type='text/css'>
+
+body {
+    max-width: 95%;
+    /*max-height: 95%; TODO not working*/
+}
 
 #calendar {
     width: 100%;
@@ -192,3 +222,4 @@
         <button class="cancel">Cancel</button>
     </div>
 </div>
+

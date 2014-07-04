@@ -1,5 +1,8 @@
 package org.openmrs.module.operationtheater;
 
+import org.hibernate.annotations.Type;
+import org.joda.time.DateTime;
+import org.openmrs.Location;
 import org.openmrs.Patient;
 
 import javax.persistence.Column;
@@ -29,6 +32,27 @@ public class Surgery extends BaseOpenmrsDataJPA {
 	@ManyToOne
 	@JoinColumn(name = "procedure_id", nullable = false)
 	private Procedure procedure;
+
+	@Column(name = "surgery_completed", columnDefinition = "boolean default false", nullable = false)
+	private Boolean surgeryCompleted = false;
+
+	/**
+	 * Planned begin date of this surgery
+	 */
+	@Column(name = "date_planned_begin")
+	@Type(type = "org.joda.time.contrib.hibernate.PersistentDateTime")
+	private DateTime datePlannedBegin;
+
+	/**
+	 * Planned finish date of this surgery
+	 */
+	@Column(name = "date_planned_finish")
+	@Type(type = "org.joda.time.contrib.hibernate.PersistentDateTime")
+	private DateTime datePlannedFinish;
+
+	@ManyToOne
+	@JoinColumn(name = "planned_location_id")
+	private Location plannedLocation;
 
 	public int getSurgeryId() {
 		return surgeryId;
@@ -62,5 +86,37 @@ public class Surgery extends BaseOpenmrsDataJPA {
 
 	public void setProcedure(Procedure procedure) {
 		this.procedure = procedure;
+	}
+
+	public Boolean getSurgeryCompleted() {
+		return surgeryCompleted;
+	}
+
+	public void setSurgeryCompleted(Boolean surgeryCompleted) {
+		this.surgeryCompleted = surgeryCompleted;
+	}
+
+	public DateTime getDatePlannedBegin() {
+		return datePlannedBegin;
+	}
+
+	public void setDatePlannedBegin(DateTime datePlannedBegin) {
+		this.datePlannedBegin = datePlannedBegin;
+	}
+
+	public DateTime getDatePlannedFinish() {
+		return datePlannedFinish;
+	}
+
+	public void setDatePlannedFinish(DateTime datePlannedFinish) {
+		this.datePlannedFinish = datePlannedFinish;
+	}
+
+	public Location getPlannedLocation() {
+		return plannedLocation;
+	}
+
+	public void setPlannedLocation(Location plannedLocation) {
+		this.plannedLocation = plannedLocation;
 	}
 }

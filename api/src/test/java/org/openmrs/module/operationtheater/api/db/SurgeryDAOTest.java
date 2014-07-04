@@ -25,7 +25,7 @@ import static org.junit.Assert.fail;
  */
 public class SurgeryDAOTest extends BaseModuleContextSensitiveTest {
 
-	public static final int TOTAL_SURGERIES = 3;
+	public static final int TOTAL_SURGERIES = 4;
 
 	@Autowired
 	SurgeryDAO surgeryDAO;
@@ -50,6 +50,7 @@ public class SurgeryDAOTest extends BaseModuleContextSensitiveTest {
 		Procedure procedure = new Procedure();
 		procedure.setId(1);
 		surgery.setProcedure(procedure);
+		surgery.setSurgeryCompleted(false);
 
 		Surgery savedSurgery = surgeryDAO.saveOrUpdate(surgery);
 		assertThat(savedSurgery.getId(), is(TOTAL_SURGERIES + 1));
@@ -92,6 +93,7 @@ public class SurgeryDAOTest extends BaseModuleContextSensitiveTest {
 		Procedure procedure = new Procedure();
 		procedure.setId(1);
 		surgery.setProcedure(procedure);
+		surgery.setSurgeryCompleted(false);
 
 		Patient patient = service.getPatient(2);
 		surgery.setPatient(patient);
@@ -138,5 +140,20 @@ public class SurgeryDAOTest extends BaseModuleContextSensitiveTest {
 		assertThat(surgeryList, hasSize(1));
 		assertThat(surgeryList.get(0).getPatient().getId(), is(1));
 		assertThat(surgeryList.get(0).getSurgeryId(), is(1));
+	}
+
+	/**
+	 * @verifies return all surgeries in the db that have not yet been performed
+	 * @see SurgeryDAO#getAllUncompletedSurgeries()
+	 */
+	@Test
+	public void getAllUncompletedSurgeries_shouldReturnAllSurgeriesInTheDbThatHaveNotYetBeenPerformed() throws Exception {
+
+		List<Surgery> surgeryList = surgeryDAO.getAllUncompletedSurgeries();
+
+		assertThat(surgeryList, hasSize(3));
+		assertThat(surgeryList.get(0).getId(), is(2));
+		assertThat(surgeryList.get(1).getId(), is(3));
+		assertThat(surgeryList.get(2).getId(), is(4));
 	}
 }

@@ -57,9 +57,12 @@
         <serializationxstreamVersion>0.2.7</serializationxstreamVersion>
 
         <optaplannerVersion>6.0.1.Final</optaplannerVersion>
-        <jodatimeVersion>2.2</jodatimeVersion>
-
         <droolsCompilerVersion>6.0.1.Final</droolsCompilerVersion>
+
+        <jodatimeVersion>2.2</jodatimeVersion>
+        <jodatimeHibernateVersion>1.3</jodatimeHibernateVersion>
+
+        <xstreamVersion>1.4.7</xstreamVersion>
     </properties>
 
     <dependencyManagement>
@@ -196,31 +199,55 @@
             <!-- drools optaplanner -->
             <dependency>
                 <groupId>org.optaplanner</groupId>
+                <artifactId>optaplanner</artifactId>
+                <version>6.0.1.Final</version>
+                <type>pom</type>
+            </dependency>
+
+            <dependency>
+                <groupId>org.optaplanner</groupId>
                 <artifactId>optaplanner-core</artifactId>
                 <version>${optaplannerVersion}</version>
                 <type>jar</type>
             </dependency>
 
-            <dependency>
-                <groupId>org.optaplanner</groupId>
-                <artifactId>optaplanner-benchmark</artifactId>
-                <version>${optaplannerVersion}</version>
-                <type>jar</type>
-            </dependency>
+            <!--<dependency>-->
+            <!--<groupId>org.optaplanner</groupId>-->
+            <!--<artifactId>optaplanner-benchmark</artifactId>-->
+            <!--<version>${optaplannerVersion}</version>-->
+            <!--<type>jar</type>-->
+            <!--</dependency>-->
 
             <dependency>
                 <groupId>org.drools</groupId>
                 <artifactId>drools-compiler</artifactId>
-                <scope>test</scope>
+                <!--<scope>test</scope>-->
                 <version>${droolsCompilerVersion}</version>
                 <type>jar</type>
             </dependency>
+
+            <!-- Xstream -->
+            <!--<dependency>-->
+            <!--<groupId>com.thoughtworks.xstream</groupId>-->
+            <!--<artifactId>xstream</artifactId>-->
+            <!--<version>${xstreamVersion}</version>-->
+            <!--<type>jar</type>-->
+            <!--&lt;!&ndash;<scope>provided</scope>&ndash;&gt;-->
+            <!--</dependency>-->
 
             <!-- joda time -->
             <dependency>
                 <groupId>joda-time</groupId>
                 <artifactId>joda-time</artifactId>
                 <version>${jodatimeVersion}</version>
+                <type>jar</type>
+                <!--<scope>provided</scope>-->
+            </dependency>
+
+            <dependency>
+                <groupId>joda-time</groupId>
+                <artifactId>joda-time-hibernate</artifactId>
+                <version>${jodatimeHibernateVersion}</version>
             </dependency>
 
             <!--<dependency>
@@ -304,6 +331,23 @@
             <id>openmrs-repo</id>
             <name>OpenMRS Nexus Repository</name>
             <url>http://mavenrepo.openmrs.org/nexus/content/repositories/public</url>
+        </repository>
+
+        <!-- TODO remove this once maven central replicates the jboss repository -->
+        <!-- Included so the examples sources in the distribution zip build out-of-the-box with maven -->
+        <repository>
+            <id>jboss-public-repository-group</id>
+            <name>JBoss Public Repository Group</name>
+            <url>http://repository.jboss.org/nexus/content/groups/public/</url>
+            <layout>default</layout>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+            </snapshots>
         </repository>
 
         <repository>

@@ -86,6 +86,12 @@
             <column name="procedure_id" type="integer">
                 <constraints nullable="false"/>
             </column>
+            <column name="surgery_completed" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_planned_begin" type="datetime"/>
+            <column name="date_planned_finish" type="datetime"/>
+            <column name="planned_location_id" type="integer"/>
 
             <column name="uuid" type="char(38)">
                 <constraints nullable="false" unique="true"/>
@@ -112,6 +118,9 @@
         <addForeignKeyConstraint constraintName="surgery_procedure_fk"
                                  baseTableName="surgery" baseColumnNames="procedure_id" referencedTableName="prozedure"
                                  referencedColumnNames="procedure_id"/>
+        <addForeignKeyConstraint constraintName="surgery_planned_location_fk"
+                                 baseTableName="surgery" baseColumnNames="planned_location_id" referencedTableName="location"
+                                 referencedColumnNames="location_id"/>
         <addForeignKeyConstraint constraintName="surgery_creator"
                                  baseTableName="surgery" baseColumnNames="creator"
                                  referencedTableName="users" referencedColumnNames="user_id"/>

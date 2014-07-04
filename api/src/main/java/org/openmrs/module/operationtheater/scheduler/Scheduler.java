@@ -28,6 +28,14 @@ public class Scheduler {
 	 * @should solve
 	 */
 	public void solve() {
+		//		Class klass = org.slf4j.LoggerFactory.class;
+		//		URL location = klass.getResource('/'+klass.getName().replace('.', '/')+".class");
+		//		System.err.println(location);
+		//
+		//		klass = org.slf4j.impl.StaticLoggerBinder.class;
+		//		location = klass.getResource('/'+klass.getName().replace('.', '/')+".class");
+		//		System.err.println(location);
+
 		// Build the Solver
 		SolverFactory solverFactory = new XmlSolverFactory("/scheduler/solverConfig.xml");
 		Solver solver = solverFactory.buildSolver();
@@ -40,17 +48,19 @@ public class Scheduler {
 		solver.solve();
 		Timetable solvedTimetable = (Timetable) solver.getBestSolution();
 
+		//set surgeries planned begin and finished attributes
+		solvedTimetable.persistSolution(otService);
+
 		// Display the result
 		System.out.println("\nsolved timetable\n"
 				+ solvedTimetable);
 	}
 
-	private Timetable createTimetable() {
+	Timetable createTimetable() {
 		Timetable timetable = new Timetable();
 
-		//get all surgeries
-		List<Surgery> surgeries = otService
-				.getAllSurgeries(false); //FIXME change to method that only returns surgeries that don't lie in the past
+		//get all uncompleted surgeries
+		List<Surgery> surgeries = otService.getAllUncompletedSurgeries();
 
 		//get operation theaters
 		LocationTag tag = locationService.getLocationTagByUuid(LOCATION_TAG_OPERATION_THEATER_UUID);
@@ -73,6 +83,10 @@ public class Scheduler {
 		for (Surgery surgery : surgeries) {
 			PlannedSurgery plannedSurgery = new PlannedSurgery();
 			plannedSurgery.setSurgery(surgery);
+			if (surgery.getDatePlannedBegin() != null) {
+				plannedSurgery.setStart(surgery.getDatePlannedBegin());
+				plannedSurgery.setEnd(surgery.getDatePlannedFinish());
+			}
 			plannedSurgeries.add(plannedSurgery);
 		}
 

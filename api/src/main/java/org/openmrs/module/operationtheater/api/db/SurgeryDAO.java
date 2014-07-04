@@ -19,4 +19,11 @@ public interface SurgeryDAO extends GenericDAO<Surgery> {
 	 */
 	public List<Surgery> getSurgeriesByPatient(Patient patient);
 
+	/**
+	 * returns all surgeries in the db that haven't yet been performed
+	 *
+	 * @return
+	 * @should return all surgeries in the db that have not yet been performed
+	 */
+	public List<Surgery> getAllUncompletedSurgeries();
 }

@@ -235,4 +235,21 @@ public class OperationTheaterServiceTest { //extends BaseModuleContextSensitiveT
 
 		assertThat(result, is(surgery));
 	}
+
+	/**
+	 * @verifies call surgeryDAO getAllUncompletedSurgeries
+	 * @see OperationTheaterService#getAllUncompletedSurgeries()
+	 */
+	@Test
+	public void getAllUncompletedSurgeries_shouldCallSurgeryDAOGetAllUncompletedSurgeries() throws Exception {
+		List<Surgery> expected = new ArrayList<Surgery>();
+
+		when(surgeryDAO.getAllUncompletedSurgeries()).thenReturn(expected);
+
+		//call function under test
+		List<Surgery> result = service.getAllUncompletedSurgeries();
+
+		//verify
+		assertThat(result, is(expected));
+	}
 }

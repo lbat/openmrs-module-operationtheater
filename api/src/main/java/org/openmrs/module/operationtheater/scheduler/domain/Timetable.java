@@ -3,6 +3,7 @@ package org.openmrs.module.operationtheater.scheduler.domain;
 import org.joda.time.DateTime;
 import org.openmrs.Location;
 import org.openmrs.module.operationtheater.Surgery;
+import org.openmrs.module.operationtheater.api.OperationTheaterService;
 import org.optaplanner.core.api.domain.solution.PlanningEntityCollectionProperty;
 import org.optaplanner.core.api.domain.solution.PlanningSolution;
 import org.optaplanner.core.api.domain.value.ValueRangeProvider;
@@ -19,7 +20,8 @@ import java.util.List;
  * Also used to act as a range provider for the planning variables
  */
 @PlanningSolution
-public class Timetable implements Solution<HardSoftScore> {
+public class
+		Timetable implements Solution<HardSoftScore> {
 
 	//problem facts  (don't change value during planning)
 	private List<Surgery> surgeries;
@@ -100,4 +102,15 @@ public class Timetable implements Solution<HardSoftScore> {
 		this.plannedSurgeries = plannedSurgeries;
 	}
 
+	/**
+	 * invoke persist method of all planned surgery objects
+	 *
+	 * @param service
+	 * @should invoke persist method of all planned surgery objects
+	 */
+	public void persistSolution(OperationTheaterService service) {
+		for (PlannedSurgery plannedSurgery : plannedSurgeries) {
+			plannedSurgery.persist(service);
+		}
+	}
 }

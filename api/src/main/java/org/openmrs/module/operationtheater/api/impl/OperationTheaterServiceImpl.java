@@ -121,6 +121,11 @@ public class OperationTheaterServiceImpl extends BaseOpenmrsService implements O
 	}
 
 	@Override
+	public List<Surgery> getAllUncompletedSurgeries() {
+		return surgeryDAO.getAllUncompletedSurgeries();
+	}
+
+	@Override
 	public Procedure getProcedureByUuid(String uuid) {
 		return procedureDAO.getByUuid(uuid);
 	}

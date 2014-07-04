@@ -172,4 +172,12 @@ public interface OperationTheaterService extends OpenmrsService {
 	 * @should call surgeryDAO getById
 	 */
 	public Surgery getSurgery(Integer id);
+
+	/**
+	 * get all uncompleted surgeries
+	 *
+	 * @return all uncompleted surgeries
+	 * @should call surgeryDAO getAllUncompletedSurgeries
+	 */
+	public List<Surgery> getAllUncompletedSurgeries();
 }

@@ -66,5 +66,7 @@ public class SurgeryValidator implements Validator {
 		if (patientService.getPatient(surgery.getPatient().getId()) == null) {
 			errors.rejectValue("patient", "operationtheater.surgery.patientDoesNotExist");
 		}
+
+		//FIXME update validator
 	}
 }

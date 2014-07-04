@@ -2,14 +2,19 @@ package org.openmrs.module.operationtheater.scheduler.domain;
 
 import org.joda.time.DateTime;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.openmrs.module.operationtheater.Procedure;
 import org.openmrs.module.operationtheater.Surgery;
+import org.openmrs.module.operationtheater.api.OperationTheaterService;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.verify;
 
 /**
  * Tests {@link PlannedSurgery}
@@ -120,5 +125,30 @@ public class PlannedSurgeryTest {
 		procedure.setOtPreparationDuration(45);
 		surgery.setProcedure(procedure);
 		return surgery;
+	}
+
+	/**
+	 * @verifies updates the begin and finish times of the surgery object and stores it in the db
+	 * @see PlannedSurgery#persist(org.openmrs.module.operationtheater.api.OperationTheaterService)
+	 */
+	@Test
+	public void persist_shouldUpdatesTheBeginAndFinishTimesOfTheSurgeryObjectAndStoresItInTheDb() throws Exception {
+		OperationTheaterService mock = Mockito.mock(OperationTheaterService.class);
+
+		Surgery surgery = new Surgery();
+		PlannedSurgery plannedSurgery = new PlannedSurgery();
+		plannedSurgery.setSurgery(surgery);
+		plannedSurgery.setStart(new DateTime(), false);
+		plannedSurgery.setEnd(new DateTime().plusHours(2));
+
+		//call function under test
+		plannedSurgery.persist(mock);
+
+		ArgumentCaptor<Surgery> captor = ArgumentCaptor.forClass(Surgery.class);
+		verify(mock).saveSurgery(captor.capture());
+
+		assertNotNull(captor);
+		assertThat(captor.getValue().getDatePlannedBegin(), is(plannedSurgery.getStart()));
+		assertThat(captor.getValue().getDatePlannedFinish(), is(plannedSurgery.getEnd()));
 	}
 }

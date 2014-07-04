@@ -1,6 +1,5 @@
 package org.openmrs.module.operationtheater.scheduler;
 
-import org.drools.compiler.compiler.DroolsError;
 import org.drools.compiler.compiler.DroolsParserException;
 import org.drools.compiler.compiler.PackageBuilder;
 import org.drools.compiler.compiler.PackageBuilderErrors;

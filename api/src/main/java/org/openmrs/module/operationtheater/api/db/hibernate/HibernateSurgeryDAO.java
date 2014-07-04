@@ -47,4 +47,14 @@ public class HibernateSurgeryDAO extends HibernateGenericDAO<Surgery> implements
 				)
 				.setParameter("patient", patient).list();
 	}
+
+	@Override
+	public List<Surgery> getAllUncompletedSurgeries() {
+		return super.sessionFactory
+				.getCurrentSession()
+				.createQuery(
+						"from " + mappedClass.getSimpleName()
+								+ " at where at.surgeryCompleted = false"
+				).list();
+	}
 }
