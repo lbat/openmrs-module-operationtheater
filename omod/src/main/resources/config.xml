@@ -61,10 +61,9 @@
             org.openmrs.module.uicommons
         </require_module>
 
-        <!-- TODO commented to remove dependency issue with jodatime - include if a better solution has been found -->
-        <!--<require_module version="${emrapiVersion}">-->
-        <!--org.openmrs.module.emrapi-->
-        <!--</require_module>-->
+        <require_module version="${emrapiVersion}">
+            org.openmrs.module.emrapi
+        </require_module>
 
         <require_module version="${appuiVersion}">
             org.openmrs.module.appui
@@ -82,14 +81,13 @@
             org.openmrs.module.appointmentscheduling
         </require_module>
 
-        <!-- TODO commented to remove dependency issue with jodatime - include if a better solution has been found -->
-        <!--<require_module version="${emrVersion}">-->
-        <!--org.openmrs.module.emr-->
-        <!--</require_module>-->
+        <require_module version="${emrVersion}">
+            org.openmrs.module.emr
+        </require_module>
 
-        <!--<require_module version="${coreappsVersion}">-->
-        <!--org.openmrs.module.coreapps-->
-        <!--</require_module>-->
+        <require_module version="${coreappsVersion}">
+            org.openmrs.module.coreapps
+        </require_module>
 
     </require_modules>
     <!-- /Module Dependencies -->
