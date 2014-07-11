@@ -15,7 +15,7 @@ $(function () {
         });
     });
 
-    addDefaultRowWhenAppointmentTableEmpty();
+    addDefaultRowWhenTableEmpty();
 });
 
 
@@ -57,18 +57,18 @@ function deleteProcedureWithCallback(procedureId, deleteElement) {
             reloadPage(data.message);
         }
         , function (err) {
-            emr.handleError(err.message);
+            emr.handleError(err);
         }
     );
 }
 
-function verifyIfAppointmentTableEmpty() {
+function verifyIfTableEmpty() {
     return $('#proceduresTable tr').length == 1 ? true : false;
 }
 
-function addDefaultRowWhenAppointmentTableEmpty() {
+function addDefaultRowWhenTableEmpty() {
 
-    if (verifyIfAppointmentTableEmpty()) {
+    if (verifyIfTableEmpty()) {
         var defaultMessage = $('#proceduresTable').attr("empty-value-message");
         $('#proceduresTable').append('<tr><td>' + defaultMessage + '</td><td></td><td></td><td></td><td></td><td></td></tr>');
     }
