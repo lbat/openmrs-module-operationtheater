@@ -5,6 +5,7 @@ import org.joda.time.Interval;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.openmrs.Location;
+import org.openmrs.module.operationtheater.SchedulingData;
 import org.openmrs.module.operationtheater.Surgery;
 import org.openmrs.module.operationtheater.api.OperationTheaterService;
 import org.optaplanner.core.api.domain.entity.PlanningEntity;
@@ -161,12 +162,17 @@ public class PlannedSurgery {
 	 * and stores it in the db
 	 *
 	 * @param service
-	 * @should updates the begin and finish times of the surgery object and stores it in the db
+	 * @should update schedulingData object and store persist it into the db
 	 */
 	public void persist(OperationTheaterService service) {
-		surgery.setDatePlannedBegin(start);
-		surgery.setDatePlannedFinish(end);
-		surgery.setPlannedLocation(location);
+		SchedulingData scheduling = surgery.getSchedulingData();
+		if (scheduling == null) {
+			scheduling = new SchedulingData();
+			surgery.setSchedulingData(scheduling);
+		}
+		scheduling.setStart(start);
+		scheduling.setEnd(end);
+		scheduling.setLocation(location);
 		service.saveSurgery(surgery);
 	}
 }

@@ -5,6 +5,7 @@ import org.openmrs.Location;
 import org.openmrs.LocationTag;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.operationtheater.SchedulingData;
 import org.openmrs.module.operationtheater.Surgery;
 import org.openmrs.module.operationtheater.api.OperationTheaterService;
 import org.openmrs.module.operationtheater.scheduler.domain.PlannedSurgery;
@@ -83,9 +84,11 @@ public class Scheduler {
 		for (Surgery surgery : surgeries) {
 			PlannedSurgery plannedSurgery = new PlannedSurgery();
 			plannedSurgery.setSurgery(surgery);
-			if (surgery.getDatePlannedBegin() != null) {
-				plannedSurgery.setStart(surgery.getDatePlannedBegin());
-				plannedSurgery.setEnd(surgery.getDatePlannedFinish());
+			SchedulingData scheduling = surgery.getSchedulingData();
+			if (scheduling != null && scheduling.getStart() != null) {
+				plannedSurgery.setStart(scheduling.getStart());
+				plannedSurgery.setEnd(scheduling.getEnd());
+				plannedSurgery.setLocation(scheduling.getLocation());
 			}
 			plannedSurgeries.add(plannedSurgery);
 		}

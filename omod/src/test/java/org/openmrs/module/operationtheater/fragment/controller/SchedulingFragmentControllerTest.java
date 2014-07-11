@@ -18,6 +18,7 @@ import org.openmrs.module.appointmentscheduling.AppointmentType;
 import org.openmrs.module.appointmentscheduling.api.AppointmentService;
 import org.openmrs.module.appui.TestUiUtils;
 import org.openmrs.module.operationtheater.Procedure;
+import org.openmrs.module.operationtheater.SchedulingData;
 import org.openmrs.module.operationtheater.Surgery;
 import org.openmrs.module.operationtheater.api.OperationTheaterService;
 import org.openmrs.ui.framework.SimpleObject;
@@ -131,11 +132,13 @@ public class SchedulingFragmentControllerTest {
 		DateTime begin = DateTime.parse("2014-06-09 12:00", DateTimeFormat.forPattern(pattern));
 		DateTime finish = DateTime.parse("2014-06-09 13:30", DateTimeFormat.forPattern(pattern));
 
-		surgery.setPlannedLocation(ot1);
 		surgery.setProcedure(procedure);
 		surgery.setPatient(patient);
-		surgery.setDatePlannedBegin(begin);
-		surgery.setDatePlannedFinish(finish);
+		SchedulingData scheduling = new SchedulingData();
+		scheduling.setStart(begin);
+		scheduling.setEnd(finish);
+		scheduling.setLocation(ot1);
+		surgery.setSchedulingData(scheduling);
 		surgeries.add(surgery);
 
 		//mock service layer
@@ -249,5 +252,54 @@ public class SchedulingFragmentControllerTest {
 		assertThat(argumentCaptor.getValue().getLocation(), equalTo(location));
 		assertThat(argumentCaptor.getValue().getStartDate(), equalTo(start));
 		assertThat(argumentCaptor.getValue().getEndDate(), equalTo(end));
+	}
+
+	/**
+	 * @verifies update SchedulingData with provided values
+	 * @see SchedulingFragmentController#adjustSurgerySchedule(String, String, java.util.Date, boolean, org.openmrs.api.LocationService, org.openmrs.module.operationtheater.api.OperationTheaterService)
+	 */
+	@Test
+	public void adjustSurgerySchedule_shouldUpdateSchedulingDataWithProvidedValues() throws Exception {
+
+		String surgeryUuid = "surgeryUuid";
+		String locationUuid = "locationUuid";
+		Date scheduledDateTime = new Date();
+		boolean dateLocked = false;
+
+		Surgery surgery = new Surgery();
+		Location location = new Location();
+
+		SchedulingData schedulingData = new SchedulingData();
+		surgery.setSchedulingData(schedulingData);
+
+		//mock service layer
+		LocationService locationService = Mockito.mock(LocationService.class);
+		OperationTheaterService otService = Mockito.mock(OperationTheaterService.class);
+		when(otService.getSurgeryByUuid(surgeryUuid)).thenReturn(surgery);
+		when(locationService.getLocationByUuid(locationUuid)).thenReturn(location);
+		ArgumentCaptor<Surgery> captor = ArgumentCaptor.forClass(Surgery.class);
+		when(otService.saveSurgery(captor.capture())).thenReturn(null);
+
+		//call function under test
+		new SchedulingFragmentController()
+				.adjustSurgerySchedule(surgeryUuid, locationUuid, scheduledDateTime, dateLocked, locationService, otService);
+
+		//verify
+		Surgery captured = captor.getValue();
+		assertThat(captured, is(surgery));
+		assertThat(captured.getSchedulingData(), is(schedulingData));
+		assertThat(captured.getSchedulingData().getLocation(), is(location));
+		assertThat(captured.getSchedulingData().getStart(), equalTo(new DateTime(scheduledDateTime)));
+		assertThat(captured.getSchedulingData().getDateLocked(), is(dateLocked));
+	}
+
+	/**
+	 * @verifies return error if SchedulingData validation fails
+	 * @see SchedulingFragmentController#adjustSurgerySchedule(String, String, java.util.Date, boolean, org.openmrs.api.LocationService, org.openmrs.module.operationtheater.api.OperationTheaterService)
+	 */
+	@Test
+	public void adjustSurgerySchedule_shouldReturnErrorIfSchedulingDataValidationFails() throws Exception {
+		//TODO auto-generated
+		//		Assert.fail("Not yet implemented");
 	}
 }

@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.openmrs.module.operationtheater.Procedure;
+import org.openmrs.module.operationtheater.SchedulingData;
 import org.openmrs.module.operationtheater.Surgery;
 import org.openmrs.module.operationtheater.api.OperationTheaterService;
 
@@ -128,11 +129,11 @@ public class PlannedSurgeryTest {
 	}
 
 	/**
-	 * @verifies updates the begin and finish times of the surgery object and stores it in the db
+	 * @verifies update schedulingData object and store persist it into the db
 	 * @see PlannedSurgery#persist(org.openmrs.module.operationtheater.api.OperationTheaterService)
 	 */
 	@Test
-	public void persist_shouldUpdatesTheBeginAndFinishTimesOfTheSurgeryObjectAndStoresItInTheDb() throws Exception {
+	public void persist_shouldUpdateSchedulingDataObjectAndStorePersistItIntoTheDb() throws Exception {
 		OperationTheaterService mock = Mockito.mock(OperationTheaterService.class);
 
 		Surgery surgery = new Surgery();
@@ -148,7 +149,9 @@ public class PlannedSurgeryTest {
 		verify(mock).saveSurgery(captor.capture());
 
 		assertNotNull(captor);
-		assertThat(captor.getValue().getDatePlannedBegin(), is(plannedSurgery.getStart()));
-		assertThat(captor.getValue().getDatePlannedFinish(), is(plannedSurgery.getEnd()));
+		SchedulingData result = captor.getValue().getSchedulingData();
+		assertThat(result.getStart(), is(plannedSurgery.getStart()));
+		assertThat(result.getEnd(), is(plannedSurgery.getEnd()));
+		assertThat(result.getLocation(), is(plannedSurgery.getLocation()));
 	}
 }

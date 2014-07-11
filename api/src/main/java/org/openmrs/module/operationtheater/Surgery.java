@@ -1,8 +1,5 @@
 package org.openmrs.module.operationtheater;
 
-import org.hibernate.annotations.Type;
-import org.joda.time.DateTime;
-import org.openmrs.Location;
 import org.openmrs.Patient;
 
 import javax.persistence.Column;
@@ -11,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 /**
@@ -36,23 +34,9 @@ public class Surgery extends BaseOpenmrsDataJPA {
 	@Column(name = "surgery_completed", columnDefinition = "boolean default false", nullable = false)
 	private Boolean surgeryCompleted = false;
 
-	/**
-	 * Planned begin date of this surgery
-	 */
-	@Column(name = "date_planned_begin")
-	@Type(type = "org.joda.time.contrib.hibernate.PersistentDateTime")
-	private DateTime datePlannedBegin;
-
-	/**
-	 * Planned finish date of this surgery
-	 */
-	@Column(name = "date_planned_finish")
-	@Type(type = "org.joda.time.contrib.hibernate.PersistentDateTime")
-	private DateTime datePlannedFinish;
-
-	@ManyToOne
-	@JoinColumn(name = "planned_location_id")
-	private Location plannedLocation;
+	@OneToOne
+	@JoinColumn(name = "scheduling_data_id")
+	private SchedulingData schedulingData;
 
 	public int getSurgeryId() {
 		return surgeryId;
@@ -96,27 +80,11 @@ public class Surgery extends BaseOpenmrsDataJPA {
 		this.surgeryCompleted = surgeryCompleted;
 	}
 
-	public DateTime getDatePlannedBegin() {
-		return datePlannedBegin;
+	public SchedulingData getSchedulingData() {
+		return schedulingData;
 	}
 
-	public void setDatePlannedBegin(DateTime datePlannedBegin) {
-		this.datePlannedBegin = datePlannedBegin;
-	}
-
-	public DateTime getDatePlannedFinish() {
-		return datePlannedFinish;
-	}
-
-	public void setDatePlannedFinish(DateTime datePlannedFinish) {
-		this.datePlannedFinish = datePlannedFinish;
-	}
-
-	public Location getPlannedLocation() {
-		return plannedLocation;
-	}
-
-	public void setPlannedLocation(Location plannedLocation) {
-		this.plannedLocation = plannedLocation;
+	public void setSchedulingData(SchedulingData schedulingData) {
+		this.schedulingData = schedulingData;
 	}
 }

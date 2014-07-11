@@ -8,6 +8,78 @@
         See http://www.liquibase.org/manual/home#available_database_refactorings
         for a list of supported elements and attributes
     -->
+    <changeSet author="Lukas Breitwieser" id="operationtheater-201407081624">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="location_tag"/>
+                <tableExists tableName="location_attribute_type"/>
+                <sqlCheck expectedResult="0">
+                    select count(*) from location_tag where uuid = 'af3e9ed5-2de2-4a10-9956-9cb2ad5f84f2'
+                </sqlCheck>
+                <sqlCheck expectedResult="0">
+                    select count(*) from location_attribute_type where uuid = '4e051aeb-a19d-49e0-820f-51ae591ec41f'
+                </sqlCheck>
+                <sqlCheck expectedResult="0">
+                    select count(*) from location_attribute_type where uuid = 'a9d9ec55-e992-4d04-aebe-808be50aa87a'
+                </sqlCheck>
+            </and>
+        </preConditions>
+        <comment>
+            Insert required entries into location_tag and location_attribute_type tables
+        </comment>
+        <insert tableName="location_tag">
+            <column name="uuid" value="af3e9ed5-2de2-4a10-9956-9cb2ad5f84f2"/>
+            <column name="name" value="Operation Theater"/>
+            <column name="description" value="Surgeries can only be performed in a location with this tag"/>
+            <column name="creator" valueNumeric="1"/>
+            <column name="date_created" valueDate="2014-07-10"/>
+            <column name="retired" valueBoolean="false"/>
+            <column name="retired_by"/>
+            <column name="date_retired"/>
+            <column name="retire_reason"/>
+        </insert>
+        <insert tableName="location_attribute_type">
+            <column name="uuid" value="4e051aeb-a19d-49e0-820f-51ae591ec41f"/>
+            <column name="name" value="default available time begin"/>
+            <column name="description"
+                    value="default timestamp where the operation theater will be available to perform surgeries"/>
+            <column name="datatype" value="org.openmrs.customdatatype.datatype.RegexValidatedTextDatatype"/>
+            <column name="datatype_config" value="[0-9]{2}:[0-9]{2}"/>
+            <column name="preferred_handler"/>
+            <column name="handler_config"/>
+            <column name="min_occurs" value="0"/>
+            <column name="max_occurs" value="1"/>
+            <column name="creator" valueNumeric="1"/>
+            <column name="date_created" valueDate="2014-07-10"/>
+            <column name="changed_by"/>
+            <column name="date_changed"/>
+            <column name="retired" valueBoolean="false"/>
+            <column name="retired_by"/>
+            <column name="date_retired"/>
+            <column name="retire_reason"/>
+        </insert>
+        <insert tableName="location_attribute_type">
+            <column name="uuid" value="a9d9ec55-e992-4d04-aebe-808be50aa87a"/>
+            <column name="name" value="default available time end"/>
+            <column name="description"
+                    value="default timestamp until the operation theater will be available to perform surgeries"/>
+            <column name="datatype" value="org.openmrs.customdatatype.datatype.RegexValidatedTextDatatype"/>
+            <column name="datatype_config" value="[0-9]{2}:[0-9]{2}"/>
+            <column name="preferred_handler"/>
+            <column name="handler_config"/>
+            <column name="min_occurs" value="0"/>
+            <column name="max_occurs" value="1"/>
+            <column name="creator" valueNumeric="1"/>
+            <column name="date_created" valueDate="2014-07-10"/>
+            <column name="changed_by"/>
+            <column name="date_changed"/>
+            <column name="retired" valueBoolean="false"/>
+            <column name="retired_by"/>
+            <column name="date_retired"/>
+            <column name="retire_reason"/>
+        </insert>
+    </changeSet>
+
     <changeSet author="Lukas Breitwieser" id="operationtheater-201405281149">
         <preConditions onFail="MARK_RAN">
             <not>
@@ -58,11 +130,68 @@
         <addForeignKeyConstraint constraintName="procedure_creator"
                                  baseTableName="prozedure" baseColumnNames="creator"
                                  referencedTableName="users" referencedColumnNames="user_id"/>
+
         <addForeignKeyConstraint constraintName="procedure_changed_by"
                                  baseTableName="prozedure" baseColumnNames="changed_by"
                                  referencedTableName="users" referencedColumnNames="user_id"/>
+
         <addForeignKeyConstraint constraintName="procedure_retired_by"
                                  baseTableName="prozedure" baseColumnNames="retired_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+    </changeSet>
+
+    <changeSet author="Lukas Breitwieser" id="operationtheater-201407091149">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="scheduling_data"/>
+            </not>
+        </preConditions>
+        <comment>
+            Create scheduling_data table
+        </comment>
+        <createTable tableName="scheduling_data">
+
+            <column name="scheduling_data_id" type="integer" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="start" type="datetime"/>
+            <column name="end" type="datetime"/>
+            <column name="date_locked" type="boolean" defaultValueBoolean="false"/>
+            <column name="location_id" type="integer"/>
+
+            <column name="uuid" type="char(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column name="voided" type="tinyint" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="voided_by" type="int"/>
+            <column name="date_voided" type="datetime"/>
+            <column name="void_reason" type="varchar(255)" defaultValue="null"/>
+        </createTable>
+
+        <addForeignKeyConstraint constraintName="scheduling_data_location_id"
+                                 baseTableName="scheduling_data" baseColumnNames="location_id" referencedTableName="location"
+                                 referencedColumnNames="location_id"/>
+
+        <addForeignKeyConstraint constraintName="scheduling_data_creator"
+                                 baseTableName="scheduling_data" baseColumnNames="creator"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+
+        <addForeignKeyConstraint constraintName="scheduling_data_changed_by"
+                                 baseTableName="scheduling_data" baseColumnNames="changed_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+
+        <addForeignKeyConstraint constraintName="scheduling_data_retired_by"
+                                 baseTableName="scheduling_data" baseColumnNames="voided_by"
                                  referencedTableName="users" referencedColumnNames="user_id"/>
     </changeSet>
 
@@ -73,7 +202,7 @@
             </not>
         </preConditions>
         <comment>
-            Create the surgery table
+            Create surgery table
         </comment>
         <createTable tableName="surgery">
 
@@ -89,9 +218,7 @@
             <column name="surgery_completed" type="boolean" defaultValueBoolean="false">
                 <constraints nullable="false"/>
             </column>
-            <column name="date_planned_begin" type="datetime"/>
-            <column name="date_planned_finish" type="datetime"/>
-            <column name="planned_location_id" type="integer"/>
+            <column name="scheduling_data_id" type="integer"/>
 
             <column name="uuid" type="char(38)">
                 <constraints nullable="false" unique="true"/>
@@ -115,20 +242,27 @@
         <addForeignKeyConstraint constraintName="surgery_patient_fk"
                                  baseTableName="surgery" baseColumnNames="patient_id" referencedTableName="patient"
                                  referencedColumnNames="patient_id"/>
+
         <addForeignKeyConstraint constraintName="surgery_procedure_fk"
                                  baseTableName="surgery" baseColumnNames="procedure_id" referencedTableName="prozedure"
                                  referencedColumnNames="procedure_id"/>
-        <addForeignKeyConstraint constraintName="surgery_planned_location_fk"
-                                 baseTableName="surgery" baseColumnNames="planned_location_id" referencedTableName="location"
-                                 referencedColumnNames="location_id"/>
+
+        <addForeignKeyConstraint constraintName="scheduling_data_fk"
+                                 baseTableName="surgery" baseColumnNames="scheduling_data_id"
+                                 referencedTableName="scheduling_data"
+                                 referencedColumnNames="scheduling_data_id"/>
+
         <addForeignKeyConstraint constraintName="surgery_creator"
                                  baseTableName="surgery" baseColumnNames="creator"
                                  referencedTableName="users" referencedColumnNames="user_id"/>
+
         <addForeignKeyConstraint constraintName="surgery_changed_by"
                                  baseTableName="surgery" baseColumnNames="changed_by"
                                  referencedTableName="users" referencedColumnNames="user_id"/>
+
         <addForeignKeyConstraint constraintName="surgery_retired_by"
                                  baseTableName="surgery" baseColumnNames="voided_by"
                                  referencedTableName="users" referencedColumnNames="user_id"/>
     </changeSet>
+
 </databaseChangeLog>

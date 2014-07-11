@@ -11,6 +11,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.appointmentscheduling.AppointmentBlock;
 import org.openmrs.module.appointmentscheduling.AppointmentType;
 import org.openmrs.module.appointmentscheduling.api.AppointmentService;
+import org.openmrs.module.operationtheater.SchedulingData;
 import org.openmrs.module.operationtheater.Surgery;
 import org.openmrs.module.operationtheater.api.OperationTheaterService;
 import org.openmrs.module.operationtheater.scheduler.Scheduler;
@@ -20,6 +21,7 @@ import org.openmrs.ui.framework.annotation.SpringBean;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -61,11 +63,11 @@ public class SchedulingFragmentController {
 	                                    @SpringBean OperationTheaterService otService) {
 
 		//Todo remove - used to determine where the class is loaded from - resolving dependency issues
-		//		Class klass = DateTime.class;
-		//		URL loc= klass.getResource('/' + klass.getName().replace('.', '/') + ".class");
-		//		System.err.println(loc);
-		//		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		//		System.err.println(classLoader);
+		Class klass = DateTime.class;
+		URL loc = klass.getResource('/' + klass.getName().replace('.', '/') + ".class");
+		System.err.println(loc);
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		System.err.println(classLoader);
 
 		//get operation theaters
 		LocationTag tag = locationService.getLocationTagByUuid(LOCATION_TAG_OPERATION_THEATER_UUID);
@@ -98,15 +100,17 @@ public class SchedulingFragmentController {
 		//add surgeries
 		List<Surgery> surgeryList = otService.getAllSurgeries(false); //FIXME change to get surgery within start-end period
 		for (Surgery surgery : surgeryList) {
-			if (surgery.getDatePlannedBegin() == null || surgery.getDatePlannedFinish() == null) {
+			SchedulingData scheduling = surgery.getSchedulingData();
+			if (scheduling == null || scheduling.getStart() == null || scheduling.getEnd() == null
+					|| scheduling.getLocation() == null) {
 				continue;
 			}
-			String startStr = dateFormatter.format(surgery.getDatePlannedBegin().toDate());
-			String endStr = dateFormatter.format(surgery.getDatePlannedFinish().toDate());
+			String startStr = dateFormatter.format(scheduling.getStart().toDate());
+			String endStr = dateFormatter.format(scheduling.getEnd().toDate());
 			String patientName = surgery.getPatient().getFamilyName() + " " + surgery.getPatient().getGivenName();
 			String procedure = surgery.getProcedure().getName();
 			int resourceId =
-					resources.indexOf(surgery.getPlannedLocation().getName())
+					resources.indexOf(scheduling.getLocation().getName())
 							+ 1; //convention: resourceId = element array index + 1
 			CalendarEvent event = new CalendarEvent(procedure + " - " + patientName, startStr, endStr, resourceId);
 			System.err.println(event);
@@ -124,6 +128,47 @@ public class SchedulingFragmentController {
 	public void schedule() {
 		System.err.println("start scheduler");
 		new Scheduler().solve();
+	}
+
+	/**
+	 *
+	 * @param surgeryUuid
+	 * @param locationUuid
+	 * @param scheduledDateTime
+	 * @param lockedDate
+	 * @param locationService
+	 * @param otService
+	 *
+	 * @should update SchedulingData with provided values
+	 * @shoudl throw IllegalArgumentException if there is no Surgery for the given uuid
+	 * @should return error if SchedulingData validation fails
+	 */
+	public void adjustSurgerySchedule(@RequestParam("surgeryUuid") String surgeryUuid,
+	                                  @RequestParam("scheduledLocationUuid") String locationUuid,
+	                                  @RequestParam("start") @DateTimeFormat(
+			                                  iso = DateTimeFormat.ISO.DATE_TIME) Date scheduledDateTime,
+	                                  @RequestParam("lockedDate") boolean lockedDate,
+	                                  @SpringBean LocationService locationService,
+	                                  @SpringBean OperationTheaterService otService) {
+
+		Location location = locationService.getLocationByUuid(locationUuid);
+
+		Surgery surgery = otService.getSurgeryByUuid(surgeryUuid);
+		if (surgery == null) {
+			throw new IllegalArgumentException("No surgery entry found for surgeryUuid: " + surgeryUuid);
+		}
+
+		SchedulingData schedulingData = surgery.getSchedulingData();
+		schedulingData.setDateLocked(lockedDate);
+		schedulingData.setStart(new DateTime(scheduledDateTime));
+		schedulingData.setLocation(location);
+
+		//validate
+		//		ValidateUtil.validate(schedulingData);
+		//FIXME return error code if validation fails
+
+		//persist
+		otService.saveSurgery(surgery);
 	}
 
 	/**
@@ -147,7 +192,7 @@ public class SchedulingFragmentController {
 	                                 @SpringBean("locationService") LocationService locationService,
 	                                 @SpringBean AppointmentService appointmentService) throws Exception {
 
-		if (new DateTime(start).isAfter(new DateTime(end))) {
+		if (available && new DateTime(start).isAfter(new DateTime(end))) {
 			throw new IllegalArgumentException("start date must be before end date"); //TODO send meaningful error message
 		}
 
