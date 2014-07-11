@@ -160,7 +160,8 @@ public interface OperationTheaterService extends OpenmrsService {
 	 *
 	 * @param procedureToRetire
 	 * @param reason
-	 * @should retire the given procedure
+	 * @should call procedureDAO saveOrUpdate if object is not null
+	 * @should retire the given procedure TODO add context sensitive test to see if aop kicks in
 	 */
 	public Procedure retireProcedure(Procedure procedureToRetire, String reason);
 

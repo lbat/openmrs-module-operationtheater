@@ -39,6 +39,8 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -80,7 +82,7 @@ public class OperationTheaterServiceTest { //extends BaseModuleContextSensitiveT
 		Surgery surgery = new Surgery();
 		service.saveSurgery(surgery);
 
-		Mockito.verify(surgeryDAO).saveOrUpdate(surgery);
+		verify(surgeryDAO).saveOrUpdate(surgery);
 		assertThat(captor.getAllValues(), hasSize(1));
 		assertEquals(surgery, captor.getValue());
 	}
@@ -101,7 +103,7 @@ public class OperationTheaterServiceTest { //extends BaseModuleContextSensitiveT
 		Procedure procedure = new Procedure();
 		service.saveProcedure(procedure);
 
-		Mockito.verify(procedureDAO).saveOrUpdate(procedure);
+		verify(procedureDAO).saveOrUpdate(procedure);
 		assertThat(captor.getAllValues(), hasSize(1));
 		assertEquals(procedure, captor.getValue());
 	}
@@ -118,12 +120,12 @@ public class OperationTheaterServiceTest { //extends BaseModuleContextSensitiveT
 		when(surgeryDAO.getAllData(true)).thenReturn(surgeryList);
 		List<Surgery> result = service.getAllSurgeries(true);
 		assertEquals(surgeryList, result);
-		Mockito.verify(surgeryDAO).getAllData(true);
+		verify(surgeryDAO).getAllData(true);
 
 		when(surgeryDAO.getAllData(false)).thenReturn(surgeryList);
 		result = service.getAllSurgeries(false);
 		assertEquals(surgeryList, result);
-		Mockito.verify(surgeryDAO).getAllData(false);
+		verify(surgeryDAO).getAllData(false);
 	}
 
 	/**
@@ -168,12 +170,12 @@ public class OperationTheaterServiceTest { //extends BaseModuleContextSensitiveT
 		when(procedureDAO.getAll(true)).thenReturn(procedureList);
 		List<Procedure> result = service.getAllProcedures(true);
 		assertEquals(procedureList, result);
-		Mockito.verify(procedureDAO).getAll(true);
+		verify(procedureDAO).getAll(true);
 
 		when(procedureDAO.getAll(false)).thenReturn(procedureList);
 		result = service.getAllProcedures(false);
 		assertEquals(procedureList, result);
-		Mockito.verify(procedureDAO).getAll(false);
+		verify(procedureDAO).getAll(false);
 	}
 
 	/**
@@ -251,5 +253,25 @@ public class OperationTheaterServiceTest { //extends BaseModuleContextSensitiveT
 
 		//verify
 		assertThat(result, is(expected));
+	}
+
+	/**
+	 * @verifies call procedureDAO saveOrUpdate if object is not null
+	 * @see OperationTheaterService#retireProcedure(org.openmrs.module.operationtheater.Procedure, String)
+	 */
+	@Test
+	public void retireProcedure_shouldCallProcedureDAOSaveOrUpdateIfObjectIsNotNull() throws Exception {
+		Procedure procedure = new Procedure();
+
+		//#1: call with null object
+		//call method under test
+		service.retireProcedure(null, "reason");
+
+		//verify
+		verify(procedureDAO, never()).saveOrUpdate(Mockito.any(Procedure.class));
+
+		//#2 call with proper procedure object
+		service.retireProcedure(procedure, "reason");
+		verify(procedureDAO).saveOrUpdate(procedure);
 	}
 }

@@ -105,7 +105,7 @@ public class OperationTheaterServiceImpl extends BaseOpenmrsService implements O
 
 	@Override
 	public Procedure retireProcedure(Procedure procedureToRetire, String reason) {
-		if (procedureToRetire != null) {
+		if (procedureToRetire == null) {
 			return null;
 		}
 
