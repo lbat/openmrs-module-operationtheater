@@ -33,6 +33,24 @@ public class SurgeryValidatorTest {
 	}
 
 	/**
+	 * @verifies throw IllegalArgumentException if obj is null
+	 * @see ProcedureValidator#validate(Object, org.springframework.validation.Errors)
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void validate_shouldThrowIllegalArgumentExceptionIfObjIsNull() throws Exception {
+		validator.validate(null, errors);
+	}
+
+	/**
+	 * @verifies throw IllegalArgumentException if obj is not instance of Procedure
+	 * @see ProcedureValidator#validate(Object, org.springframework.validation.Errors)
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void validate_shouldThrowIllegalArgumentExceptionIfObjIsNotInstanceOfProcedure() throws Exception {
+		validator.validate(new Object(), errors);
+	}
+
+	/**
 	 * @verifies fail validation if patient is null or empty
 	 * @see SurgeryValidator#validate(Object, org.springframework.validation.Errors)
 	 */
@@ -58,17 +76,6 @@ public class SurgeryValidatorTest {
 		surgery.setPatient(patient);
 		validator.validate(surgery, errors);
 		Mockito.verify(errors, never()).rejectValue(Matchers.anyString(), Matchers.anyString());
-	}
-
-	/**
-	 * @verifies fail validation if obj is not instance of surgery
-	 * @see SurgeryValidator#validate(Object, org.springframework.validation.Errors)
-	 */
-	@Test
-	public void validate_shouldFailValidationIfObjIsNotInstanceOfSurgery() throws Exception {
-		Object o = new Object();
-		validator.validate(o, errors);
-		Mockito.verify(errors).rejectValue("surgery", "error.general");
 	}
 
 	/**

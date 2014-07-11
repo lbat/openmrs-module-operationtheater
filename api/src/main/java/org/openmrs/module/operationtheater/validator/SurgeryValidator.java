@@ -36,13 +36,18 @@ public class SurgeryValidator implements Validator {
 	 */
 	@SuppressWarnings("unchecked")
 	public boolean supports(Class c) {
+		if (log.isDebugEnabled()) {
+			log.debug(this.getClass().getName() + ".supports: " + c.getName());
+		}
+
 		return c.equals(Surgery.class);
 	}
 
 	/**
 	 * Checks the form object for any inconsistencies/errors
 	 *
-	 * @should fail validation if obj is not instance of surgery
+	 * @should throw IllegalArgumentException if obj is null
+	 * @should throw IllegalArgumentException if obj is not instance of Procedure
 	 * @should fail validation if patient is null or empty
 	 * @should fail validation if patient does not exist
 	 * @should pass validation if all required fields have proper values
@@ -50,15 +55,15 @@ public class SurgeryValidator implements Validator {
 	 * org.springframework.validation.Errors)
 	 */
 	public void validate(Object obj, Errors errors) {
-		if (!(obj instanceof Surgery)) {
-			errors.rejectValue("surgery", "error.general");
-			return;
+		if (log.isDebugEnabled()) {
+			log.debug(this.getClass().getName() + ".validate...");
 		}
+
+		if (obj == null || !(obj instanceof Surgery)) {
+			throw new IllegalArgumentException("The parameter obj should not be null and must be of type " + Surgery.class);
+		}
+
 		Surgery surgery = (Surgery) obj;
-		if (surgery == null) {
-			errors.rejectValue("surgery", "error.general");
-			return;
-		}
 		if (surgery.getPatient() == null) {
 			errors.rejectValue("patient", "operationtheater.Surgery.emptyPatientID");
 			return;

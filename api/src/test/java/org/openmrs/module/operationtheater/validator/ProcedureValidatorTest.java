@@ -9,7 +9,6 @@ import org.springframework.validation.Errors;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.mock;
 
 /**
@@ -41,14 +40,21 @@ public class ProcedureValidatorTest {
 	}
 
 	/**
-	 * @verifies fail validation if obj is not instance of surgery
+	 * @verifies throw IllegalArgumentException if obj is null
 	 * @see ProcedureValidator#validate(Object, org.springframework.validation.Errors)
 	 */
-	@Test
-	public void validate_shouldFailValidationIfObjIsNotInstanceOfSurgery() throws Exception {
-		Object obj = new Object();
-		validator.validate(obj, errors);
-		verify(errors).rejectValue("Procedure", "error.general");
+	@Test(expected = IllegalArgumentException.class)
+	public void validate_shouldThrowIllegalArgumentExceptionIfObjIsNull() throws Exception {
+		validator.validate(null, errors);
+	}
+
+	/**
+	 * @verifies throw IllegalArgumentException if obj is not instance of Procedure
+	 * @see ProcedureValidator#validate(Object, org.springframework.validation.Errors)
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void validate_shouldThrowIllegalArgumentExceptionIfObjIsNotInstanceOfProcedure() throws Exception {
+		validator.validate(new Object(), errors);
 	}
 
 	/**

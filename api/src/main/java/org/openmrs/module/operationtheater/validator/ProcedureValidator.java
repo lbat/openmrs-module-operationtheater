@@ -35,13 +35,18 @@ public class ProcedureValidator implements Validator {
 	 */
 	@SuppressWarnings("unchecked")
 	public boolean supports(Class c) {
+		if (log.isDebugEnabled()) {
+			log.debug(this.getClass().getName() + ".supports: " + c.getName());
+		}
+
 		return c.equals(Procedure.class);
 	}
 
 	/**
 	 * Checks the form object for any inconsistencies/errors
 	 *
-	 * @should fail validation if obj is not instance of surgery
+	 * @should throw IllegalArgumentException if obj is null
+	 * @should throw IllegalArgumentException if obj is not instance of Procedure
 	 * @should fail validation if name is null empty or whitespace or longer than 100 chars
 	 * @should fail validation if description is longer than 1024 chars
 	 * @should fail validation if interventionDuration is null negative or greater than 24 hours
@@ -52,20 +57,21 @@ public class ProcedureValidator implements Validator {
 	 * org.springframework.validation.Errors)
 	 */
 	public void validate(Object obj, Errors errors) {
-		if (!(obj instanceof Procedure)) {
-			errors.rejectValue("Procedure", "error.general");
-			return;
+		if (log.isDebugEnabled()) {
+			log.debug(this.getClass().getName() + ".validate...");
 		}
+
+		if (obj == null || !(obj instanceof Procedure)) {
+			throw new IllegalArgumentException(
+					"The parameter obj should not be null and must be of type " + Procedure.class);
+		}
+
 		Procedure procedure = (Procedure) obj;
-		if (procedure == null) {
-			errors.rejectValue("Procedure", "error.general");
-		} else {
-			validateNameField(errors, procedure);
-			validateDescriptionField(errors, procedure.getDescription());
-			validateInterventionDurationField(errors, procedure);
-			validateOtPreparationDurationField(errors, procedure);
-			validateInpatientStayField(errors, procedure);
-		}
+		validateNameField(errors, procedure);
+		validateDescriptionField(errors, procedure.getDescription());
+		validateInterventionDurationField(errors, procedure);
+		validateOtPreparationDurationField(errors, procedure);
+		validateInpatientStayField(errors, procedure);
 	}
 
 	private void validateNameField(Errors errors, Procedure procedure) {
