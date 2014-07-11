@@ -5,8 +5,10 @@
 
     ui.includeCss("operationtheater", "bower_components/fullcalendar/fullcalendar.css")
     ui.includeJavascript("operationtheater", "bower_components/fullcalendar/fullcalendar.js")
+    ui.includeJavascript("operationtheater", "scheduling_page/adjustAvailableTimesDialog.js")
+    ui.includeJavascript("operationtheater", "scheduling_page/adjustSurgeryScheduleDialog.js")
+    ui.includeJavascript("operationtheater", "bower_components/validation/jquery.validate.js")
 
-    ui.includeJavascript("operationtheater", "schedulingAvailableTimesDialog.js")
     ui.includeJavascript("uicommons", "emr.js")
     ui.includeJavascript("uicommons", "moment.min.js")
     ui.includeJavascript("uicommons", "datetimepicker/bootstrap-datetimepicker.min.js")
@@ -27,11 +29,14 @@
         operationTheaters.push("${it.name}")
         <% } %>
 
+        //create dialogs
         availableTimesDialog.createDialog();
+        adjustSurgeryScheduleDialog.createDialog();
 
         jq('#calendar').fullCalendar({
+            height: 3000,
             header: {
-                left: 'prev,next today, resourceDay, resourceWeek',
+                left: 'prev,next today, resourceDay, agendaWeek, resourceWeek',
                 center: 'title',
                 right: ''
             },
@@ -54,7 +59,8 @@
                     availableTimesDialog.show(calEvent);
                 } else {
                     //FIXME remove this hack - just for demonstration purpose
-                    window.location.href = '${ui.pageLink("operationtheater", "surgery", [surgeryId:2, patientId:6])}';
+                    //window.location.href = '${ui.pageLink("operationtheater", "surgery", [surgeryId:2, patientId:6])}';
+                    adjustSurgeryScheduleDialog.show(calEvent);
                 }
             },
             resources: calResources,
@@ -70,10 +76,17 @@
                         })
                         .error(function (xhr, status, err) {
                             emr.handleError(xhr);
-                            //emr.errorAlert("AJAX error " + err, null); //TODO message.properties
+                            emr.errorAlert("An error occurred during event loading", null); //TODO message.properties
                         })
             }
-//        events: [{"title":"","start":"2014-06-03 05:00","end":"2014-06-03 15:00","resourceId":1,"allDay":false, annotation:true, "resourceName":"OT 1"}]
+//        events: [{"title":"test","start":"2014-07-07 05:00","end":"2014-07-07 15:00","resourceId":1,"allDay":false, annotation:true, "resourceName":"OT 1"},
+//                 {"title":"test2","start":"2014-07-07 05:00","end":"2014-07-07 15:00","resourceId":2,"allDay":false, annotation:true, "resourceName":"OT 2"}
+//        ]
+        });
+
+        resizeFullCalendar();
+        jq(window).resize(function () {
+            resizeFullCalendar();
         });
 
         //customize fullcalendars design
@@ -155,16 +168,31 @@
 //        <th class="fc-agenda-gutter fc-widget-header fc-last" style="width: 13px;">&nbsp;</th></tr>
     });
 
+    //TODO offset not correct
+    function resizeFullCalendar() {
+        var offset = jq("#calendar").offset();
+        var margin = parseInt(jq(document.body).css("margin-top")) + parseInt(jq(document.body).css("margin-bottom"));
+        console.log(offset.top);
+        console.log(margin);
+
+        var height = jq(window).height() * 0.95 - offset.top;
+        jq('#calendar').fullCalendar('option', 'height', height);
+    }
+
 </script>
 <style type='text/css'>
+input.error {
+    border: 2px solid;
+    border-color: #ff6666;
+}
 
 body {
     max-width: 95%;
-    /*max-height: 95%; TODO not working*/
 }
 
 #calendar {
     width: 100%;
+    height: 100%;
     margin: 0 auto;
 }
 
@@ -177,6 +205,7 @@ body {
 <div id='calendar'></div>
 
 <div id='loading' style='display:none'>loading...</div>
+
 
 <div id="available-times-dialog" class="dialog simplemodal-data" style="">
     <div class="dialog-header">
@@ -206,13 +235,21 @@ body {
                 <p>
                     <label for="start_time_picker-display">start time:</label>
                     <!--<input id="startTime" name="startTime" placeholder="e.g. 08:00" type="text"></input>-->
-                    ${ui.includeFragment("operationtheater", "field/datetimepicker", [id: 'start_time_picker', label: '', formFieldName: 'start time picker', useTime: true])}
+                    ${ui.includeFragment("operationtheater", "field/datetimepicker", [
+                            id           : 'start_time_picker',
+                            label        : '',
+                            formFieldName: 'startTimePicker',
+                            useTime      : true])}
                 </p>
 
                 <p>
                     <label for="end_time_picker-display">end time:</label>
                     <!--<input id="endTime" name="endTime" placeholder="e.g. 17:00" type="text"></input>-->
-                    ${ui.includeFragment("operationtheater", "field/datetimepicker", [id: 'end_time_picker', label: '', formFieldName: 'end time picker', useTime: true])}
+                    ${ui.includeFragment("operationtheater", "field/datetimepicker", [
+                            id           : 'end_time_picker',
+                            label        : '',
+                            formFieldName: 'endTimePicker',
+                            useTime      : true])}
                 </p>
 
             </form>
@@ -223,3 +260,50 @@ body {
     </div>
 </div>
 
+<div id="adjust-schedule-dialog" class="dialog simplemodal-data" style="">
+    <div class="dialog-header">
+        <i class="icon-time"></i>
+
+        <h3>Adjust surgery schedule</h3>
+    </div>
+
+    <div class="dialog-content">
+        <p class="dialog-instructions">Please adjust and confirm the schedule for the selected surgery</p>
+        <ul>
+            <li class="info">
+                <span id="">Surgery</span>
+                <h5 id="adjust-schedule-surgery"></h5>
+            </li>
+
+            <form id="adjust-schedule-form" class="simple-form-ui">
+
+                <p>
+                    <label for="adjust-surgery-form-location">Operation Theater:</label>
+                    <span class="select-arrow">
+                        <select id="adjust-surgery-form-location">
+                            <option value="null">not specified</option>
+                            <% resources.eachWithIndex { it, i -> %>
+                            <option value="${it.name}">${it.name}</option>
+                            <% } %>
+                        </select>
+                    </span>
+                </p>
+
+                <p>
+                    <label for="adjust_schedule_start_time-display">start time:</label>
+                    ${ui.includeFragment("operationtheater", "field/datetimepicker", [
+                            id           : 'adjust_schedule_start_time',
+                            label        : '',
+                            formFieldName: 'startTime',
+                            useTime      : true,
+                            format       : "yyyy-mm-dd hh:ii",
+                            startView    : 2])}
+                </p>
+
+            </form>
+        </ul>
+
+        <button class="confirm right">Confirm</button>
+        <button class="cancel">Cancel</button>
+    </div>
+</div>

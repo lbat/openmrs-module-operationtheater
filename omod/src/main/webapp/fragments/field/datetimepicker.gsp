@@ -65,13 +65,14 @@
         <% if (config.classes) { %> class="${config.classes.join(' ')}" <% } %>
         <% if (config.dependency || required) { %> data-bind="value: ${config.id}" <% } %>/>
 
-    ${ui.includeFragment("uicommons", "fieldErrors", [fieldName: config.formFieldName])}
+    ${ui.includeFragment("uicommons", "fieldErrors", [fieldName: config.formFieldName, id: config.id + "-error"])}
 </span>
 
 <script type="text/javascript">
     var viewModel = viewModel || {};
     viewModel.validations = viewModel.validations || [];
 
+    //http://www.malot.fr/bootstrap-datetimepicker/
     jq("#${ config.id }-wrapper").datetimepicker({
         <% if (!config.useTime) { %>
         minView: 2,
@@ -80,12 +81,20 @@
         autoclose: true,
         pickerPosition: "bottom-left",
         todayHighlight: false,
+        <% if (config.startView) { %>
+        startView: ${config.startView},
+        <% } else {%>
         startView: 1,
-        <% if (config.useTime) { %>
+        <% } %>
+        <% if (config.format) { %>
+        format: "${config.format}",
+        <% } else if (config.useTime) { %>
         format: "hh:ii",
         <% } else { %>
         format: "dd-mm-yyyy",
         <% } %>
+
+
 
         <% if (startDate) { %>
         startDate: "${ startDate instanceof Date ? dateStringFormat.format(startDate) : startDate }",
