@@ -274,4 +274,24 @@ public class OperationTheaterServiceTest { //extends BaseModuleContextSensitiveT
 		service.retireProcedure(procedure, "reason");
 		verify(procedureDAO).saveOrUpdate(procedure);
 	}
+
+	/**
+	 * @verifies call surgeryDAO saveOrUpdate if object is not null
+	 * @see OperationTheaterService#voidSurgery(org.openmrs.module.operationtheater.Surgery, String)
+	 */
+	@Test
+	public void voidSurgery_shouldCallSurgeryDAOSaveOrUpdateIfObjectIsNotNull() throws Exception {
+		Surgery surgery = new Surgery();
+
+		//#1: call with null object
+		//call method under test
+		service.voidSurgery(null, "reason");
+
+		//verify
+		verify(surgeryDAO, never()).saveOrUpdate(Mockito.any(Surgery.class));
+
+		//#2 call with proper procedure object
+		service.voidSurgery(surgery, "reason");
+		verify(surgeryDAO).saveOrUpdate(surgery);
+	}
 }

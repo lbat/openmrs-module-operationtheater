@@ -20,17 +20,17 @@ $(function () {
 
 
 function createDeleteProcedureDialog(procedureId, deleteElement) {
-    deleteProcedureDialog = emr.setupConfirmationDialog({
+    deleteDialog = emr.setupConfirmationDialog({
         selector: '#delete-procedure-dialog',
         actions: {
             confirm: function () {
                 jq('#delete-procedure-dialog' + ' .icon-spin').css('display', 'inline-block').parent().addClass('disabled');
                 deleteProcedureWithCallback(procedureId, deleteElement);
-                deleteProcedureDialog.close();
+                deleteDialog.close();
                 jq('#delete-procedure-dialog' + ' .icon-spin').css('display', 'none').parent().removeClass('disabled');
             },
             cancel: function () {
-                deleteProcedureDialog.close();
+                deleteDialog.close();
             }
         }
     });
@@ -46,7 +46,7 @@ function reloadPage() {
 }
 
 function showDeleteProcedureDialog() {
-    deleteProcedureDialog.show();
+    deleteDialog.show();
     return false;
 }
 

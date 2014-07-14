@@ -1,76 +1,77 @@
 // TODO redo using angular?
 
 $(function () {
-    $(document).on('click', '.deleteProcedure', function (event) {
-        var procedureId = $(event.target).attr("data-procedure-id");
-        createDeleteProcedureDialog(procedureId, $(this));
-        showDeleteProcedureDialog();
+    $(document).on('click', '.deleteElement', function (event) {
+        var id = $(event.target).attr("data-id");
+        createDeleteDialog(id, $(this));
+        showDeleteDialog();
     });
 
-    $(document).on('click', '.editProcedure', function (event) {
+    $(document).on('click', '.editElement', function (event) {
         emr.navigateTo({
             provider: 'operationtheater',
             page: 'surgery',
-            query: { surgeryId: $(event.target).attr("data-procedure-id"), patientId: $(event.target).attr("data-patient-id")  }
+            query: { surgeryId: $(event.target).attr("data-id"), patientId: $(event.target).attr("data-patient-id")  }
         });
     });
 
-    addDefaultRowWhenAppointmentTableEmpty();
+    addDefaultRowWhenTableEmpty();
 });
 
 
-function createDeleteProcedureDialog(procedureId, deleteElement) {
-    deleteProcedureDialog = emr.setupConfirmationDialog({
-        selector: '#delete-procedure-dialog',
+function createDeleteDialog(id, deleteElement) {
+    deleteDialog = emr.setupConfirmationDialog({
+        selector: '#delete-dialog',
         actions: {
             confirm: function () {
-                jq('#delete-procedure-dialog' + ' .icon-spin').css('display', 'inline-block').parent().addClass('disabled');
-                deleteProcedureWithCallback(procedureId, deleteElement);
-                deleteProcedureDialog.close();
-                jq('#delete-procedure-dialog' + ' .icon-spin').css('display', 'none').parent().removeClass('disabled');
+                jq('#delete-dialog' + ' .icon-spin').css('display', 'inline-block').parent().addClass('disabled');
+                deleteWithCallback(id, deleteElement);
+                deleteDialog.close();
+                jq('#delete-dialog' + ' .icon-spin').css('display', 'none').parent().removeClass('disabled');
             },
             cancel: function () {
-                deleteProcedureDialog.close();
+                deleteDialog.close();
             }
         }
     });
 }
 
 
-function reloadPage() {
+function reloadPage(patientId) {
     emr.navigateTo({
         provider: 'operationtheater',
-        page: 'manageProcedures',
-        query: {deleted: true}
+        page: 'patientsSurgeries',
+        query: {deleted: true, patientId: patientId}
     });
 }
 
-function showDeleteProcedureDialog() {
-    deleteProcedureDialog.show();
+function showDeleteDialog() {
+    deleteDialog.show();
     return false;
 }
 
-function deleteProcedureWithCallback(procedureId, deleteElement) {
-    emr.getFragmentActionWithCallback('operationtheater', 'manageProcedures', 'retireProcedure'
-        , { procedureId: procedureId}
+function deleteWithCallback(id, deleteElement) {
+    var patientId = $(deleteElement).attr("data-patient-id");
+    emr.getFragmentActionWithCallback('operationtheater', 'patientsSurgeries', 'voidSurgery'
+        , { surgeryId: id}
         , function (data) {
-            reloadPage(data.message);
+            reloadPage(patientId);
         }
         , function (err) {
-            emr.handleError(err.message);
+            emr.handleError(err);
         }
     );
 }
 
-function verifyIfAppointmentTableEmpty() {
-    return $('#proceduresTable tr').length == 1 ? true : false;
+function verifyIfTableEmpty() {
+    return $('#surgeriesTable tr').length == 1 ? true : false;
 }
 
-function addDefaultRowWhenAppointmentTableEmpty() {
+function addDefaultRowWhenTableEmpty() {
 
-    if (verifyIfAppointmentTableEmpty()) {
-        var defaultMessage = $('#proceduresTable').attr("empty-value-message");
-        $('#proceduresTable').append('<tr><td>' + defaultMessage + '</td><td></td><td></td><td></td><td></td><td></td></tr>');
+    if (verifyIfTableEmpty()) {
+        var defaultMessage = $('#surgeriesTable').attr("empty-value-message");
+        $('#surgeriesTable').append('<tr><td>' + defaultMessage + '</td><td></td><td></td><td></td></tr>');
     }
 }
 

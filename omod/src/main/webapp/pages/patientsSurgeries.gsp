@@ -1,6 +1,5 @@
 <%
     ui.decorateWith("appui", "standardEmrPage")
-//    ui.includeCss("appointmentschedulingui", "appointmentType.css")
     ui.includeJavascript("operationtheater", "patientsSurgeries.js")
 %>
 
@@ -28,7 +27,7 @@ ${ui.includeFragment("coreapps", "patientHeader", [patient: patient.patient, act
 /* Todo refactor to compass */
 
 /* line 1, ../../../compass/sass/appointmentType.scss */
-.procedure-label {
+.surgeries-label {
     display: inline-block;
 }
 
@@ -38,7 +37,7 @@ ${ui.includeFragment("coreapps", "patientHeader", [patient: patient.patient, act
 }
 
 /* line 9, ../../../compass/sass/appointmentType.scss */
-#proceduresTable {
+#surgeriesTable {
     word-break: break-all;
 }
 </style>
@@ -46,13 +45,13 @@ ${ui.includeFragment("coreapps", "patientHeader", [patient: patient.patient, act
 
 <div class="container">
     <div>
-        <div id="manageProceduresTitle" class="procedure-label">
+        <div class="surgeries-label">
             <h1>
                 ${ui.message("operationtheater.patientsSurgeries.title")}
             </h1>
         </div>
 
-        <button class="confirm procedure-label right"
+        <button class="confirm surgeries-label right"
                 onclick="location.href = '${ui.pageLink("operationtheater", "surgery")}?patientId=${patientId}'">
             <i class="icon-plus"></i>
             ${ui.message("operationtheater.patientsSurgeries.button.new")}
@@ -60,8 +59,8 @@ ${ui.includeFragment("coreapps", "patientHeader", [patient: patient.patient, act
 
     </div>
 
-    <div id="procedures-list">
-        <table id="proceduresTable" empty-value-message='${ui.message("uicommons.dataTable.emptyTable")}'>
+    <div>
+        <table id="surgeriesTable" empty-value-message='${ui.message("uicommons.dataTable.emptyTable")}'>
             <thead>
             <tr>
                 <th style="width: 22%">${ui.format(ui.message("general.dateCreated"))}</th>
@@ -79,20 +78,21 @@ ${ui.includeFragment("coreapps", "patientHeader", [patient: patient.patient, act
                 <td>${ui.format(surgery.procedure.description)}</td>
                 <td class="align-center">
                     <span>
-                        <i class="editProcedure delete-item icon-pencil"
-                           data-procedure-id="${surgery.id}"
+                        <i class="editElement delete-item icon-pencil"
+                           data-id="${surgery.id}"
                            data-patient-id="${surgery.patient.id}"
                            data-edit-url='${ui.pageLink("operationtheater", "surgery")}'
                            title="${ui.message("coreapps.edit")}"></i>
-                        <i class="deleteProcedure delete-item icon-remove"
-                           data-procedure-id="${surgery.id}"
+                        <i class="deleteElement delete-item icon-remove"
+                           data-patient-id="${surgery.patient.id}"
+                           data-id="${surgery.id}"
                            title="${ui.message("coreapps.delete")}"></i>
                     </span>
                 </td>
             </tr>
 
 
-            <div id="delete-procedure-dialog" class="dialog" style="display: none">
+            <div id="delete-dialog" class="dialog" style="display: none">
                 <div class="dialog-header">
                     <h3>${ui.message("operationtheater.patientsSurgeries.deleteSurgeryDialogTitle")}</h3>
                 </div>
@@ -117,7 +117,7 @@ ${ui.includeFragment("coreapps", "patientHeader", [patient: patient.patient, act
 </div>
 
 
-${ui.includeFragment("uicommons", "widget/dataTable", [object : "#proceduresTable",
+${ui.includeFragment("uicommons", "widget/dataTable", [object: "#surgeriesTable",
                                                        options: [
                                                                bFilter        : false,
                                                                bJQueryUI      : true,

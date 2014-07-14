@@ -132,7 +132,8 @@ public interface OperationTheaterService extends OpenmrsService {
 	 *
 	 * @param surgery
 	 * @param reason  for the voiding
-	 * @should void the given surgery
+	 * @should call surgeryDAO saveOrUpdate if object is not null
+	 * @should void the given surgery TODO add context sensitive test to see if aop kicks in
 	 */
 	public Surgery voidSurgery(Surgery surgery, String reason);
 

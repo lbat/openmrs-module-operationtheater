@@ -30,7 +30,7 @@ public class ManageProceduresFragmentController {
 		if (procedureToRetire != null) {
 			try {
 				service.retireProcedure(procedureToRetire,
-						"Retired procedure by system administration");
+						"");
 				return new SuccessResult("operationtheater.procedure.retiredSuccessfully");
 			}
 			catch (APIAuthenticationException e) {
