@@ -3,14 +3,14 @@ package org.openmrs.module.operationtheater.validator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Location;
+import org.openmrs.LocationTag;
 import org.openmrs.annotation.Handler;
+import org.openmrs.api.LocationService;
+import org.openmrs.api.context.Context;
+import org.openmrs.module.operationtheater.OTMetadata;
 import org.openmrs.module.operationtheater.SchedulingData;
-import org.openmrs.validator.ValidateUtil;
 import org.springframework.validation.Errors;
-import org.springframework.validation.MapBindingResult;
 import org.springframework.validation.Validator;
-
-import java.util.HashMap;
 
 /**
  * Validates attributes on the {@link SchedulingData} object.
@@ -44,7 +44,8 @@ public class SchedulingDataValidator implements Validator {
 	 * @should fail validation if dateLocked is null
 	 * @should fail validation if dateLocked is true and scheduledDateTime is null
 	 * @should fail validation if start is not null and scheduled location is null
-	 * @should fail validation if location is not valid
+	 * @should fail validation if location does not exist
+	 * @should fail if location is not tagged as an operation theater
 	 * @should fail validation if start is not null and end is null
 	 * @should fail validation if start is after end
 	 * @should pass validation if all fields are valid
@@ -68,7 +69,6 @@ public class SchedulingDataValidator implements Validator {
 		validateLocation(errors, schedulingData);
 	}
 
-	//FIXME insert error messages into messages file
 	private void validateDateLocked(Errors errors, SchedulingData schedulingData) {
 		if (schedulingData.getDateLocked() == null) {
 			errors.rejectValue("dateLocked", "operationtheater.schedulingData.validation.dateLocked.errorMessage");
@@ -98,10 +98,20 @@ public class SchedulingDataValidator implements Validator {
 			return;
 		}
 
-		MapBindingResult locationErrors = new MapBindingResult(new HashMap<String, String>(), Location.class.getName());
-		ValidateUtil.validate(location, locationErrors);
-		if (locationErrors.hasErrors()) {
-			errors.rejectValue("location", "operationtheater.schedulingData.validation.location.invalidErrorMessage");
+		LocationService locationService = Context.getLocationService();
+		Location locationFromDb = locationService.getLocation(location.getId());
+		if (locationFromDb == null) {
+			errors.rejectValue("location", "operationtheater.schedulingData.validation.location.doesNotExist");
+			return;
+		}
+		boolean otTagPresent = false;
+		for (LocationTag tag : locationFromDb.getTags()) {
+			if (tag.getUuid().equals(OTMetadata.LOCATION_TAG_OPERATION_THEATER_UUID)) {
+				otTagPresent = true;
+			}
+		}
+		if (!otTagPresent) {
+			errors.rejectValue("location", "operationtheater.schedulingData.validation.location.missingOTTag");
 		}
 	}
 }

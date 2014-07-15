@@ -3,6 +3,7 @@ package org.openmrs.module.operationtheater.fragment.controller;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
@@ -17,11 +18,20 @@ import org.openmrs.module.appointmentscheduling.AppointmentBlock;
 import org.openmrs.module.appointmentscheduling.AppointmentType;
 import org.openmrs.module.appointmentscheduling.api.AppointmentService;
 import org.openmrs.module.appui.TestUiUtils;
+import org.openmrs.module.operationtheater.MockUtil;
+import org.openmrs.module.operationtheater.OTMetadata;
 import org.openmrs.module.operationtheater.Procedure;
 import org.openmrs.module.operationtheater.SchedulingData;
 import org.openmrs.module.operationtheater.Surgery;
 import org.openmrs.module.operationtheater.api.OperationTheaterService;
 import org.openmrs.ui.framework.SimpleObject;
+import org.openmrs.ui.framework.UiUtils;
+import org.openmrs.ui.framework.fragment.action.FailureResult;
+import org.openmrs.ui.framework.fragment.action.FragmentActionResult;
+import org.openmrs.ui.framework.fragment.action.SuccessResult;
+import org.openmrs.validator.ValidateUtil;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -32,6 +42,7 @@ import java.util.Set;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -40,15 +51,13 @@ import static org.mockito.Mockito.when;
 /**
  * Tests {@link SchedulingFragmentController}
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(ValidateUtil.class)
 public class SchedulingFragmentControllerTest {
 
-	private final String DEFAULT_AVAILABLE_TIME_BEGIN_UUID = "4e051aeb-a19d-49e0-820f-51ae591ec41f";
-
-	private final String DEFAULT_AVAILABLE_TIME_END_UUID = "a9d9ec55-e992-4d04-aebe-808be50aa87a";
-
-	private final String LOCATION_TAG_OPERATION_THEATER_UUID = "af3e9ed5-2de2-4a10-9956-9cb2ad5f84f2";
-
-	private final String APPT_TYPE_UUID = "93263567-286d-4567-8596-0611d9800206";
+	private void mockValidateUtil(final boolean validationShouldPass) throws Exception {
+		MockUtil.mockValidateUtil(validationShouldPass, SchedulingData.class, "field", "code");
+	}
 
 	/**
 	 * @verifies return scheduled surgeries and available times for all operating theaters
@@ -71,16 +80,16 @@ public class SchedulingFragmentControllerTest {
 		List<Location> locations = new ArrayList<Location>();
 
 		LocationAttributeType beginAttributeType = new LocationAttributeType();
-		beginAttributeType.setUuid(DEFAULT_AVAILABLE_TIME_BEGIN_UUID);
+		beginAttributeType.setUuid(OTMetadata.DEFAULT_AVAILABLE_TIME_BEGIN_UUID);
 		LocationAttributeType endAttributeType = new LocationAttributeType();
-		endAttributeType.setUuid(DEFAULT_AVAILABLE_TIME_END_UUID);
+		endAttributeType.setUuid(OTMetadata.DEFAULT_AVAILABLE_TIME_END_UUID);
 
 		LocationAttribute defaultBeginAttr = Mockito.spy(new LocationAttribute());
 		defaultBeginAttr.setValue("08:45");
 		Mockito.doReturn(beginAttributeType).when(defaultBeginAttr).getDescriptor();
 		LocationAttribute defaultEndAttr = Mockito.spy(new LocationAttribute());
 		Mockito.doReturn(endAttributeType).when(defaultEndAttr).getDescriptor();
-		defaultEndAttr.setUuid(DEFAULT_AVAILABLE_TIME_END_UUID);
+		defaultEndAttr.setUuid(OTMetadata.DEFAULT_AVAILABLE_TIME_END_UUID);
 		defaultEndAttr.setValue("19:16");
 		Set<LocationAttribute> attributes = new HashSet<LocationAttribute>();
 		attributes.add(defaultBeginAttr);
@@ -123,6 +132,7 @@ public class SchedulingFragmentControllerTest {
 
 		List<Surgery> surgeries = new ArrayList<Surgery>();
 		Surgery surgery = new Surgery();
+		surgery.setUuid("uuid");
 		Procedure procedure = new Procedure();
 		procedure.setName("Procedure Name");
 		Patient patient = Mockito.mock(Patient.class);
@@ -138,6 +148,7 @@ public class SchedulingFragmentControllerTest {
 		scheduling.setStart(begin);
 		scheduling.setEnd(finish);
 		scheduling.setLocation(ot1);
+		scheduling.setDateLocked(true);
 		surgery.setSchedulingData(scheduling);
 		surgeries.add(surgery);
 
@@ -146,7 +157,7 @@ public class SchedulingFragmentControllerTest {
 		AppointmentService appointmentService = Mockito.mock(AppointmentService.class);
 		OperationTheaterService otService = Mockito.mock(OperationTheaterService.class);
 
-		doReturn(tag).when(locationService).getLocationTagByUuid(LOCATION_TAG_OPERATION_THEATER_UUID);
+		doReturn(tag).when(locationService).getLocationTagByUuid(OTMetadata.LOCATION_TAG_OPERATION_THEATER_UUID);
 		doReturn(locations).when(locationService).getLocationsByTag(tag);
 		doReturn(blocks).when(appointmentService).getAppointmentBlocks(start, end, "1,2,3,", null, null);
 		doReturn(surgeries).when(otService).getAllSurgeries(false);
@@ -162,20 +173,20 @@ public class SchedulingFragmentControllerTest {
 
 		assertThat(result, hasSize(6));
 		assertThat(result.get(0).toJson(),
-				is("{\"title\":\"\",\"start\":\"2014-06-09 00:00\",\"end\":\"2014-06-09 08:45\",\"availableStart\":\"2014-06-09 08:45\",\"availableEnd\":\"2014-06-09 19:16\",\"resourceId\":1,\"allDay\":false,\"editable\":false,\"annotation\":true,\"color\":\"grey\"}"));
+				is("{\"title\":\"\",\"start\":\"2014-06-09 00:00\",\"end\":\"2014-06-09 08:45\",\"availableStart\":\"2014-06-09 08:45\",\"availableEnd\":\"2014-06-09 19:16\",\"surgeryUuid\":null,\"dateLocked\":false,\"resourceId\":1,\"allDay\":false,\"editable\":false,\"annotation\":true,\"color\":\"grey\"}"));
 		assertThat(result.get(1).toJson(), is(
-				"{\"title\":\"\",\"start\":\"2014-06-09 19:16\",\"end\":\"2014-06-09 23:59\",\"availableStart\":\"2014-06-09 08:45\",\"availableEnd\":\"2014-06-09 19:16\",\"resourceId\":1,\"allDay\":false,\"editable\":false,\"annotation\":true,\"color\":\"grey\"}"));
+				"{\"title\":\"\",\"start\":\"2014-06-09 19:16\",\"end\":\"2014-06-09 23:59\",\"availableStart\":\"2014-06-09 08:45\",\"availableEnd\":\"2014-06-09 19:16\",\"surgeryUuid\":null,\"dateLocked\":false,\"resourceId\":1,\"allDay\":false,\"editable\":false,\"annotation\":true,\"color\":\"grey\"}"));
 
 		assertThat(result.get(2).toJson(), is(
-				"{\"title\":\"\",\"start\":\"2014-06-09 00:00\",\"end\":\"2014-06-09 07:35\",\"availableStart\":\"2014-06-09 07:35\",\"availableEnd\":\"2014-06-09 20:55\",\"resourceId\":2,\"allDay\":false,\"editable\":false,\"annotation\":true,\"color\":\"grey\"}"));
+				"{\"title\":\"\",\"start\":\"2014-06-09 00:00\",\"end\":\"2014-06-09 07:35\",\"availableStart\":\"2014-06-09 07:35\",\"availableEnd\":\"2014-06-09 20:55\",\"surgeryUuid\":null,\"dateLocked\":false,\"resourceId\":2,\"allDay\":false,\"editable\":false,\"annotation\":true,\"color\":\"grey\"}"));
 		assertThat(result.get(3).toJson(), is(
-				"{\"title\":\"\",\"start\":\"2014-06-09 20:55\",\"end\":\"2014-06-09 23:59\",\"availableStart\":\"2014-06-09 07:35\",\"availableEnd\":\"2014-06-09 20:55\",\"resourceId\":2,\"allDay\":false,\"editable\":false,\"annotation\":true,\"color\":\"grey\"}"));
+				"{\"title\":\"\",\"start\":\"2014-06-09 20:55\",\"end\":\"2014-06-09 23:59\",\"availableStart\":\"2014-06-09 07:35\",\"availableEnd\":\"2014-06-09 20:55\",\"surgeryUuid\":null,\"dateLocked\":false,\"resourceId\":2,\"allDay\":false,\"editable\":false,\"annotation\":true,\"color\":\"grey\"}"));
 
 		assertThat(result.get(4).toJson(), is(
-				"{\"title\":\"\",\"start\":\"2014-06-09 00:00\",\"end\":\"2014-06-09 23:59\",\"availableStart\":\"2014-06-09 00:00\",\"availableEnd\":\"2014-06-09 23:59\",\"resourceId\":3,\"allDay\":false,\"editable\":false,\"annotation\":true,\"color\":\"grey\"}"));
+				"{\"title\":\"\",\"start\":\"2014-06-09 00:00\",\"end\":\"2014-06-09 23:59\",\"availableStart\":\"2014-06-09 00:00\",\"availableEnd\":\"2014-06-09 23:59\",\"surgeryUuid\":null,\"dateLocked\":false,\"resourceId\":3,\"allDay\":false,\"editable\":false,\"annotation\":true,\"color\":\"grey\"}"));
 
 		assertThat(result.get(5).toJson(), is(
-				"{\"title\":\"Procedure Name - family name given name\",\"start\":\"2014-06-09 12:00\",\"end\":\"2014-06-09 13:30\",\"availableStart\":\"\",\"availableEnd\":\"\",\"resourceId\":1,\"allDay\":false,\"editable\":false,\"annotation\":false,\"color\":\"blue\"}"));
+				"{\"title\":\"Procedure Name - family name given name\",\"start\":\"2014-06-09 12:00\",\"end\":\"2014-06-09 13:30\",\"availableStart\":\"\",\"availableEnd\":\"\",\"surgeryUuid\":\"uuid\",\"dateLocked\":true,\"resourceId\":1,\"allDay\":false,\"editable\":false,\"annotation\":false,\"color\":\"blue\"}"));
 	}
 
 	/**
@@ -255,11 +266,12 @@ public class SchedulingFragmentControllerTest {
 	}
 
 	/**
-	 * @verifies update SchedulingData with provided values
+	 * @verifies update SchedulingData with provided values and return SuccessResult
 	 * @see SchedulingFragmentController#adjustSurgerySchedule(String, String, java.util.Date, boolean, org.openmrs.api.LocationService, org.openmrs.module.operationtheater.api.OperationTheaterService)
 	 */
 	@Test
-	public void adjustSurgerySchedule_shouldUpdateSchedulingDataWithProvidedValues() throws Exception {
+	public void adjustSurgerySchedule_shouldUpdateSchedulingDataWithProvidedValuesAndReturnSuccessResult() throws Exception {
+		mockValidateUtil(true);
 
 		String surgeryUuid = "surgeryUuid";
 		String locationUuid = "locationUuid";
@@ -268,6 +280,11 @@ public class SchedulingFragmentControllerTest {
 
 		Surgery surgery = new Surgery();
 		Location location = new Location();
+
+		Procedure procedure = new Procedure();
+		procedure.setOtPreparationDuration(12);
+		procedure.setInterventionDuration(34);
+		surgery.setProcedure(procedure);
 
 		SchedulingData schedulingData = new SchedulingData();
 		surgery.setSchedulingData(schedulingData);
@@ -281,8 +298,9 @@ public class SchedulingFragmentControllerTest {
 		when(otService.saveSurgery(captor.capture())).thenReturn(null);
 
 		//call function under test
-		new SchedulingFragmentController()
-				.adjustSurgerySchedule(surgeryUuid, locationUuid, scheduledDateTime, dateLocked, locationService, otService);
+		FragmentActionResult result = new SchedulingFragmentController()
+				.adjustSurgerySchedule(new TestUiUtils(), surgeryUuid, locationUuid, scheduledDateTime, dateLocked,
+						locationService, otService);
 
 		//verify
 		Surgery captured = captor.getValue();
@@ -290,16 +308,76 @@ public class SchedulingFragmentControllerTest {
 		assertThat(captured.getSchedulingData(), is(schedulingData));
 		assertThat(captured.getSchedulingData().getLocation(), is(location));
 		assertThat(captured.getSchedulingData().getStart(), equalTo(new DateTime(scheduledDateTime)));
+		assertThat(captured.getSchedulingData().getEnd(), equalTo(new DateTime(scheduledDateTime).plusMinutes(12 + 34)));
 		assertThat(captured.getSchedulingData().getDateLocked(), is(dateLocked));
+
+		assertThat(result, instanceOf(SuccessResult.class));
+		assertThat(((SuccessResult) result).getMessage(), equalTo(
+				"operationtheater.scheduling.page.surgeryAdjustedSuccessfully"));
 	}
 
 	/**
-	 * @verifies return error if SchedulingData validation fails
+	 * @verifies return FailureResult if SchedulingData validation fails
 	 * @see SchedulingFragmentController#adjustSurgerySchedule(String, String, java.util.Date, boolean, org.openmrs.api.LocationService, org.openmrs.module.operationtheater.api.OperationTheaterService)
 	 */
 	@Test
-	public void adjustSurgerySchedule_shouldReturnErrorIfSchedulingDataValidationFails() throws Exception {
-		//TODO auto-generated
-		//		Assert.fail("Not yet implemented");
+	public void adjustSurgerySchedule_shouldReturnFailureResultIfSchedulingDataValidationFails() throws Exception {
+		mockValidateUtil(false);
+
+		String surgeryUuid = "surgeryUuid";
+		String locationUuid = "locationUuid";
+		Date scheduledDateTime = new Date();
+		boolean dateLocked = false;
+
+		Surgery surgery = new Surgery();
+		Location location = new Location();
+		Procedure procedure = new Procedure();
+		procedure.setInterventionDuration(12);
+		procedure.setOtPreparationDuration(34);
+		surgery.setProcedure(procedure);
+
+		SchedulingData schedulingData = new SchedulingData();
+		surgery.setSchedulingData(schedulingData);
+
+		//mock service layer
+		LocationService locationService = Mockito.mock(LocationService.class);
+		OperationTheaterService otService = Mockito.mock(OperationTheaterService.class);
+		when(otService.getSurgeryByUuid(surgeryUuid)).thenReturn(surgery);
+		when(locationService.getLocationByUuid(locationUuid)).thenReturn(location);
+		ArgumentCaptor<Surgery> captor = ArgumentCaptor.forClass(Surgery.class);
+		when(otService.saveSurgery(captor.capture())).thenReturn(null);
+
+		//call function under test
+		FragmentActionResult result = new SchedulingFragmentController()
+				.adjustSurgerySchedule(new TestUiUtils(), surgeryUuid, locationUuid, scheduledDateTime, dateLocked,
+						locationService, otService);
+
+		//verify
+		assertThat(result, instanceOf(FailureResult.class));
+		assertThat(((FailureResult) result).getErrors().getFieldErrorCount(), is(1));
+		assertThat(((FailureResult) result).getErrors().getFieldErrors().get(0).getField(), is("field"));
+		assertThat(((FailureResult) result).getErrors().getFieldErrors().get(0).getCode(), is("code"));
+	}
+
+	/**
+	 * @verifies throw IllegalArgumentException if there is no Surgery for the given uuid
+	 * @see SchedulingFragmentController#adjustSurgerySchedule(org.openmrs.ui.framework.UiUtils, String, String, java.util.Date, boolean, org.openmrs.api.LocationService, org.openmrs.module.operationtheater.api.OperationTheaterService)
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void adjustSurgerySchedule_shouldThrowIllegalArgumentExceptionIfThereIsNoSurgeryForTheGivenUuid()
+			throws Exception {
+
+		String surgeryUuid = "invalidUuid";
+		String locationUuid = "";
+		UiUtils ui = new TestUiUtils();
+
+		LocationService locationService = Mockito.mock(LocationService.class);
+		OperationTheaterService otService = Mockito.mock(OperationTheaterService.class);
+		when(otService.getSurgeryByUuid(surgeryUuid)).thenReturn(null);
+		when(locationService.getLocationByUuid(locationUuid)).thenReturn(null);
+
+		new SchedulingFragmentController()
+				.adjustSurgerySchedule(ui, surgeryUuid, locationUuid, new Date(), true, locationService,
+						otService);
 	}
 }

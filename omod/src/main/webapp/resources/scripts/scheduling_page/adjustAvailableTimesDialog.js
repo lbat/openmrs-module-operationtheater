@@ -58,6 +58,8 @@
                     if (!jq('#available-time-form').valid())
                         return;
 
+                    jq('#available-times-dialog' + ' .icon-spin').css('display', 'inline-block').parent().addClass('disabled');
+
                     var params = {};
                     params.locationUuid = calEvent.resource.uuid//"76d562c4-79d7-45ef-b1c4-8e15c2b01c41";
                     params.available = jq('#is-ot-available').is(':checked');
@@ -65,10 +67,14 @@
                     params.endTime = dateFormatted + " " + jq("#end_time_picker-display").val() + ":00.0";
                     emr.getFragmentActionWithCallback('operationtheater', 'scheduling', 'adjustAvailableTimes', params
                         , function (data) {
-                            emr.successMessage("Updated available times"); //Todo message.properties
+                            emr.successMessage(data.message);
                             dialog.close();
+                            jq('#available-times-dialog' + ' .icon-spin').css('display', 'none').parent().removeClass('disabled');
                             jq('#calendar').fullCalendar('refetchEvents');
-                        });
+                        }, function (err) {
+                            emr.handleError(err); //FIXME field errors are not displayed - only global errors
+                        }
+                    );
                 },
                 cancel: function () {
                     dialog.close();

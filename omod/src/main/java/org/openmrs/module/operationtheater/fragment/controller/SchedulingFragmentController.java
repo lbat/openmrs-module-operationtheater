@@ -11,6 +11,8 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.appointmentscheduling.AppointmentBlock;
 import org.openmrs.module.appointmentscheduling.AppointmentType;
 import org.openmrs.module.appointmentscheduling.api.AppointmentService;
+import org.openmrs.module.operationtheater.OTMetadata;
+import org.openmrs.module.operationtheater.Procedure;
 import org.openmrs.module.operationtheater.SchedulingData;
 import org.openmrs.module.operationtheater.Surgery;
 import org.openmrs.module.operationtheater.api.OperationTheaterService;
@@ -18,10 +20,14 @@ import org.openmrs.module.operationtheater.scheduler.Scheduler;
 import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.ui.framework.annotation.SpringBean;
+import org.openmrs.ui.framework.fragment.action.FailureResult;
+import org.openmrs.ui.framework.fragment.action.FragmentActionResult;
+import org.openmrs.ui.framework.fragment.action.SuccessResult;
+import org.openmrs.validator.ValidateUtil;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.validation.MapBindingResult;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,14 +41,6 @@ public class SchedulingFragmentController {
 
 	private final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm", Context.getLocale());
 
-	//TODO move to OTMMetadata class
-	private final String DEFAULT_AVAILABLE_TIME_BEGIN_UUID = "4e051aeb-a19d-49e0-820f-51ae591ec41f";
-
-	private final String DEFAULT_AVAILABLE_TIME_END_UUID = "a9d9ec55-e992-4d04-aebe-808be50aa87a";
-
-	private final String LOCATION_TAG_OPERATION_THEATER_UUID = "af3e9ed5-2de2-4a10-9956-9cb2ad5f84f2";
-
-	private final String APPT_TYPE_UUID = "93263567-286d-4567-8596-0611d9800206";
 
 	/**
 	 * @param ui
@@ -62,15 +60,8 @@ public class SchedulingFragmentController {
 	                                    @SpringBean AppointmentService appointmentService,
 	                                    @SpringBean OperationTheaterService otService) {
 
-		//Todo remove - used to determine where the class is loaded from - resolving dependency issues
-		Class klass = DateTime.class;
-		URL loc = klass.getResource('/' + klass.getName().replace('.', '/') + ".class");
-		System.err.println(loc);
-		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		System.err.println(classLoader);
-
 		//get operation theaters
-		LocationTag tag = locationService.getLocationTagByUuid(LOCATION_TAG_OPERATION_THEATER_UUID);
+		LocationTag tag = locationService.getLocationTagByUuid(OTMetadata.LOCATION_TAG_OPERATION_THEATER_UUID);
 		List<Location> locations = locationService.getLocationsByTag(tag);
 
 		//build string "locationID1, locationID2, ..."
@@ -109,16 +100,19 @@ public class SchedulingFragmentController {
 			String endStr = dateFormatter.format(scheduling.getEnd().toDate());
 			String patientName = surgery.getPatient().getFamilyName() + " " + surgery.getPatient().getGivenName();
 			String procedure = surgery.getProcedure().getName();
+			String surgeryUuid = surgery.getUuid();
 			int resourceId =
 					resources.indexOf(scheduling.getLocation().getName())
 							+ 1; //convention: resourceId = element array index + 1
-			CalendarEvent event = new CalendarEvent(procedure + " - " + patientName, startStr, endStr, resourceId);
+			CalendarEvent event = new CalendarEvent(procedure + " - " + patientName, startStr, endStr, surgeryUuid,
+					scheduling.getDateLocked(), resourceId);
 			System.err.println(event);
 			events.add(event);
 		}
 
 		return SimpleObject
-				.fromCollection(events, ui, "title", "start", "end", "availableStart", "availableEnd", "resourceId",
+				.fromCollection(events, ui, "title", "start", "end", "availableStart", "availableEnd", "surgeryUuid",
+						"dateLocked", "resourceId",
 						"allDay", "editable", "annotation", "color");
 	}
 
@@ -139,36 +133,49 @@ public class SchedulingFragmentController {
 	 * @param locationService
 	 * @param otService
 	 *
-	 * @should update SchedulingData with provided values
-	 * @shoudl throw IllegalArgumentException if there is no Surgery for the given uuid
-	 * @should return error if SchedulingData validation fails
+	 * @should update SchedulingData with provided values and return SuccessResult
+	 * @should throw IllegalArgumentException if there is no Surgery for the given uuid
+	 * @should return FailureResult if SchedulingData validation fails
+	 *
 	 */
-	public void adjustSurgerySchedule(@RequestParam("surgeryUuid") String surgeryUuid,
-	                                  @RequestParam("scheduledLocationUuid") String locationUuid,
+	public FragmentActionResult adjustSurgerySchedule(UiUtils ui,
+	                                                  @RequestParam("surgeryUuid") String surgeryUuid,
+	                                                  @RequestParam("scheduledLocationUuid") String locationUuid,
 	                                  @RequestParam("start") @DateTimeFormat(
 			                                  iso = DateTimeFormat.ISO.DATE_TIME) Date scheduledDateTime,
 	                                  @RequestParam("lockedDate") boolean lockedDate,
-	                                  @SpringBean LocationService locationService,
+	                                  @SpringBean("locationService") LocationService locationService,
 	                                  @SpringBean OperationTheaterService otService) {
 
-		Location location = locationService.getLocationByUuid(locationUuid);
+		Location location = locationService.getLocationByUuid(
+				locationUuid); //TODO replace with @ModelAttribute("location") @BindParams(value="scheduledLocationUuid") Location location
 
 		Surgery surgery = otService.getSurgeryByUuid(surgeryUuid);
 		if (surgery == null) {
 			throw new IllegalArgumentException("No surgery entry found for surgeryUuid: " + surgeryUuid);
 		}
 
+		DateTime start = new DateTime(scheduledDateTime);
+		Procedure p = surgery.getProcedure();
+		int duration = p.getInterventionDuration() + p.getOtPreparationDuration();
+		DateTime end = start.plusMinutes(duration);
+
 		SchedulingData schedulingData = surgery.getSchedulingData();
 		schedulingData.setDateLocked(lockedDate);
-		schedulingData.setStart(new DateTime(scheduledDateTime));
+		schedulingData.setStart(start);
+		schedulingData.setEnd(end);
 		schedulingData.setLocation(location);
 
-		//validate
-		//		ValidateUtil.validate(schedulingData);
-		//FIXME return error code if validation fails
+		MapBindingResult errors = new MapBindingResult(new HashMap<String, String>(), SchedulingData.class.getName());
+		ValidateUtil.validate(schedulingData, errors);
+		if (errors.hasErrors()) {
+			return new FailureResult(errors);
+		}
 
 		//persist
 		otService.saveSurgery(surgery);
+
+		return new SuccessResult(ui.message("operationtheater.scheduling.page.surgeryAdjustedSuccessfully"));
 	}
 
 	/**
@@ -234,7 +241,7 @@ public class SchedulingFragmentController {
 		} else {
 			block.setLocation(location);
 			AppointmentType type = appointmentService.getAppointmentTypeByUuid(
-					APPT_TYPE_UUID); //TODO what is the appointment type for? - resolve that - just added a random one
+					OTMetadata.APPT_TYPE_UUID); //TODO what is the appointment type for? - resolve that - just added a random one
 			HashSet<AppointmentType> set = new HashSet<AppointmentType>();
 			set.add(type);
 			block.setTypes(set);
@@ -255,9 +262,9 @@ public class SchedulingFragmentController {
 		} else {
 			//no appointmentBlock found -> use default value (LocationAttribute)
 			LocationAttribute defaultBegin = getAttributeByUuid(location.getActiveAttributes(),
-					DEFAULT_AVAILABLE_TIME_BEGIN_UUID);
+					OTMetadata.DEFAULT_AVAILABLE_TIME_BEGIN_UUID);
 			LocationAttribute defaultEnd = getAttributeByUuid(location.getActiveAttributes(),
-					DEFAULT_AVAILABLE_TIME_END_UUID);
+					OTMetadata.DEFAULT_AVAILABLE_TIME_END_UUID);
 
 			if (defaultBegin == null || defaultEnd == null) {
 				return;
@@ -354,6 +361,10 @@ public class SchedulingFragmentController {
 
 		private String color = "blue"; //TODO define color as LocationAttribute
 
+		private String surgeryUuid;
+
+		private boolean dateLocked;
+
 		public CalendarEvent(String title, String start, String end, String availableStart, String availableEnd,
 		                     int resourceId,
 		                     boolean annotation) {
@@ -369,10 +380,13 @@ public class SchedulingFragmentController {
 			}
 		}
 
-		public CalendarEvent(String title, String start, String end, int resourceId) {
+		public CalendarEvent(String title, String start, String end, String surgeryUuid, boolean dateLocked,
+		                     int resourceId) {
 			this.title = title;
 			this.start = start;
 			this.end = end;
+			this.surgeryUuid = surgeryUuid;
+			this.dateLocked = dateLocked;
 			this.resourceId = resourceId;
 			annotation = false;
 		}
@@ -461,6 +475,22 @@ public class SchedulingFragmentController {
 
 		public void setResourceId(int resourceId) {
 			this.resourceId = resourceId;
+		}
+
+		public String getSurgeryUuid() {
+			return surgeryUuid;
+		}
+
+		public void setSurgeryUuid(String surgeryUuid) {
+			this.surgeryUuid = surgeryUuid;
+		}
+
+		public boolean isDateLocked() {
+			return dateLocked;
+		}
+
+		public void setDateLocked(boolean dateLocked) {
+			this.dateLocked = dateLocked;
 		}
 
 		@Override

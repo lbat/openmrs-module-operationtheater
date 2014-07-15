@@ -23,15 +23,15 @@
     jq(document).ready(function () {
 
         var calResources = [];
-        var operationTheaters = [];
+        var operationTheaters = {};
         <% resources.eachWithIndex { it, i -> %>
         calResources.push({id: "${i+1}", name: "${ it.name }", uuid: "${ it.uuid }"});//, color: "black", textColor: "black"});
-        operationTheaters.push("${it.name}")
+        operationTheaters["${it.name}"] = "${it.uuid}";
         <% } %>
 
         //create dialogs
         availableTimesDialog.createDialog();
-        adjustSurgeryScheduleDialog.createDialog();
+        adjustSurgeryScheduleDialog.createDialog(operationTheaters);
 
         jq('#calendar').fullCalendar({
             height: 3000,
@@ -52,6 +52,8 @@
                     width = width + 'px';
                     jq(element).css('width', width);
                     jq(element).css('opacity', '0.4');
+                } else if (event.dateLocked) {
+                    jq(element).addClass("icon-lock");
                 }
             },
             eventClick: function (calEvent, jsEvent, view) {
@@ -68,7 +70,7 @@
                 var params = {};
                 params.start = jq.fullCalendar.formatDate(start, 'yyyy-MM-dd');
                 params.end = jq.fullCalendar.formatDate(end, 'yyyy-MM-dd');
-                params.resources = operationTheaters;
+                params.resources = Object.keys(operationTheaters);
                 jq.ajaxSetup({ scriptCharset: "utf-8", contentType: "application/json; charset=utf-8"});
                 jq.getJSON('${ ui.actionLink("operationtheater", "scheduling", "getEvents") }', jq.param(params, true))
                         .success(function (data) {
@@ -79,9 +81,6 @@
                             emr.errorAlert("An error occurred during event loading", null); //TODO message.properties
                         })
             }
-//        events: [{"title":"test","start":"2014-07-07 05:00","end":"2014-07-07 15:00","resourceId":1,"allDay":false, annotation:true, "resourceName":"OT 1"},
-//                 {"title":"test2","start":"2014-07-07 05:00","end":"2014-07-07 15:00","resourceId":2,"allDay":false, annotation:true, "resourceName":"OT 2"}
-//        ]
         });
 
         resizeFullCalendar();
@@ -255,8 +254,9 @@ body {
             </form>
         </ul>
 
-        <button class="confirm right">Confirm</button>
-        <button class="cancel">Cancel</button>
+        <button class="confirm right">${ui.message("emr.save")}
+            <i class="icon-spinner icon-spin icon-2x" style="display: none; margin-left: 10px;"></i></button>
+        <button class="cancel">${ui.message("emr.cancel")}</button>
     </div>
 </div>
 
@@ -296,14 +296,21 @@ body {
                             label        : '',
                             formFieldName: 'startTime',
                             useTime      : true,
-                            format       : "yyyy-mm-dd hh:ii",
+                            format: "dd-mm-yyyy hh:ii",
                             startView    : 2])}
+                </p>
+
+                <p>
+                    <input id="lock-date" checked="checked" type="checkbox"></input>
+                    <label>Lock date (scheduler will not change it)</label>
                 </p>
 
             </form>
         </ul>
 
-        <button class="confirm right">Confirm</button>
-        <button class="cancel">Cancel</button>
+
+        <button class="confirm right">${ui.message("emr.save")}
+            <i class="icon-spinner icon-spin icon-2x" style="display: none; margin-left: 10px;"></i></button>
+        <button class="cancel">${ui.message("emr.cancel")}</button>
     </div>
 </div>
