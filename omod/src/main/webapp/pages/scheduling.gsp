@@ -88,37 +88,16 @@
             resizeFullCalendar();
         });
 
-        //customize fullcalendars design
-//        jq("span.fc-button").addClass("button");
         //add datepicker button
-        jq('span:contains(today)').parents('td').append('<span class="fc-header-space"></span><span id="datepicker-link" class="button" href="#" onclick="return false"><i class ="icon-calendar"></i></span>');
-//        jq('span:contains(today)').parents ('td').append ('<div>'+
-//                '<form id="form_datetime">'+
-//                '<input width="1px" hidden="true" type="text" value="" style="display: none">'+
-//                '<span class="button"><i class="icon-calendar"></i></span>'+
-//        '</form>'+
-//        '</div>');
-//        jq("#form_datetime").datetimepicker({
-//            format: "dd MM yyyy - hh:ii",
-//            autoclose: true,
-//            todayBtn: true,
-//            pickerPosition: "bottom-left"
-////        showOn: 'button'
-//        });
+        jq('span:contains(today)').parents('td').append('<span class="fc-header-space"></span>' +
+                '<span id="datepicker-button" class="button" href="#" onclick="return false">' +
+                '   <i class ="icon-calendar"></i>' +
+                '' +
+                '</span>' +
+                '<span">' +
+                '   <input id="datetimepicker" style="visibility: hidden; height: 1px;width: 1px; padding:0px;" size="16" type="text" value="2012-06-15" readonly>' +
+                '</span>');
 
-//        jq("#date-picker").datepicker({
-//            dateFormat: 'dd-mm-yy',
-//            clickInput: true,
-//            showOn: 'button',
-//            buttonImage: 'icon-calendar',
-//            buttonImageOnly: true,
-//
-//            onSelect: function(dateText, inst) {
-//                // I don't know if this conversion works, maybe a string parsing is needed
-//                var date = new Date(dateText);
-//                jq('#calendar').fullCalendar('gotoDate', date.getFullYear(), date.getMonth(), date.getDate());
-//            }
-//        });
 
         jq('td.fc-header-right').empty();
         jq('td.fc-header-right').append('<div class="dropdown" style="margin-right:0px; top:0px">' +
@@ -141,30 +120,54 @@
         jq('#schedule-action').click(function () {
             jq.getJSON('${ ui.actionLink("operationtheater", "scheduling", "schedule") }', null)
                     .success(function (data) {
-                        emr.successMessage("scheduled successfully: " + data);
+                        emr.successMessage(data.message);
                     })
                     .error(function (xhr, status, err) {
                         emr.handleError(xhr);
-                        //emr.errorAlert("AJAX error " + err, null); //TODO message.properties
                     })
         });
 
-        //remove border from header table
-        jq("table.fc-header tr").css("border-collapse", "collapse");
-        jq("table.fc-header tr").css("border", "0");
-        jq("table.fc-header td").css("border-collapse", "collapse");
-        jq("table.fc-header td").css("border", "0");
+        //attach datetimepicker to calendar button
+        jq(function () {
+            var button = jq("#datepicker-button");
 
-        //todo weekly view adjust header - add row
-//        <tr class="fc-first fc-last"><th class="fc-agenda-axis fc-widget-header fc-first" style="width: 50px;">&nbsp;</th>
-//        <th colspan="3" class="fc-sun fc-col0 fc-widget-header">Monday</th>
-//        <th colspan="3" class="fc-sun fc-col0 fc-widget-header">Tuesday</th>
-//        <th colspan="3" class="fc-sun fc-col0 fc-widget-header">Wednesday</th>
-//        <th colspan="3" class="fc-sun fc-col0 fc-widget-header">Thursday</th>
-//        <th colspan="3" class="fc-sun fc-col0 fc-widget-header">Friday</th>
-//        <th colspan="3" class="fc-sun fc-col0 fc-widget-header">Saturday</th>
-//        <th colspan="3" class="fc-sat fc-col20 fc-widget-header">Sunday</th>
-//        <th class="fc-agenda-gutter fc-widget-header fc-last" style="width: 13px;">&nbsp;</th></tr>
+            jq("#datetimepicker").datetimepicker({
+                format: 'yyyy-mm-dd',
+                minView: 2,
+                pickerPosition: "bottom-left",
+                autoClose: true,
+                language: "${org.openmrs.api.context.Context.getLocale()}",
+                todayHighlight: true
+            });
+
+            jq("#datetimepicker").datetimepicker().on('changeDate', function (ev) {
+                console.log(ev.date);
+                jq('#datetimepicker').datetimepicker('hide');
+                jq("#calendar").fullCalendar('gotoDate', ev.date);
+            });
+
+            button.click(function () {
+                console.log("dim: " + left + " - " + top);
+                var date = jq('#calendar').fullCalendar('getDate');
+                var dateStr = moment.utc(date).format("YYYY-mm-DD");
+                jq('#datetimepicker').val(dateStr);
+                jq('#datetimepicker').datetimepicker('show');
+
+                var datetimepicker = jq('div:visible.datetimepicker');
+                var left = button.offset().left + button.outerWidth() / 2 - datetimepicker.width() + 15;
+                var top = button.offset().top + button.outerHeight(true);
+                datetimepicker.css({top: top, left: left});
+            });
+
+            //customize fullcalendars design
+//        jq("span.fc-button").addClass("button");
+
+            //remove border from header table
+            jq("table.fc-header tr").css("border-collapse", "collapse");
+            jq("table.fc-header tr").css("border", "0");
+            jq("table.fc-header td").css("border-collapse", "collapse");
+            jq("table.fc-header td").css("border", "0");
+        });
     });
 
     //TODO offset not correct
@@ -200,6 +203,7 @@ body {
 <h1>
     ${ui.message("operationtheater.scheduling.page.heading")}
 </h1>
+
 
 <div id='calendar'></div>
 
