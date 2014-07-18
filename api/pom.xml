@@ -119,6 +119,14 @@
             </exclusions>
         </dependency>
 
+        <!-- DBSetup (dbunit alternative) -->
+        <dependency>
+            <groupId>com.ninja-squad</groupId>
+            <artifactId>DbSetup</artifactId>
+            <version>1.3.0</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
