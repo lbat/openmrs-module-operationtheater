@@ -41,7 +41,6 @@ public class SchedulingFragmentController {
 
 	private final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm", Context.getLocale());
 
-
 	/**
 	 * @param ui
 	 * @param start
@@ -121,11 +120,10 @@ public class SchedulingFragmentController {
 	 */
 	public void schedule() {
 		System.err.println("start scheduler");
-		new Scheduler().solve();
+		Scheduler.INSTANCE.solve();
 	}
 
 	/**
-	 *
 	 * @param surgeryUuid
 	 * @param locationUuid
 	 * @param scheduledDateTime
@@ -136,16 +134,15 @@ public class SchedulingFragmentController {
 	 * @should update SchedulingData with provided values and return SuccessResult
 	 * @should throw IllegalArgumentException if there is no Surgery for the given uuid
 	 * @should return FailureResult if SchedulingData validation fails
-	 *
 	 */
 	public FragmentActionResult adjustSurgerySchedule(UiUtils ui,
 	                                                  @RequestParam("surgeryUuid") String surgeryUuid,
 	                                                  @RequestParam("scheduledLocationUuid") String locationUuid,
-	                                  @RequestParam("start") @DateTimeFormat(
-			                                  iso = DateTimeFormat.ISO.DATE_TIME) Date scheduledDateTime,
-	                                  @RequestParam("lockedDate") boolean lockedDate,
-	                                  @SpringBean("locationService") LocationService locationService,
-	                                  @SpringBean OperationTheaterService otService) {
+	                                                  @RequestParam("start") @DateTimeFormat(
+			                                                  iso = DateTimeFormat.ISO.DATE_TIME) Date scheduledDateTime,
+	                                                  @RequestParam("lockedDate") boolean lockedDate,
+	                                                  @SpringBean("locationService") LocationService locationService,
+	                                                  @SpringBean OperationTheaterService otService) {
 
 		Location location = locationService.getLocationByUuid(
 				locationUuid); //TODO replace with @ModelAttribute("location") @BindParams(value="scheduledLocationUuid") Location location

@@ -15,12 +15,16 @@ package org.openmrs.module.operationtheater;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.module.DaemonToken;
+import org.openmrs.module.DaemonTokenAware;
 import org.openmrs.module.ModuleActivator;
 
 /**
  * This class contains the logic that is run every time this module is either started or stopped.
  */
-public class OperationTheaterModuleActivator implements ModuleActivator {
+public class OperationTheaterModuleActivator implements ModuleActivator, DaemonTokenAware {
+
+	public static DaemonToken DAEMON_TOKEN;
 
 	protected Log log = LogFactory.getLog(getClass());
 
@@ -66,4 +70,8 @@ public class OperationTheaterModuleActivator implements ModuleActivator {
 		log.info("Operation Theater Module stopped");
 	}
 
+	@Override
+	public void setDaemonToken(DaemonToken token) {
+		this.DAEMON_TOKEN = token;
+	}
 }

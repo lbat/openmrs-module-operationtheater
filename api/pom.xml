@@ -119,6 +119,13 @@
             </exclusions>
         </dependency>
 
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr-runtime</artifactId>
+            <version>3.5</version>
+            <scope>test</scope>
+        </dependency>
+
         <!-- DBSetup (dbunit alternative) -->
         <dependency>
             <groupId>com.ninja-squad</groupId>

@@ -39,5 +39,5 @@ rule "firstComeFirstServed"
         DateTime $created = new DateTime($surgery.getSurgery().getDateCreated().getTime());
         Period $period = new Period($created, $start);
 
-        scoreHolder.addSoftConstraintMatch(kcontext, -$period.getDays());
+        scoreHolder.addSoftConstraintMatch(kcontext, -$period.getDays()*24 -$period.getHours());
 end

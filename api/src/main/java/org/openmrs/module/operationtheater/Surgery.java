@@ -2,6 +2,7 @@ package org.openmrs.module.operationtheater;
 
 import org.openmrs.Patient;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -34,7 +35,7 @@ public class Surgery extends BaseOpenmrsDataJPA {
 	@Column(name = "surgery_completed", columnDefinition = "boolean default false", nullable = false)
 	private Boolean surgeryCompleted = false;
 
-	@OneToOne
+	@OneToOne(cascade = { CascadeType.ALL })
 	@JoinColumn(name = "scheduling_data_id")
 	private SchedulingData schedulingData;
 

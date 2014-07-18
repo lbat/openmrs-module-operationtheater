@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <solver>
-    <!--Todo set mode to production and change it in unit tests dynamically -->
-    <environmentMode>FAST_ASSERT</environmentMode>
+    <environmentMode>PRODUCTION</environmentMode>
 
     <!-- model definition -->
     <solutionClass>org.openmrs.module.operationtheater.scheduler.domain.Timetable</solutionClass>
@@ -15,8 +14,8 @@
 
     <!-- configuration of the optimization algorithm(s) -->
     <termination>
-        <maximumSecondsSpend>60</maximumSecondsSpend>
-        <scoreAttained>-0hard/-999999soft</scoreAttained>
+        <maximumSecondsSpend>5</maximumSecondsSpend>
+        <scoreAttained>-0hard/0soft</scoreAttained>
     </termination>
     <constructionHeuristic>
         <constructionHeuristicType>FIRST_FIT</constructionHeuristicType>
