@@ -9,6 +9,7 @@ import org.openmrs.module.operationtheater.SchedulingData;
 import org.openmrs.module.operationtheater.Surgery;
 import org.openmrs.module.operationtheater.api.OperationTheaterService;
 import org.openmrs.module.operationtheater.scheduler.solver.MovablePlannedSurgerySelectionFilter;
+import org.openmrs.module.operationtheater.scheduler.solver.PlannedSurgeryDifficultyComparator;
 import org.optaplanner.core.api.domain.entity.PlanningEntity;
 import org.optaplanner.core.api.domain.variable.PlanningVariable;
 
@@ -18,7 +19,8 @@ import org.optaplanner.core.api.domain.variable.PlanningVariable;
  * This attributes are called Planning Variables - see the @PlanningVariable annotation on the corresponding setters
  * possible values of a planning variable is defined by the value range provider
  */
-@PlanningEntity(movableEntitySelectionFilter = MovablePlannedSurgerySelectionFilter.class)
+@PlanningEntity(movableEntitySelectionFilter = MovablePlannedSurgerySelectionFilter.class,
+		difficultyComparatorClass = PlannedSurgeryDifficultyComparator.class)
 public class PlannedSurgery {
 
 	private Surgery surgery;
