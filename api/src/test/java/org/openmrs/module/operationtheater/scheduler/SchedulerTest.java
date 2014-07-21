@@ -41,7 +41,7 @@ public class SchedulerTest extends BaseModuleContextSensitiveTest {
 				DbUtilDefaultInserts.get(),
 				insertInto(Config.PROCEDURE)
 						.columns("name", "intervention_duration", "ot_preparation_duration", "inpatient_stay")
-						.values("Appenddectomy", 35, 25, 4)
+						.values("Appendectomy", 35, 25, 4)
 						.build(),
 				insertInto(Config.SCHEDULING_DATA)
 						.columns("start", "end", "location_id", "date_locked")
@@ -88,7 +88,8 @@ public class SchedulerTest extends BaseModuleContextSensitiveTest {
 		//wait until a solution has been found
 		long max_waiting_time = 180000;//3min
 		long start = System.currentTimeMillis();
-		while (Scheduler.INSTANCE.isSolving() && System.currentTimeMillis() < start + max_waiting_time) {
+		while (Scheduler.INSTANCE.getStatus() == Scheduler.Status.RUNNING
+				&& System.currentTimeMillis() < start + max_waiting_time) {
 			Thread.currentThread().sleep(2000); //2s
 		}
 
@@ -107,7 +108,7 @@ public class SchedulerTest extends BaseModuleContextSensitiveTest {
 	 */
 	@Test(expected = IllegalStateException.class)
 	public void solve_shouldThrowIllegalStateExceptionIfSolveHasAlreadyBeenStartedButNotFinished() throws Exception {
-		Scheduler.INSTANCE.setSolving(true);
+		Scheduler.INSTANCE.setStatus(Scheduler.Status.RUNNING);
 
 		//call method under test
 		Scheduler.INSTANCE.solve();

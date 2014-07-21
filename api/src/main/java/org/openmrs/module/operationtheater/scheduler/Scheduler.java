@@ -1,5 +1,7 @@
 package org.openmrs.module.operationtheater.scheduler;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 import org.openmrs.Location;
 import org.openmrs.LocationTag;
@@ -24,17 +26,19 @@ public enum Scheduler {
 
 	INSTANCE;
 
+	protected Log log = LogFactory.getLog(getClass());
+
 	private SolverFactory solverFactory;
 
-	private OperationTheaterService otService = Context.getService(OperationTheaterService.class);
+	private OperationTheaterService otService;
 
-	private LocationService locationService = Context.getLocationService();
+	private LocationService locationService;
 
 	private Solver solver;
 
 	private Thread solverThread;
 
-	private boolean solving = false;
+	private Status status = Status.PRISTINE;
 
 	private Scheduler() {
 		solverFactory = new XmlSolverFactory("/scheduler/solverConfig.xml");
@@ -50,7 +54,7 @@ public enum Scheduler {
 		solverFactory = new XmlSolverFactory("/scheduler/solverConfig.xml");
 		solver = null;
 		solverThread = null;
-		solving = false;
+		status = Status.PRISTINE;
 	}
 
 	/**
@@ -79,14 +83,14 @@ public enum Scheduler {
 	 */
 	//FIXME add privilege level
 	public void solve() throws IllegalStateException {
-		if (solving) {
+		if (status == Status.RUNNING) {
 			throw new IllegalStateException("Already solving");
 		}
 		if (solver == null) {
 			solver = solverFactory.buildSolver();
 		}
 
-		solving = true;
+		status = Status.RUNNING;
 
 		solverThread = Daemon.runInDaemonThread(new Runnable() {
 
@@ -94,6 +98,7 @@ public enum Scheduler {
 			public void run() {
 				try {
 					otService = Context.getService(OperationTheaterService.class);
+					locationService = Context.getLocationService();
 
 					// Load problem
 					final Timetable unsolvedTimetable = createTimetable();
@@ -106,12 +111,15 @@ public enum Scheduler {
 					//set surgeries planned begin and finished attributes
 					solvedTimetable.persistSolution(otService);
 
+					status = Status.SUCCEEDED;
+
 					// Display the result
 					System.out.println("\nsolved timetable\n"
 							+ solvedTimetable);
 				}
-				finally {
-					solving = false;
+				catch (Exception e) {
+					status = Status.FAILED;
+					log.error(e);
 				}
 			}
 		}, OperationTheaterModuleActivator.DAEMON_TOKEN);
@@ -122,17 +130,17 @@ public enum Scheduler {
 	 *
 	 * @return
 	 */
-	public boolean isSolving() {
-		return solving;
+	public Status getStatus() {
+		return status;
 	}
 
 	/**
 	 * used for testing purposes not during normal execution
 	 *
-	 * @param solving
+	 * @param status
 	 */
-	public void setSolving(boolean solving) {
-		this.solving = solving;
+	public void setStatus(Status status) {
+		this.status = status;
 	}
 
 	private Timetable createTimetable() {
@@ -179,5 +187,9 @@ public enum Scheduler {
 		//set planning entity
 		timetable.setPlannedSurgeries(plannedSurgeries);
 		return timetable;
+	}
+
+	public static enum Status {
+		PRISTINE, RUNNING, SUCCEEDED, FAILED
 	}
 }

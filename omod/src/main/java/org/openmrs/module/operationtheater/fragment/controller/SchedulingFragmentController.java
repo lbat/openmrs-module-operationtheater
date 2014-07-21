@@ -1,5 +1,7 @@
 package org.openmrs.module.operationtheater.fragment.controller;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormatter;
@@ -40,6 +42,8 @@ import java.util.Map;
 public class SchedulingFragmentController {
 
 	private final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm", Context.getLocale());
+
+	protected Log log = LogFactory.getLog(getClass());
 
 	/**
 	 * @param ui
@@ -116,11 +120,38 @@ public class SchedulingFragmentController {
 	}
 
 	/**
-	 * @should schedule surgeries
+	 * @should return SuccessResult if solve method doesnt throw an IllegalStateException
+	 * @should return FailureResult if solve method throws an IllegalStateException
 	 */
-	public void schedule() {
-		System.err.println("start scheduler");
-		Scheduler.INSTANCE.solve();
+	public FragmentActionResult schedule(UiUtils ui) {
+		try {
+			Scheduler.INSTANCE.solve();
+			return new SuccessResult(ui.message("operationtheater.scheduling.startedSuccessfully"));
+		}
+		catch (IllegalStateException e) {
+			return new FailureResult(ui.message("operationtheater.scheduling.schedulerAlreadyRunning"));
+		}
+
+	}
+
+	/**
+	 * @param ui
+	 * @return
+	 * @should return SuccessResult if status is running or succeeded
+	 * @should return FailureResult if status is failed, pristine or any other
+	 */
+	public FragmentActionResult getSolverStatus(UiUtils ui) {
+		switch (Scheduler.INSTANCE.getStatus()) {
+			case RUNNING:
+				return new SuccessResult("running");
+			case SUCCEEDED:
+				return new SuccessResult(ui.message("operationtheater.scheduling.finishedSuccessfully"));
+			case FAILED:
+				return new FailureResult(ui.message("operationtheater.scheduling.schedulingFailed"));
+			case PRISTINE:
+				return new FailureResult(ui.message("operationtheater.scheduling.schedulerNotStarted"));
+		}
+		return new FailureResult("uncaughtException.title");
 	}
 
 	/**

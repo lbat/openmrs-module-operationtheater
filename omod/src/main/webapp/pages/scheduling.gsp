@@ -78,7 +78,6 @@
                         })
                         .error(function (xhr, status, err) {
                             emr.handleError(xhr);
-                            emr.errorAlert("An error occurred during event loading", null); //TODO message.properties
                         })
             }
         });
@@ -116,16 +115,35 @@
                 '</ul>' +
                 '</div>');
 
-
+        //execute scheduler
+        var pullSchedulingStatus;
         jq('#schedule-action').click(function () {
             jq.getJSON('${ ui.actionLink("operationtheater", "scheduling", "schedule") }', null)
                     .success(function (data) {
                         emr.successMessage(data.message);
+                        jq('#wait-during-calculation').show();
+                        pullSchedulingStatus = setInterval(function () {
+                            jq.getJSON('${ ui.actionLink("operationtheater", "scheduling", "getSolverStatus") }', null)
+                                    .success(function (data) {
+                                        if (data.message == "running") {
+                                            return;
+                                        }
+                                        jq('#wait-during-calculation').hide();
+                                        emr.successMessage(data.message);
+                                        clearInterval(pullSchedulingStatus);
+                                    })
+                                    .error(function (xhr, status, err) {
+                                        emr.handleError(xhr);
+                                        jq('#wait-during-calculation').hide();
+                                        clearInterval(pullSchedulingStatus);
+                                    })
+                        }, 1000);
                     })
                     .error(function (xhr, status, err) {
                         emr.handleError(xhr);
                     })
         });
+
 
         //attach datetimepicker to calendar button
         jq(function () {
@@ -159,7 +177,7 @@
                 datetimepicker.css({top: top, left: left});
             });
 
-            //customize fullcalendars design
+            //customize fullcalendar design
 //        jq("span.fc-button").addClass("button");
 
             //remove border from header table
@@ -203,6 +221,17 @@ body {
 <h1>
     ${ui.message("operationtheater.scheduling.page.heading")}
 </h1>
+
+<div id="wait-during-calculation" class="note-container" style="display: none">
+    <div class="note warning">
+        <div class="text">
+            <i class="icon-spinner icon-spin medium"></i>
+
+            <p>Please wait while the optimal scheduling is calculated</p>
+
+        </div>
+    </div>
+</div>
 
 
 <div id='calendar'></div>

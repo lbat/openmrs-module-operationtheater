@@ -24,14 +24,17 @@ import org.openmrs.module.operationtheater.Procedure;
 import org.openmrs.module.operationtheater.SchedulingData;
 import org.openmrs.module.operationtheater.Surgery;
 import org.openmrs.module.operationtheater.api.OperationTheaterService;
+import org.openmrs.module.operationtheater.scheduler.Scheduler;
 import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.ui.framework.fragment.action.FailureResult;
 import org.openmrs.ui.framework.fragment.action.FragmentActionResult;
 import org.openmrs.ui.framework.fragment.action.SuccessResult;
 import org.openmrs.validator.ValidateUtil;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.reflect.Whitebox;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -52,7 +55,7 @@ import static org.mockito.Mockito.when;
  * Tests {@link SchedulingFragmentController}
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(ValidateUtil.class)
+@PrepareForTest({ ValidateUtil.class, Scheduler.class })
 public class SchedulingFragmentControllerTest {
 
 	private void mockValidateUtil(final boolean validationShouldPass) throws Exception {
@@ -379,5 +382,84 @@ public class SchedulingFragmentControllerTest {
 		new SchedulingFragmentController()
 				.adjustSurgerySchedule(ui, surgeryUuid, locationUuid, new Date(), true, locationService,
 						otService);
+	}
+
+	/**
+	 * @verifies return SuccessResult if solve method doesnt throw an IllegalStateException
+	 * @see SchedulingFragmentController#schedule(org.openmrs.ui.framework.UiUtils)
+	 */
+	@Test
+	public void schedule_shouldReturnSuccessResultIfSolveMethodDoesntThrowAnIllegalStateException() throws Exception {
+		Scheduler mockInstance = PowerMockito.mock(Scheduler.class);
+		Whitebox.setInternalState(Scheduler.class, "INSTANCE", mockInstance);
+		PowerMockito.doNothing().when(mockInstance).solve();
+
+		//call method under test
+		FragmentActionResult result = new SchedulingFragmentController().schedule(new TestUiUtils());
+
+		//verify
+		assertThat(result, instanceOf(SuccessResult.class));
+		assertThat(((SuccessResult) result).getMessage(), is("operationtheater.scheduling.startedSuccessfully"));
+	}
+
+	/**
+	 * @verifies return FailureResult if solve method throws an IllegalStateException
+	 * @see SchedulingFragmentController#schedule(org.openmrs.ui.framework.UiUtils)
+	 */
+	@Test
+	public void schedule_shouldReturnFailureResultIfSolveMethodThrowsAnIllegalStateException() throws Exception {
+		Scheduler mockInstance = PowerMockito.mock(Scheduler.class);
+		Whitebox.setInternalState(Scheduler.class, "INSTANCE", mockInstance);
+		PowerMockito.doThrow(new IllegalStateException()).when(mockInstance).solve();
+
+		//call method under test
+		FragmentActionResult result = new SchedulingFragmentController().schedule(new TestUiUtils());
+
+		//verify
+		assertThat(result, instanceOf(FailureResult.class));
+		assertThat(((FailureResult) result).getSingleError(), is("operationtheater.scheduling.schedulerAlreadyRunning"));
+	}
+
+	/**
+	 * @verifies return SuccessResult if status is running or succeeded
+	 * @see SchedulingFragmentController#getSolverStatus(org.openmrs.ui.framework.UiUtils)
+	 */
+	@Test
+	public void getSolverStatus_shouldReturnSuccessResultIfStatusIsRunningOrSucceeded() throws Exception {
+		Scheduler mockInstance = PowerMockito.mock(Scheduler.class);
+		Whitebox.setInternalState(Scheduler.class, "INSTANCE", mockInstance);
+		when(mockInstance.getStatus()).thenReturn(Scheduler.Status.RUNNING).thenReturn(Scheduler.Status.SUCCEEDED);
+
+		//call method under test
+		FragmentActionResult result_running = new SchedulingFragmentController().getSolverStatus(new TestUiUtils());
+		FragmentActionResult result_succeeded = new SchedulingFragmentController().getSolverStatus(new TestUiUtils());
+
+		//verify
+		assertThat(result_running, instanceOf(SuccessResult.class));
+		assertThat(((SuccessResult) result_running).getMessage(), is("running"));
+		assertThat(result_succeeded, instanceOf(SuccessResult.class));
+		assertThat(((SuccessResult) result_succeeded).getMessage(), is("operationtheater.scheduling.finishedSuccessfully"));
+	}
+
+	/**
+	 * @verifies return FailureResult if status is failed, pristine or any other
+	 * @see SchedulingFragmentController#getSolverStatus(org.openmrs.ui.framework.UiUtils)
+	 */
+	@Test
+	public void getSolverStatus_shouldReturnFailureResultIfStatusIsFailedPristineOrAnyOther() throws Exception {
+		Scheduler mockInstance = PowerMockito.mock(Scheduler.class);
+		Whitebox.setInternalState(Scheduler.class, "INSTANCE", mockInstance);
+		when(mockInstance.getStatus()).thenReturn(Scheduler.Status.FAILED).thenReturn(Scheduler.Status.PRISTINE);
+
+		//call method under test
+		FragmentActionResult result_failed = new SchedulingFragmentController().getSolverStatus(new TestUiUtils());
+		FragmentActionResult result_pristine = new SchedulingFragmentController().getSolverStatus(new TestUiUtils());
+
+		//verify
+		assertThat(result_failed, instanceOf(FailureResult.class));
+		assertThat(((FailureResult) result_failed).getSingleError(), is("operationtheater.scheduling.schedulingFailed"));
+		assertThat(result_pristine, instanceOf(FailureResult.class));
+		assertThat(((FailureResult) result_pristine).getSingleError(),
+				is("operationtheater.scheduling.schedulerNotStarted"));
 	}
 }
