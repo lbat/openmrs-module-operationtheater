@@ -34,21 +34,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-//import org.openmrs.module.coreapps.contextmodel.VisitContextModel;
-
 public class SurgeryPageController {
 
 	protected final Log log = LogFactory.getLog(getClass());
 
-	public Object controller(@RequestParam("patientId") Patient patient, PageModel model,
+	public Object controller(PageModel model,
+	                         @RequestParam(value = "patientId", required = true) Patient patient,
 	                         @RequestParam(value = "surgeryId", required = false) Integer surgeryId,
-	                         @InjectBeans PatientDomainWrapper patientDomainWrapper,
 	                         @SpringBean OperationTheaterService otService,
+	                         @InjectBeans PatientDomainWrapper patientDomainWrapper,
 	                         @SpringBean("adtService") AdtService adtService,
-	                         //		                         @SpringBean("visitService") VisitService visitService,
-	                         //		                         @SpringBean("encounterService") EncounterService encounterService,
-	                         //		                         @SpringBean("emrApiProperties") EmrApiProperties emrApiProperties,
-	                         //		                         @SpringBean("appFrameworkService") AppFrameworkService appFrameworkService,
 	                         @SpringBean("applicationEventService") ApplicationEventService applicationEventService,
 	                         UiSessionContext sessionContext) {
 
@@ -88,32 +83,10 @@ public class SurgeryPageController {
 		AppContextModel contextModel = sessionContext.generateAppContextModel();
 		contextModel.put("patientId", patient.getId());
 		contextModel.put("patientDead", patient.isDead());
-		//			contextModel.put("visit", activeVisit == null ? null : new VisitContextModel(activeVisit));
-
-		//			List<Extension> overallActions = appFrameworkService.getExtensionsForCurrentUser("patientDashboard.overallActions", contextModel);
-		//			Collections.sort(overallActions);
-		//			model.addAttribute("overallActions", overallActions);
-		//
-		//			List<Extension> visitActions = appFrameworkService.getExtensionsForCurrentUser("patientDashboard.visitActions", contextModel);
-		//			Collections.sort(visitActions);
-		//			model.addAttribute("visitActions", visitActions);
-
-		//			List<Extension> includeFragments = appFrameworkService.getExtensionsForCurrentUser("patientDashboard.includeFragments");
-		//			Collections.sort(includeFragments);
-		//			model.addAttribute("includeFragments", includeFragments);
-		//
-		//			List<Extension> otherActions = appFrameworkService.getExtensionsForCurrentUser(
-		//					"clinicianFacingPatientDashboard.otherActions", contextModel);
-		//			Collections.sort(otherActions);
-		//			model.addAttribute("otherActions", otherActions);
 
 		applicationEventService.patientViewed(patient, sessionContext.getCurrentUser());
 
 		return null;
-	}
-
-	public void controller() {
-
 	}
 
 	public String post(PageModel model,
