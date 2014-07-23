@@ -7,6 +7,7 @@
     ui.includeJavascript("operationtheater", "bower_components/fullcalendar/fullcalendar.js")
     ui.includeJavascript("operationtheater", "scheduling_page/adjustAvailableTimesDialog.js")
     ui.includeJavascript("operationtheater", "scheduling_page/adjustSurgeryScheduleDialog.js")
+    ui.includeJavascript("operationtheater", "scheduling_page/filterOperationTheatersInDailyView.js")
     ui.includeJavascript("operationtheater", "bower_components/validation/jquery.validate.js")
 
     ui.includeJavascript("uicommons", "emr.js")
@@ -25,13 +26,14 @@
         var calResources = [];
         var operationTheaters = {};
         <% resources.eachWithIndex { it, i -> %>
-        calResources.push({id: "${i+1}", name: "${ it.name }", uuid: "${ it.uuid }"});//, color: "black", textColor: "black"});
+        calResources.push({id: "${i+1}", name: "${ it.name }", uuid: "${ it.uuid }", selected: true});//, color: "black", textColor: "black"});
         operationTheaters["${it.name}"] = "${it.uuid}";
         <% } %>
 
         //create dialogs
         availableTimesDialog.createDialog();
         adjustSurgeryScheduleDialog.createDialog(operationTheaters);
+        filterResourcesDialog.createDialog();
 
         jq('#calendar').fullCalendar({
             height: 3000,
@@ -110,7 +112,7 @@
                 '        <a href="#" id="schedule-action" ><i class="icon-calendar"></i>Schedule</a>' +
                 '    </li>' +
                 '    <li>' +
-                '        <a href="#"><i class="icon-filter"></i>Filter</a>' +
+                '        <a href="#" id="filter-action"><i class="icon-filter"></i>Filter</a>' +
                 '    </li>' +
                 '</ul>' +
                 '</div>');
@@ -144,6 +146,11 @@
                     .error(function (xhr, status, err) {
                         emr.handleError(xhr);
                     })
+        });
+
+        //show filter dialog
+        jq('#filter-action').click(function () {
+            filterResourcesDialog.show(calResources);
         });
 
 
@@ -238,8 +245,24 @@ body {
 
 <div id='calendar'></div>
 
-<div id='loading' style='display:none'>loading...</div>
+<div id="filter-resources-dialog" class="dialog simplemodal-data" style="">
+    <div class="dialog-header">
+        <i class="icon-filter"></i>
 
+        <h3>Filter Operation Theaters</h3>
+    </div>
+
+    <div class="dialog-content">
+        <p class="dialog-instructions">Please select operation theaters that should be displayed</p>
+        <ul>
+            <!-- TODO add select all, deselect all link -->
+            <form id="filter-resources-form" class="simple-form-ui"></form>
+        </ul>
+
+        <button class="confirm right">${ui.message("emr.okay")}</button>
+        <button class="cancel">${ui.message("emr.cancel")}</button>
+    </div>
+</div>
 
 <div id="available-times-dialog" class="dialog simplemodal-data" style="">
     <div class="dialog-header">
