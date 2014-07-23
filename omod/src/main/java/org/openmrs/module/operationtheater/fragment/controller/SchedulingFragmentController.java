@@ -298,7 +298,7 @@ public class SchedulingFragmentController {
 				return;
 			}
 
-			DateTimeFormatter timeFormatter = org.joda.time.format.DateTimeFormat.forPattern("HH:mm");
+			DateTimeFormatter timeFormatter = OTMetadata.AVAILABLE_TIME_FORMATTER;
 			LocalTime beginTime = LocalTime.parse((String) defaultBegin.getValue(), timeFormatter);
 			LocalTime endTime = LocalTime.parse((String) defaultEnd.getValue(), timeFormatter);
 

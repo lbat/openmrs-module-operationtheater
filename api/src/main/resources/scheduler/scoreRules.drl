@@ -28,6 +28,14 @@ rule "overlappingSurgeriesInSameOperationTheater"
         scoreHolder.addHardConstraintMatch(kcontext, -1);
 end
 
+//It is not allowed to have surgeries outside available times
+rule "surgeriesOutsideAvailableTimes"
+    when
+        PlannedSurgery(isOutsideAvailableTimes())
+    then
+        scoreHolder.addHardConstraintMatch(kcontext, -1);
+end
+
 //// ############################################################################
 //// Soft constraints
 //// ############################################################################

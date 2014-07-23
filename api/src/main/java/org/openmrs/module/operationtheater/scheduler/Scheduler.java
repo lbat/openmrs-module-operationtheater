@@ -90,6 +90,13 @@ public enum Scheduler {
 			solver = solverFactory.buildSolver();
 		}
 
+		try {
+			new PlannedSurgery().isOutsideAvailableTimes();
+		}
+		catch (Exception e) {
+		}
+		;
+
 		status = Status.RUNNING;
 
 		solverThread = Daemon.runInDaemonThread(new Runnable() {
@@ -168,7 +175,7 @@ public enum Scheduler {
 		//set up initial solution
 		List<PlannedSurgery> plannedSurgeries = new ArrayList<PlannedSurgery>();
 		for (Surgery surgery : surgeries) {
-			PlannedSurgery plannedSurgery = new PlannedSurgery();
+			PlannedSurgery plannedSurgery = new PlannedSurgery(otService);
 			plannedSurgery.setSurgery(surgery);
 			SchedulingData scheduling = surgery.getSchedulingData();
 			if (scheduling != null && scheduling.getStart() != null) {

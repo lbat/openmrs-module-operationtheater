@@ -23,6 +23,9 @@ import org.optaplanner.core.api.domain.variable.PlanningVariable;
 		difficultyComparatorClass = PlannedSurgeryDifficultyComparator.class)
 public class PlannedSurgery {
 
+	private OperationTheaterService otService; //= Context.getService(OperationTheaterService.class);
+
+	//
 	private Surgery surgery;
 
 	// Planning variables: will change during planning (between score calculations)
@@ -34,10 +37,8 @@ public class PlannedSurgery {
 	//not changed by the solver
 	private DateTime end;
 
-	public PlannedSurgery(Surgery surgery, DateTime start, DateTime end) {
-		this.surgery = surgery;
-		this.start = start;
-		this.end = end;
+	public PlannedSurgery(OperationTheaterService otService) {
+		this.otService = otService;
 	}
 
 	public PlannedSurgery() {
@@ -55,6 +56,24 @@ public class PlannedSurgery {
 		}
 		//if Interval is constructed with a null parameter it assumes a current timestamp
 		return new Interval(this.start, this.end).overlaps(new Interval(other.start, other.end));
+	}
+
+	/**
+	 * convenient method used by drool file and helps to keep this file readable
+	 *
+	 * @return
+	 * @should return true if location start or end variables are null
+	 * @should return if current scheduling is outside available times
+	 */
+	public boolean isOutsideAvailableTimes() {
+		if (start == null || end == null || location == null) {
+			return true;
+		}
+
+		Interval available = otService.getLocationAvailableTime(location, start);
+		Interval scheduled = new Interval(start, end);
+		Interval overlap = scheduled.overlap(available);
+		return !scheduled.equals(overlap);
 	}
 
 	public Surgery getSurgery() {

@@ -6,12 +6,17 @@ import org.drools.compiler.compiler.PackageBuilderErrors;
 import org.drools.core.RuleBase;
 import org.drools.core.RuleBaseFactory;
 import org.drools.core.StatefulSession;
+import org.drools.core.base.RuleNameEqualsAgendaFilter;
 import org.drools.core.base.RuleNameStartsWithAgendaFilter;
 import org.joda.time.DateTime;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.mockito.internal.util.reflection.Whitebox;
 import org.openmrs.Location;
 import org.openmrs.module.operationtheater.Surgery;
+import org.openmrs.module.operationtheater.api.OperationTheaterService;
 import org.openmrs.module.operationtheater.scheduler.domain.PlannedSurgery;
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScoreHolder;
 
@@ -22,6 +27,8 @@ import java.io.InputStreamReader;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 
 public class DrlRuleTest {
 
@@ -45,8 +52,16 @@ public class DrlRuleTest {
 		session.setGlobal("scoreHolder", new HardSoftScoreHolder(true));
 	}
 
+	@After
+	public void tearDown() {
+		session.dispose();
+	}
+
 	@Test
 	public void testRule_overlappingSurgeriesInSameOperationTheater() {
+		OperationTheaterService otService = Mockito.mock(OperationTheaterService.class);
+		when(otService.getLocationAvailableTime(any(Location.class), any(DateTime.class))).thenReturn(null);
+
 		Location location = new Location();
 
 		PlannedSurgery ps1 = new PlannedSurgery();
@@ -66,10 +81,14 @@ public class DrlRuleTest {
 		ps1.setEnd(end1);
 		ps2.setEnd(end2);
 
+		//it seems that all methods are called on inserts -> we have to mock OperationTheaterService
+		Whitebox.setInternalState(ps1, "otService", otService);
+		Whitebox.setInternalState(ps2, "otService", otService);
+
 		session.insert(ps1);
 		session.insert(ps2);
 
-		session.fireAllRules(new RuleNameStartsWithAgendaFilter("overlappingSurgeriesInSameOperationTheater"));
+		session.fireAllRules(new RuleNameEqualsAgendaFilter("overlappingSurgeriesInSameOperationTheater"), 1);
 		HardSoftScoreHolder scoreHolder = (HardSoftScoreHolder) session.getGlobal("scoreHolder");
 
 		//verify

@@ -15,10 +15,19 @@ package org.openmrs.module.operationtheater.api.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.joda.time.DateTime;
+import org.joda.time.Interval;
+import org.joda.time.LocalTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.openmrs.Location;
+import org.openmrs.LocationAttribute;
 import org.openmrs.Patient;
 import org.openmrs.api.APIException;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.impl.BaseOpenmrsService;
+import org.openmrs.module.appointmentscheduling.AppointmentBlock;
+import org.openmrs.module.appointmentscheduling.api.AppointmentService;
+import org.openmrs.module.operationtheater.OTMetadata;
 import org.openmrs.module.operationtheater.Procedure;
 import org.openmrs.module.operationtheater.Surgery;
 import org.openmrs.module.operationtheater.api.OperationTheaterService;
@@ -28,11 +37,13 @@ import org.openmrs.validator.ValidateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Resource;
+import java.util.Date;
 import java.util.List;
 
 /**
  * It is a default implementation of {@link OperationTheaterService}.
  */
+//@Service
 public class OperationTheaterServiceImpl extends BaseOpenmrsService implements OperationTheaterService {
 
 	protected final Log log = LogFactory.getLog(this.getClass());
@@ -45,6 +56,9 @@ public class OperationTheaterServiceImpl extends BaseOpenmrsService implements O
 
 	@Resource(name = "patientService")
 	private PatientService patientService;
+
+	@Resource(name = "appointmentService")
+	private AppointmentService appointmentService;
 
 	@Override
 	public void setSurgeryDAO(SurgeryDAO dao) {
@@ -59,6 +73,11 @@ public class OperationTheaterServiceImpl extends BaseOpenmrsService implements O
 	@Override
 	public void setPatientService(PatientService patientService) {
 		this.patientService = patientService;
+	}
+
+	@Override
+	public void setAppointmentService(AppointmentService appointmentService) {
+		this.appointmentService = appointmentService;
 	}
 
 	@Override
@@ -144,6 +163,42 @@ public class OperationTheaterServiceImpl extends BaseOpenmrsService implements O
 	@Override
 	public List<Procedure> getAllProcedures(boolean includeRetired) throws APIException {
 		return procedureDAO.getAll(includeRetired);
+	}
+
+	@Override
+	public Interval getLocationAvailableTime(Location location, DateTime date) {
+		Date date1 = date.toDate();
+		List<AppointmentBlock> blocks = appointmentService.getAppointmentBlocks(date1,
+				date1, location.getId() + ",", null, null);
+		//		List<AppointmentBlock> blocks = new ArrayList<AppointmentBlock>();
+
+		if (blocks.size() == 1) {
+			return new Interval(new DateTime(blocks.get(0).getStartDate()), new DateTime(blocks.get(0).getEndDate()));
+		} else if (blocks.size() > 1) {
+			throw new APIException("There shouldn't be multiple appointment blocks per location and date");
+		}
+
+		DateTimeFormatter timeFormatter = OTMetadata.AVAILABLE_TIME_FORMATTER;
+		DateTime availableStart = null;
+		DateTime availableEnd = null;
+		for (LocationAttribute attribute : location.getAttributes()) {
+			if (attribute.getAttributeType().getUuid().equals(OTMetadata.DEFAULT_AVAILABLE_TIME_BEGIN_UUID)) {
+				LocalTime beginTime = LocalTime.parse((String) attribute.getValue(), timeFormatter);
+				availableStart = date.withTime(beginTime.getHourOfDay(), beginTime.getMinuteOfHour(), 0, 0);
+			} else if (attribute.getAttributeType().getUuid().equals(OTMetadata.DEFAULT_AVAILABLE_TIME_END_UUID)) {
+				LocalTime endTime = LocalTime.parse((String) attribute.getValue(), timeFormatter);
+				availableEnd = date.withTime(endTime.getHourOfDay(), endTime.getMinuteOfHour(), 0, 0);
+			}
+		}
+
+		if (availableStart != null && availableEnd != null) {
+			return new Interval(availableStart, availableEnd);
+		}
+
+		throw new APIException("Available times not defined. please make sure that the attributes " +
+				"'default available time begin' and 'default available time end' for the location " + location.getName()
+				+ " are defined");
+
 	}
 
 }

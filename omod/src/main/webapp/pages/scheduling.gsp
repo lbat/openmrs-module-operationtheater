@@ -131,11 +131,13 @@
                                         jq('#wait-during-calculation').hide();
                                         emr.successMessage(data.message);
                                         clearInterval(pullSchedulingStatus);
+                                        jq('#calendar').fullCalendar('refetchEvents');
                                     })
                                     .error(function (xhr, status, err) {
                                         emr.handleError(xhr);
                                         jq('#wait-during-calculation').hide();
                                         clearInterval(pullSchedulingStatus);
+                                        jq('#calendar').fullCalendar('refetchEvents');
                                     })
                         }, 1000);
                     })

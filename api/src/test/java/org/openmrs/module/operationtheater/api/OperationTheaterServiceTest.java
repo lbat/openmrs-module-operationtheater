@@ -13,12 +13,24 @@
  */
 package org.openmrs.module.operationtheater.api;
 
+import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.mockito.internal.util.reflection.Whitebox;
+import org.openmrs.Location;
+import org.openmrs.LocationAttribute;
+import org.openmrs.LocationAttributeType;
 import org.openmrs.Patient;
+import org.openmrs.Provider;
+import org.openmrs.api.APIException;
+import org.openmrs.module.appointmentscheduling.AppointmentBlock;
+import org.openmrs.module.appointmentscheduling.AppointmentType;
+import org.openmrs.module.appointmentscheduling.api.AppointmentService;
+import org.openmrs.module.operationtheater.OTMetadata;
 import org.openmrs.module.operationtheater.Procedure;
 import org.openmrs.module.operationtheater.Surgery;
 import org.openmrs.module.operationtheater.api.db.ProcedureDAO;
@@ -32,13 +44,20 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -268,7 +287,7 @@ public class OperationTheaterServiceTest { //extends BaseModuleContextSensitiveT
 		service.retireProcedure(null, "reason");
 
 		//verify
-		verify(procedureDAO, never()).saveOrUpdate(Mockito.any(Procedure.class));
+		verify(procedureDAO, never()).saveOrUpdate(any(Procedure.class));
 
 		//#2 call with proper procedure object
 		service.retireProcedure(procedure, "reason");
@@ -288,10 +307,154 @@ public class OperationTheaterServiceTest { //extends BaseModuleContextSensitiveT
 		service.voidSurgery(null, "reason");
 
 		//verify
-		verify(surgeryDAO, never()).saveOrUpdate(Mockito.any(Surgery.class));
+		verify(surgeryDAO, never()).saveOrUpdate(any(Surgery.class));
 
 		//#2 call with proper procedure object
 		service.voidSurgery(surgery, "reason");
 		verify(surgeryDAO).saveOrUpdate(surgery);
+	}
+
+	/**
+	 * @verifies return interval from corresponding appointmentBlock
+	 * @see OperationTheaterService#getLocationAvailableTime(org.openmrs.Location, org.joda.time.DateTime)
+	 */
+	@Test
+	public void getLocationAvailableTime_shouldReturnIntervalFromCorrespondingAppointmentBlock() throws Exception {
+		Location location = new Location();
+		location.setName("operation theater");
+
+		DateTime date = new DateTime();
+		ArrayList<AppointmentBlock> blocks = new ArrayList<AppointmentBlock>();
+		AppointmentBlock block = new AppointmentBlock();
+		block.setStartDate(date.withTime(12, 30, 0, 0).toDate());
+		block.setEndDate(date.withTime(13, 30, 0, 0).toDate());
+		blocks.add(block);
+
+		AppointmentService appointmentService = Mockito.mock(AppointmentService.class);
+		when(appointmentService
+				.getAppointmentBlocks(eq(date.toDate()), eq(date.toDate()), eq(location.getId() + ","), any(Provider.class),
+						any(
+								AppointmentType.class))).thenReturn(blocks);
+
+		OperationTheaterService otService = new OperationTheaterServiceImpl();
+		Whitebox.setInternalState(otService, "appointmentService", appointmentService);
+
+		//call function under test
+		Interval result = otService.getLocationAvailableTime(location, date);
+
+		//verify
+		assertThat(result, notNullValue(Interval.class));
+		assertThat(result.getStart(), equalTo(date.withTime(12, 30, 0, 0)));
+		assertThat(result.getEnd(), equalTo(date.withTime(13, 30, 0, 0)));
+	}
+
+	/**
+	 * @verifies return interval from location attribute if there is no appointmentBlock entry
+	 * @see OperationTheaterService#getLocationAvailableTime(org.openmrs.Location, org.joda.time.DateTime)
+	 */
+	@Test
+	public void getLocationAvailableTime_shouldReturnIntervalFromLocationAttributeIfThereIsNoAppointmentBlockEntry()
+			throws Exception {
+		AppointmentService appointmentService = Mockito.mock(AppointmentService.class);
+		when(appointmentService.getAppointmentBlocks(any(Date.class), any(Date.class), anyString(), any(Provider.class), any(
+				AppointmentType.class))).thenReturn(new ArrayList<AppointmentBlock>());
+
+		OperationTheaterService otService = new OperationTheaterServiceImpl();
+		Whitebox.setInternalState(otService, "appointmentService", appointmentService);
+
+		Location location = new Location();
+		LocationAttribute start = new LocationAttribute();
+		LocationAttributeType startType = new LocationAttributeType();
+		startType.setUuid(OTMetadata.DEFAULT_AVAILABLE_TIME_BEGIN_UUID);
+		start.setAttributeType(startType);
+		start.setValue("12:30");
+		LocationAttribute end = new LocationAttribute();
+		LocationAttributeType endType = new LocationAttributeType();
+		endType.setUuid(OTMetadata.DEFAULT_AVAILABLE_TIME_END_UUID);
+		end.setAttributeType(endType);
+		end.setValue("13:30");
+		HashSet<LocationAttribute> attributes = new HashSet<LocationAttribute>();
+		attributes.add(start);
+		attributes.add(end);
+		location.setAttributes(attributes);
+
+		//call function under test
+		Interval result = otService.getLocationAvailableTime(location, new DateTime());
+
+		//verify
+		assertThat(result, notNullValue(Interval.class));
+		assertThat(result.getStart(), equalTo(new DateTime().withTime(12, 30, 0, 0)));
+		assertThat(result.getEnd(), equalTo(new DateTime().withTime(13, 30, 0, 0)));
+	}
+
+	/**
+	 * @verifies throw APIException if there is more than one appoitnmentBlock for this day and location
+	 * @see OperationTheaterService#getLocationAvailableTime(org.openmrs.Location, org.joda.time.DateTime)
+	 */
+	@Test(expected = APIException.class)
+	public void getLocationAvailableTime_shouldThrowAPIExceptionIfThereIsMoreThanOneAppoitnmentBlockForThisDayAndLocation()
+			throws Exception {
+		AppointmentService appointmentService = Mockito.mock(AppointmentService.class);
+		ArrayList<AppointmentBlock> appointmentBlocks = new ArrayList<AppointmentBlock>();
+		appointmentBlocks.add(new AppointmentBlock());
+		appointmentBlocks.add(new AppointmentBlock());
+		when(appointmentService.getAppointmentBlocks(any(Date.class), any(Date.class), anyString(), any(Provider.class), any(
+				AppointmentType.class))).thenReturn(appointmentBlocks);
+
+		OperationTheaterService otService = new OperationTheaterServiceImpl();
+		Whitebox.setInternalState(otService, "appointmentService", appointmentService);
+
+		//call function under test
+		otService.getLocationAvailableTime(new Location(), new DateTime());
+	}
+
+	/**
+	 * @verifies throw APIException if availableStart attribute is not defined
+	 * @see OperationTheaterService#getLocationAvailableTime(org.openmrs.Location, org.joda.time.DateTime)
+	 */
+	@Test(expected = APIException.class)
+	public void getLocationAvailableTime_shouldThrowAPIExceptionIfAvailableStartAttributeIsNotDefined() throws Exception {
+		AppointmentService appointmentService = Mockito.mock(AppointmentService.class);
+		when(appointmentService.getAppointmentBlocks(any(Date.class), any(Date.class), anyString(), any(Provider.class), any(
+				AppointmentType.class))).thenReturn(new ArrayList<AppointmentBlock>());
+
+		OperationTheaterService otService = new OperationTheaterServiceImpl();
+		Whitebox.setInternalState(otService, "appointmentService", appointmentService);
+
+		Location location = new Location();
+		LocationAttribute start = new LocationAttribute();
+		LocationAttributeType startType = new LocationAttributeType();
+		startType.setUuid(OTMetadata.DEFAULT_AVAILABLE_TIME_BEGIN_UUID);
+		start.setAttributeType(startType);
+		start.setValue("12:30");
+		location.setAttribute(start);
+
+		//call function under test
+		otService.getLocationAvailableTime(location, new DateTime());
+	}
+
+	/**
+	 * @verifies throw APIException if availableEnd attribute is not defined
+	 * @see OperationTheaterService#getLocationAvailableTime(org.openmrs.Location, org.joda.time.DateTime)
+	 */
+	@Test(expected = APIException.class)
+	public void getLocationAvailableTime_shouldThrowAPIExceptionIfAvailableEndAttributeIsNotDefined() throws Exception {
+		AppointmentService appointmentService = Mockito.mock(AppointmentService.class);
+		when(appointmentService.getAppointmentBlocks(any(Date.class), any(Date.class), anyString(), any(Provider.class), any(
+				AppointmentType.class))).thenReturn(new ArrayList<AppointmentBlock>());
+
+		OperationTheaterService otService = new OperationTheaterServiceImpl();
+		Whitebox.setInternalState(otService, "appointmentService", appointmentService);
+
+		Location location = new Location();
+		LocationAttribute end = new LocationAttribute();
+		LocationAttributeType endType = new LocationAttributeType();
+		endType.setUuid(OTMetadata.DEFAULT_AVAILABLE_TIME_END_UUID);
+		end.setAttributeType(endType);
+		end.setValue("12:30");
+		location.setAttribute(end);
+
+		//call function under test
+		otService.getLocationAvailableTime(location, new DateTime());
 	}
 }

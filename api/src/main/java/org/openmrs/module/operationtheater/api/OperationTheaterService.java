@@ -13,10 +13,14 @@
  */
 package org.openmrs.module.operationtheater.api;
 
+import org.joda.time.DateTime;
+import org.joda.time.Interval;
+import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.api.APIException;
 import org.openmrs.api.OpenmrsService;
 import org.openmrs.api.PatientService;
+import org.openmrs.module.appointmentscheduling.api.AppointmentService;
 import org.openmrs.module.operationtheater.Procedure;
 import org.openmrs.module.operationtheater.Surgery;
 import org.openmrs.module.operationtheater.api.db.ProcedureDAO;
@@ -57,9 +61,17 @@ public interface OperationTheaterService extends OpenmrsService {
 	 * Sets the DAO for the Patient service. This is done by DI and Spring. See the
 	 * applicationContext-service.xml definition file.
 	 *
-	 * @param dao DAO for this service
+	 * @param patientService
 	 */
-	public void setPatientService(PatientService dao);
+	public void setPatientService(PatientService patientService);
+
+	/**
+	 * Sets the DAO for the Patient service. This is done by DI and Spring. See the
+	 * applicationContext-service.xml definition file.
+	 *
+	 * @param appointmentService
+	 */
+	public void setAppointmentService(AppointmentService appointmentService);
 
 	/**
 	 * Creates or updates the given surgery in the database.
@@ -182,4 +194,19 @@ public interface OperationTheaterService extends OpenmrsService {
 	 * @should call surgeryDAO getAllUncompletedSurgeries
 	 */
 	public List<Surgery> getAllUncompletedSurgeries();
+
+	/**
+	 * get available times for the given date and location
+	 * custom available times for specific dates are stored inside appointment blocks,
+	 * defaults are stored as location attributes
+	 *
+	 * @param date
+	 * @return
+	 * @should return interval from corresponding appointmentBlock
+	 * @should return interval from location attribute if there is no appointmentBlock entry
+	 * @should throw APIException if there is more than one appoitnmentBlock for this day and location
+	 * @should throw APIException if availableStart attribute is not defined
+	 * @should throw APIException if availableEnd attribute is not defined
+	 */
+	public Interval getLocationAvailableTime(Location location, DateTime date);
 }
