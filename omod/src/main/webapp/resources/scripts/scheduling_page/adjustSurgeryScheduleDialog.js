@@ -12,8 +12,8 @@
         calEvent = event;
 
         jq('#adjust-schedule-surgery').text(calEvent.title);
-        jq('#adjust-surgery-form-location').val(calEvent.resource.name);
-        jq('#is-ot-amvn vailable').prop("checked", calEvent.dateLocked);
+        jq('#adjust-surgery-form-location option[value="' + calEvent.resource.name + '"]').prop("selected", true);
+        jq('#lock-date').prop("checked", calEvent.dateLocked);
 
         jq('#adjust_schedule_start_time-wrapper').datetimepicker('setStartDate', new Date());
 
