@@ -35,24 +35,44 @@
         adjustSurgeryScheduleDialog.createDialog(operationTheaters);
         filterResourcesDialog.createDialog();
 
+        var events;
+        var loadFromServer = true;
+        var dailyView = true;
+        var lastOTInWeeklyView = calResources[0];
         jq('#calendar').fullCalendar({
             height: 3000,
             header: {
-                left: 'prev,next today, resourceDay, agendaWeek, resourceWeek',
+                left: 'prev,next today',
                 center: 'title',
-                right: ''
+                right: 'resourceDay, agendaWeek'
             },
             defaultView: "resourceDay",
             allDaySlot: false,
             editable: true,
             eventDurationEditable: false,
             eventStartEditable: true,
+            viewDisplay: function (view, element) { //viewRender in later versions
+                if (view.name == "resourceDay" && !dailyView) {
+                    dailyView = true;
+                    jq('#select-weekly-resource-form').hide();
+                    loadFromServer = false;
+                    jq('#calendar').fullCalendar('refetchEvents');
+                    resizeFullCalendar();
+                } else if (view.name != "resourceDay" && dailyView) {
+                    dailyView = false;
+                    jq('#select-weekly-resource-form').show();
+                    jq('#calendar').fullCalendar('refetchEvents');
+                    resizeFullCalendar();
+                }
+            },
             eventAfterRender: function (event, element, view) {
-                if (event.annotation) {
+                if (event.annotation && view.name == "resourceDay") {
                     schedule = jq('.highlighting');
                     width = jq('.fc-widget-content').width();
                     width = width + 'px';
                     jq(element).css('width', width);
+                }
+                if (event.annotation) {
                     jq(element).css('opacity', '0.4');
                 } else if (event.dateLocked) {
                     jq(element).addClass("icon-lock");
@@ -69,6 +89,12 @@
             },
             resources: calResources,
             events: function (start, end, callback) {
+                if (!loadFromServer && dailyView) {
+                    loadFromServer = true;
+                    callback(events);
+                    return;
+                }
+
                 var params = {};
                 params.start = jq.fullCalendar.formatDate(start, 'yyyy-MM-dd');
                 params.end = jq.fullCalendar.formatDate(end, 'yyyy-MM-dd');
@@ -76,7 +102,15 @@
                 jq.ajaxSetup({ scriptCharset: "utf-8", contentType: "application/json; charset=utf-8"});
                 jq.getJSON('${ ui.actionLink("operationtheater", "scheduling", "getEvents") }', jq.param(params, true))
                         .success(function (data) {
-                            callback(data);
+                            events = data;
+                            if (!dailyView) {
+                                var filteredEvents = jq.grep(events, function (e) {
+                                    return e.resourceId == lastOTInWeeklyView.id
+                                });
+                                callback(filteredEvents);
+                            } else {
+                                callback(events);
+                            }
                         })
                         .error(function (xhr, status, err) {
                             emr.handleError(xhr);
@@ -84,38 +118,24 @@
             }
         });
 
-        resizeFullCalendar();
-        jq(window).resize(function () {
-            resizeFullCalendar();
-        });
-
         //add datepicker button
         jq('span:contains(today)').parents('td').append('<span class="fc-header-space"></span>' +
                 '<span id="datepicker-button" class="button" href="#" onclick="return false">' +
                 '   <i class ="icon-calendar"></i>' +
-                '' +
                 '</span>' +
                 '<span">' +
                 '   <input id="datetimepicker" style="visibility: hidden; height: 1px;width: 1px; padding:0px;" size="16" type="text" value="2012-06-15" readonly>' +
                 '</span>');
 
+        //add week view resource selector
+        jq('.fc-header-title').parents('td').append('<form id="select-weekly-resource-form" style="margin-bottom: 10px; display: none"><span class="select-arrow">' +
+                '       <select id="select-weekly-resource">' +
+                <% resources.eachWithIndex { it, i -> %>
+                '       <option value="${it.name}">${it.name}</option>' +
+                <% } %>
+                '   </select>' +
+                '</span></form>');
 
-        jq('td.fc-header-right').empty();
-        jq('td.fc-header-right').append('<div class="dropdown" style="margin-right:0px; top:0px">' +
-                '<span class="dropdown-name">' +
-                '    <i class="icon-cog"></i>' +
-                '    Actions' +
-                '    <i class="icon-sort-down"></i>' +
-                '</span>' +
-                '<ul>' +
-                '    <li>' +
-                '        <a href="#" id="schedule-action" ><i class="icon-calendar"></i>Schedule</a>' +
-                '    </li>' +
-                '    <li>' +
-                '        <a href="#" id="filter-action"><i class="icon-filter"></i>Filter</a>' +
-                '    </li>' +
-                '</ul>' +
-                '</div>');
 
         //execute scheduler
         var pullSchedulingStatus;
@@ -153,6 +173,17 @@
             filterResourcesDialog.show(calResources);
         });
 
+        //displayed operation theater (weekly view) change listener
+        jq('#select-weekly-resource').change(function () {
+            lastOTInWeeklyView = jq.grep(calResources, function (e) {
+                return e.name === jq('#select-weekly-resource').val()
+            })[0];
+            loadFromServer = false;
+            jq('#calendar').fullCalendar("refetchEvents");
+            jq('#calendar').fullCalendar('removeEvents', function (event) {
+                return event.resource.id != lastOTInWeeklyView.id;
+            });
+        });
 
         //attach datetimepicker to calendar button
         jq(function () {
@@ -195,6 +226,11 @@
             jq("table.fc-header td").css("border-collapse", "collapse");
             jq("table.fc-header td").css("border", "0");
         });
+
+        jq(window).resize(function () {
+            resizeFullCalendar();
+        });
+        resizeFullCalendar();
     });
 
     //TODO offset not correct
@@ -204,9 +240,10 @@
         console.log(offset.top);
         console.log(margin);
 
-        var height = jq(window).height() * 0.95 - offset.top;
+        var height = jq(window).height() * 0.95 - offset.top - 10;
         jq('#calendar').fullCalendar('option', 'height', height);
     }
+
 
 </script>
 <style type='text/css'>
@@ -223,6 +260,7 @@ body {
     width: 100%;
     height: 100%;
     margin: 0 auto;
+    margin-top: 20px;
 }
 
 </style>
@@ -235,13 +273,23 @@ body {
     <div class="note warning">
         <div class="text">
             <i class="icon-spinner icon-spin medium"></i>
-
             <p>Please wait while the optimal scheduling is calculated</p>
-
         </div>
     </div>
 </div>
 
+<div class="actions dropdown" style="top:0px;margin-bottom: 10px">
+    <span class="dropdown-name"><i class="icon-cog"></i>Actions<i class="icon-sort-down"></i></span>
+    <ul>
+        <li>
+            <a href="#" id="schedule-action"><i class="icon-calendar"></i>Schedule</a>
+        </li>
+
+        <li>
+            <a href="#" id="filter-action"><i class="icon-filter"></i>Filter</a>
+        </li>
+    </ul>
+</div>
 
 <div id='calendar'></div>
 
@@ -359,7 +407,7 @@ body {
                 </p>
 
                 <p>
-                    <input id="lock-date" checked="checked" type="checkbox"></input>
+                    <input id="lock-date" type="checkbox"></input>
                     <label>Lock date (scheduler will not change it)</label>
                 </p>
 
