@@ -1,5 +1,6 @@
 package org.openmrs.module.operationtheater.api.db;
 
+import org.joda.time.DateTime;
 import org.openmrs.Patient;
 import org.openmrs.module.operationtheater.Surgery;
 
@@ -26,4 +27,15 @@ public interface SurgeryDAO extends GenericDAO<Surgery> {
 	 * @should return all surgeries in the db that have not yet been performed
 	 */
 	public List<Surgery> getAllUncompletedSurgeries();
+
+	/**
+	 * returns all surgeries that are scheduled between the given timeframe
+	 *
+	 * @param from
+	 * @param to
+	 * @return
+	 * @should return all unvoided surgeries that are scheduled between from and to date
+	 */
+	public List<Surgery> getScheduledSurgeries(DateTime from, DateTime to);
+
 }

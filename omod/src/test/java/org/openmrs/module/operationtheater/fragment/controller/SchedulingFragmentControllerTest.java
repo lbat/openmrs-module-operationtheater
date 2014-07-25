@@ -168,7 +168,7 @@ public class SchedulingFragmentControllerTest {
 		doReturn(tag).when(locationService).getLocationTagByUuid(OTMetadata.LOCATION_TAG_OPERATION_THEATER_UUID);
 		doReturn(locations).when(locationService).getLocationsByTag(tag);
 		doReturn(blocks).when(appointmentService).getAppointmentBlocks(start, end, "1,2,3,", null, null);
-		doReturn(surgeries).when(otService).getAllSurgeries(false);
+		doReturn(surgeries).when(otService).getScheduledSurgeries(eq(new DateTime(start)), eq(new DateTime(end)));
 
 		//call function under test
 		List<SimpleObject> result = new SchedulingFragmentController().getEvents(new TestUiUtils(),

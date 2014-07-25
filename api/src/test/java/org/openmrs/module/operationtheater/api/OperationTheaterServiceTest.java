@@ -457,4 +457,42 @@ public class OperationTheaterServiceTest { //extends BaseModuleContextSensitiveT
 		//call function under test
 		otService.getLocationAvailableTime(location, new DateTime());
 	}
+
+	/**
+	 * @verifies call surgeryDAO getScheduledSurgeries if parameter are not null
+	 * @see OperationTheaterService#getScheduledSurgeries(org.joda.time.DateTime, org.joda.time.DateTime)
+	 */
+	@Test
+	public void getScheduledSurgeries_shouldCallSurgeryDAOGetScheduledSurgeriesIfParameterAreNotNull() throws Exception {
+
+		DateTime from = new DateTime();
+		DateTime to = from.plusDays(1);
+
+		//call function under test
+		service.getScheduledSurgeries(from, to);
+
+		//verify
+		verify(surgeryDAO).getScheduledSurgeries(from, to);
+	}
+
+	/**
+	 * @verifies return empty list if a parameter is null
+	 * @see OperationTheaterService#getScheduledSurgeries(org.joda.time.DateTime, org.joda.time.DateTime)
+	 */
+	@Test
+	public void getScheduledSurgeries_shouldReturnEmptyListIfAParameterIsNull() throws Exception {
+		//call function under test
+		List<Surgery> result = service.getScheduledSurgeries(null, new DateTime());
+
+		//verify
+		assertThat(result, hasSize(0));
+		verify(surgeryDAO, never()).getScheduledSurgeries(any(DateTime.class), any(DateTime.class));
+
+		//call function under test
+		result = service.getScheduledSurgeries(new DateTime(), null);
+
+		//verify
+		assertThat(result, hasSize(0));
+		verify(surgeryDAO, never()).getScheduledSurgeries(any(DateTime.class), any(DateTime.class));
+	}
 }

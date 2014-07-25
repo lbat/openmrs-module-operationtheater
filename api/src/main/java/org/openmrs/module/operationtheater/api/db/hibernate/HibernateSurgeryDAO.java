@@ -15,6 +15,9 @@ package org.openmrs.module.operationtheater.api.db.hibernate;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Criteria;
+import org.hibernate.criterion.Restrictions;
+import org.joda.time.DateTime;
 import org.openmrs.Patient;
 import org.openmrs.module.operationtheater.Surgery;
 import org.openmrs.module.operationtheater.api.db.OperationTheaterDAO;
@@ -56,5 +59,24 @@ public class HibernateSurgeryDAO extends HibernateGenericDAO<Surgery> implements
 						"from " + mappedClass.getSimpleName()
 								+ " at where at.surgeryCompleted = false"
 				).list();
+	}
+
+	@Override
+	public List<Surgery> getScheduledSurgeries(DateTime from, DateTime to) {
+		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Surgery.class);
+		criteria.add(Restrictions.eq("voided", false));
+
+		criteria.createAlias("schedulingData", "schedulingData");
+
+		if (from != null) {
+			criteria.add(Restrictions.ge("schedulingData.start", from));
+		}
+
+		if (to != null) {
+			criteria.add(Restrictions.le("schedulingData.end", to));
+		}
+
+		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+		return criteria.list();
 	}
 }

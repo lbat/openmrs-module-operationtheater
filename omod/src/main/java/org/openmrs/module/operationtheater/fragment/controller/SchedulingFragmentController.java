@@ -86,7 +86,7 @@ public class SchedulingFragmentController {
 		}
 
 		//add surgeries
-		List<Surgery> surgeryList = otService.getAllSurgeries(false); //FIXME change to get surgery within start-end period
+		List<Surgery> surgeryList = otService.getScheduledSurgeries(new DateTime(start), endDate);
 		for (Surgery surgery : surgeryList) {
 			CalendarEvent event = getSurgeryCalendarEvent(resources, surgery);
 			events.add(event);
@@ -450,7 +450,7 @@ public class SchedulingFragmentController {
 		 */
 		private boolean annotation;
 
-		private String color = "blue"; //TODO define color as LocationAttribute
+		private String color = "blue";
 
 		private String surgeryUuid;
 

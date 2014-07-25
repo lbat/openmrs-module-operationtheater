@@ -37,6 +37,7 @@ import org.openmrs.validator.ValidateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -142,6 +143,14 @@ public class OperationTheaterServiceImpl extends BaseOpenmrsService implements O
 	@Override
 	public List<Surgery> getAllUncompletedSurgeries() {
 		return surgeryDAO.getAllUncompletedSurgeries();
+	}
+
+	@Override
+	public List<Surgery> getScheduledSurgeries(DateTime from, DateTime to) {
+		if (from == null || to == null) {
+			return new ArrayList<Surgery>();
+		}
+		return surgeryDAO.getScheduledSurgeries(from, to);
 	}
 
 	@Override
