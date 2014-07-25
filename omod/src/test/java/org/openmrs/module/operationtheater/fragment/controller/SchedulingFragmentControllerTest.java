@@ -191,7 +191,7 @@ public class SchedulingFragmentControllerTest {
 				"{\"title\":\"\",\"start\":\"2014-06-09 20:55\",\"end\":\"2014-06-09 23:59\",\"availableStart\":\"2014-06-09 07:35\",\"availableEnd\":\"2014-06-09 20:55\",\"surgeryUuid\":null,\"dateLocked\":false,\"resourceId\":2,\"allDay\":false,\"editable\":false,\"annotation\":true,\"color\":\"grey\"}"));
 
 		assertThat(result.get(4).toJson(), is(
-				"{\"title\":\"\",\"start\":\"2014-06-09 00:00\",\"end\":\"2014-06-09 23:59\",\"availableStart\":\"2014-06-09 00:00\",\"availableEnd\":\"2014-06-09 23:59\",\"surgeryUuid\":null,\"dateLocked\":false,\"resourceId\":3,\"allDay\":false,\"editable\":false,\"annotation\":true,\"color\":\"grey\"}"));
+				"{\"title\":\"\",\"start\":\"2014-06-09 00:00\",\"end\":\"2014-06-09 23:59\",\"availableStart\":\"2014-06-09 00:00\",\"availableEnd\":\"2014-06-09 00:00\",\"surgeryUuid\":null,\"dateLocked\":false,\"resourceId\":3,\"allDay\":false,\"editable\":false,\"annotation\":true,\"color\":\"grey\"}"));
 
 		assertThat(result.get(5).toJson(), is(
 				"{\"title\":\"Procedure Name - family name given name\",\"start\":\"2014-06-09 12:00\",\"end\":\"2014-06-09 13:30\",\"availableStart\":\"\",\"availableEnd\":\"\",\"surgeryUuid\":\"uuid\",\"dateLocked\":true,\"resourceId\":1,\"allDay\":false,\"editable\":false,\"annotation\":false,\"color\":\"#00ffff\"}"));

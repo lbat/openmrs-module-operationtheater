@@ -353,7 +353,7 @@ public class SchedulingFragmentController {
 		String endOfDay = dateFormatter.format(startDate.plusHours(24).minusMinutes(1).toDate());
 		if (start.equals(end)) {
 			//location is not available for this day
-			CalendarEvent event = new CalendarEvent("", beginOfDay, endOfDay, beginOfDay, endOfDay, resourceId, true);
+			CalendarEvent event = new CalendarEvent("", beginOfDay, endOfDay, beginOfDay, beginOfDay, resourceId, true);
 			events.add(event);
 		} else {
 			CalendarEvent morning = new CalendarEvent("", beginOfDay, start, start, end, resourceId, true);
