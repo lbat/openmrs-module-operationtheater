@@ -49,7 +49,7 @@
         return false;
     };
 
-    availableTimesDialog.createDialog = function () {
+    availableTimesDialog.createDialog = function (greaterThanErrorMsg) {
 
         dialog = emr.setupConfirmationDialog({
             selector: '#available-times-dialog',
@@ -112,7 +112,7 @@
 
             return isNaN(value) && isNaN($(params).val())
                 || (Number(value) > Number($(params).val()));
-        }, 'Must be greater than start time.');
+        }, greaterThanErrorMsg);
 
         jq('#available-time-form').validate({
             ignore: [],

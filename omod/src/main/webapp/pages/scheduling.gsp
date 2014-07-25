@@ -33,7 +33,8 @@
         <% } %>
 
         //create dialogs
-        availableTimesDialog.createDialog();
+        availableTimesDialog.createDialog("${ui.message("operationtheater.validation.error.greaterThan",
+            ui.message("operationtheater.scheduling.page.availableTimesDialog.label.startTime"))}");
         adjustSurgeryScheduleDialog.createDialog(resourceLookUp);
         filterResourcesDialog.createDialog();
 
@@ -83,7 +84,8 @@ body {
     <div class="note warning">
         <div class="text">
             <i class="icon-spinner icon-spin medium"></i>
-            <p>Please wait while the optimal scheduling is calculated</p>
+
+            <p>${ui.message("operationtheater.scheduling.page.waitWhileSchedulingIsCalculated")}</p>
         </div>
     </div>
 </div>
@@ -93,11 +95,13 @@ body {
     <span class="dropdown-name"><i class="icon-cog"></i>Actions<i class="icon-sort-down"></i></span>
     <ul>
         <li>
-            <a href="#" id="schedule-action"><i class="icon-calendar"></i>Schedule</a>
+            <a href="#" id="schedule-action"><i
+                    class="icon-calendar"></i>${ui.message("operationtheater.scheduling.page.action.schedule")}</a>
         </li>
 
         <li>
-            <a href="#" id="filter-action"><i class="icon-filter"></i>Filter</a>
+            <a href="#" id="filter-action"><i
+                    class="icon-filter"></i>${ui.message("operationtheater.scheduling.page.action.filter")}</a>
         </li>
     </ul>
 </div>
@@ -112,11 +116,11 @@ body {
     <div class="dialog-header">
         <i class="icon-filter"></i>
 
-        <h3>Filter Operation Theaters</h3>
+        <h3>${ui.message("operationtheater.scheduling.page.filterResourcesDialog.heading")}</h3>
     </div>
 
     <div class="dialog-content">
-        <p class="dialog-instructions">Please select operation theaters that should be displayed</p>
+        <p class="dialog-instructions">${ui.message("operationtheater.scheduling.page.filterResourcesDialog.instructions")}</p>
         <ul>
             <!-- TODO add select all, deselect all link -->
             <form id="filter-resources-form" class="simple-form-ui"></form>
@@ -132,29 +136,29 @@ body {
     <div class="dialog-header">
         <i class="icon-time"></i>
 
-        <h3>Operation Theater available times</h3>
+        <h3>${ui.message("operationtheater.scheduling.page.availableTimesDialog.heading")}</h3>
     </div>
 
     <div class="dialog-content">
-        <p class="dialog-instructions">Please enter and confirm the available times:</p>
+        <p class="dialog-instructions">${ui.message("operationtheater.scheduling.page.availableTimesDialog.instructions")}</p>
         <ul>
             <li class="info">
-                <span>Operation Theater</span>
+                <span>${ui.message("operationtheater.scheduling.page.availableTimesDialog.info.location")}</span>
                 <h5 id="available-times-dialog-ot">OT 1</h5>
             </li>
             <li class="info">
-                <span>Date</span>
+                <span>${ui.message("operationtheater.scheduling.page.availableTimesDialog.info.date")}</span>
                 <h5 id="available-times-dialog-date" data-bind="text: text">01.06.2014</h5>
             </li>
 
             <form id="available-time-form" class="simple-form-ui">
                 <p>
                     <input id="is-ot-available" checked="checked" type="checkbox"></input>
-                    <label>OT available for this day</label>
+                    <label>${ui.message("operationtheater.scheduling.page.availableTimesDialog.label.available")}</label>
                 </p>
 
                 <p>
-                    <label for="start_time_picker-display">start time:</label>
+                    <label for="start_time_picker-display">${ui.message("operationtheater.scheduling.page.availableTimesDialog.label.startTime")}</label>
                     <!--<input id="startTime" name="startTime" placeholder="e.g. 08:00" type="text"></input>-->
                     ${ui.includeFragment("operationtheater", "field/datetimepicker", [
                             id           : 'start_time_picker',
@@ -164,7 +168,7 @@ body {
                 </p>
 
                 <p>
-                    <label for="end_time_picker-display">end time:</label>
+                    <label for="end_time_picker-display">${ui.message("operationtheater.scheduling.page.availableTimesDialog.label.endTime")}</label>
                     <!--<input id="endTime" name="endTime" placeholder="e.g. 17:00" type="text"></input>-->
                     ${ui.includeFragment("operationtheater", "field/datetimepicker", [
                             id           : 'end_time_picker',
@@ -172,7 +176,6 @@ body {
                             formFieldName: 'endTimePicker',
                             useTime      : true])}
                 </p>
-
             </form>
         </ul>
 
@@ -187,24 +190,23 @@ body {
     <div class="dialog-header">
         <i class="icon-time"></i>
 
-        <h3>Adjust surgery schedule</h3>
+        <h3>${ui.message("operationtheater.scheduling.page.adjustScheduleDialog.heading")}</h3>
     </div>
 
     <div class="dialog-content">
-        <p class="dialog-instructions">Please adjust and confirm the schedule for the selected surgery</p>
+        <p class="dialog-instructions">${ui.message("operationtheater.scheduling.page.adjustScheduleDialog.instructions")}</p>
         <ul>
             <li class="info">
-                <span id="">Surgery</span>
+                <span id="">${ui.message("operationtheater.scheduling.page.adjustScheduleDialog.info")}</span>
                 <h5 id="adjust-schedule-surgery"></h5>
             </li>
 
             <form id="adjust-schedule-form" class="simple-form-ui">
-
                 <p>
-                    <label for="adjust-surgery-form-location">Operation Theater:</label>
+                    <label for="adjust-surgery-form-location">${ui.message("operationtheater.scheduling.page.adjustScheduleDialog.label.location")}</label>
                     <span class="select-arrow">
                         <select id="adjust-surgery-form-location">
-                            <option value="null">not specified</option>
+                            <option value="null">${ui.message("operationtheater.notSpecified")}</option>
                             <% resources.eachWithIndex { it, i -> %>
                             <option value="${it.name}">${it.name}</option>
                             <% } %>
@@ -213,7 +215,7 @@ body {
                 </p>
 
                 <p>
-                    <label for="adjust_schedule_start_time-display">start time:</label>
+                    <label for="adjust_schedule_start_time-display">${ui.message("operationtheater.scheduling.page.adjustScheduleDialog.label.startTime")}</label>
                     ${ui.includeFragment("operationtheater", "field/datetimepicker", [
                             id           : 'adjust_schedule_start_time',
                             label        : '',
@@ -225,12 +227,10 @@ body {
 
                 <p>
                     <input id="lock-date" type="checkbox"></input>
-                    <label>Lock date (scheduler will not change it)</label>
+                    <label>${ui.message("operationtheater.scheduling.page.adjustScheduleDialog.label.lockDate")}</label>
                 </p>
-
             </form>
         </ul>
-
 
         <button class="confirm right">${ui.message("emr.save")}
             <i class="icon-spinner icon-spin icon-2x" style="display: none; margin-left: 10px;"></i></button>
