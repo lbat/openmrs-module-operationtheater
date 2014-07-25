@@ -8,6 +8,37 @@
         See http://www.liquibase.org/manual/home#available_database_refactorings
         for a list of supported elements and attributes
     -->
+    <changeSet author="Lukas Breitwieser" id="operationtheater-201407250935">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from location_attribute_type where uuid = 'aefe79d0-aa24-4216-ad00-41ba073f7a39'
+            </sqlCheck>
+        </preConditions>
+        <comment>
+            create "calendar color" location attribute type
+        </comment>
+        <insert tableName="location_attribute_type">
+            <column name="uuid" value="aefe79d0-aa24-4216-ad00-41ba073f7a39"/>
+            <column name="name" value="Calendar color"/>
+            <column name="description"
+                    value="Display color used for surgeries that are scheduled for this operation theater"/>
+            <column name="datatype" value="org.openmrs.customdatatype.datatype.RegexValidatedTextDatatype"/>
+            <column name="datatype_config" value="#[a-fA-F0-9]{6}"/>
+            <column name="preferred_handler"/>
+            <column name="handler_config"/>
+            <column name="min_occurs" value="0"/>
+            <column name="max_occurs" value="1"/>
+            <column name="creator" valueNumeric="1"/>
+            <column name="date_created" valueDate="2014-07-25"/>
+            <column name="changed_by"/>
+            <column name="date_changed"/>
+            <column name="retired" valueBoolean="false"/>
+            <column name="retired_by"/>
+            <column name="date_retired"/>
+            <column name="retire_reason"/>
+        </insert>
+    </changeSet>
+
     <changeSet author="Lukas Breitwieser" id="operationtheater-201407081624">
         <preConditions onFail="MARK_RAN">
             <and>

@@ -86,17 +86,22 @@ public class SchedulingFragmentControllerTest {
 		beginAttributeType.setUuid(OTMetadata.DEFAULT_AVAILABLE_TIME_BEGIN_UUID);
 		LocationAttributeType endAttributeType = new LocationAttributeType();
 		endAttributeType.setUuid(OTMetadata.DEFAULT_AVAILABLE_TIME_END_UUID);
+		LocationAttributeType calendarColorType = new LocationAttributeType();
+		calendarColorType.setUuid(OTMetadata.CALENDAR_COLOR_UUID);
 
 		LocationAttribute defaultBeginAttr = Mockito.spy(new LocationAttribute());
 		defaultBeginAttr.setValue("08:45");
 		Mockito.doReturn(beginAttributeType).when(defaultBeginAttr).getDescriptor();
 		LocationAttribute defaultEndAttr = Mockito.spy(new LocationAttribute());
 		Mockito.doReturn(endAttributeType).when(defaultEndAttr).getDescriptor();
-		defaultEndAttr.setUuid(OTMetadata.DEFAULT_AVAILABLE_TIME_END_UUID);
 		defaultEndAttr.setValue("19:16");
+		LocationAttribute calendarColor = Mockito.spy(new LocationAttribute());
+		Mockito.doReturn(calendarColorType).when(calendarColor).getDescriptor();
+		calendarColor.setValue("#00ffff");
 		Set<LocationAttribute> attributes = new HashSet<LocationAttribute>();
 		attributes.add(defaultBeginAttr);
 		attributes.add(defaultEndAttr);
+		attributes.add(calendarColor);
 
 		Location ot1 = new Location();
 		ot1.setId(1);
@@ -189,7 +194,7 @@ public class SchedulingFragmentControllerTest {
 				"{\"title\":\"\",\"start\":\"2014-06-09 00:00\",\"end\":\"2014-06-09 23:59\",\"availableStart\":\"2014-06-09 00:00\",\"availableEnd\":\"2014-06-09 23:59\",\"surgeryUuid\":null,\"dateLocked\":false,\"resourceId\":3,\"allDay\":false,\"editable\":false,\"annotation\":true,\"color\":\"grey\"}"));
 
 		assertThat(result.get(5).toJson(), is(
-				"{\"title\":\"Procedure Name - family name given name\",\"start\":\"2014-06-09 12:00\",\"end\":\"2014-06-09 13:30\",\"availableStart\":\"\",\"availableEnd\":\"\",\"surgeryUuid\":\"uuid\",\"dateLocked\":true,\"resourceId\":1,\"allDay\":false,\"editable\":false,\"annotation\":false,\"color\":\"blue\"}"));
+				"{\"title\":\"Procedure Name - family name given name\",\"start\":\"2014-06-09 12:00\",\"end\":\"2014-06-09 13:30\",\"availableStart\":\"\",\"availableEnd\":\"\",\"surgeryUuid\":\"uuid\",\"dateLocked\":true,\"resourceId\":1,\"allDay\":false,\"editable\":false,\"annotation\":false,\"color\":\"#00ffff\"}"));
 	}
 
 	/**

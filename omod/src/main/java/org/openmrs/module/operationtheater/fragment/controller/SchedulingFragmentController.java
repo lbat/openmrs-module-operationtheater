@@ -104,11 +104,12 @@ public class SchedulingFragmentController {
 			String patientName = surgery.getPatient().getFamilyName() + " " + surgery.getPatient().getGivenName();
 			String procedure = surgery.getProcedure().getName();
 			String surgeryUuid = surgery.getUuid();
+			String color = getCalendarColor(scheduling.getLocation());
 			int resourceId =
 					resources.indexOf(scheduling.getLocation().getName())
 							+ 1; //convention: resourceId = element array index + 1
 			CalendarEvent event = new CalendarEvent(procedure + " - " + patientName, startStr, endStr, surgeryUuid,
-					scheduling.getDateLocked(), resourceId);
+					scheduling.getDateLocked(), resourceId, color);
 			System.err.println(event);
 			events.add(event);
 		}
@@ -117,6 +118,16 @@ public class SchedulingFragmentController {
 				.fromCollection(events, ui, "title", "start", "end", "availableStart", "availableEnd", "surgeryUuid",
 						"dateLocked", "resourceId",
 						"allDay", "editable", "annotation", "color");
+	}
+
+	private String getCalendarColor(Location location) {
+		LocationAttribute colorAttr = getAttributeByUuid(location.getActiveAttributes(),
+				OTMetadata.CALENDAR_COLOR_UUID);
+		String color = null;
+		if (colorAttr != null) {
+			color = (String) colorAttr.getValue();
+		}
+		return color;
 	}
 
 	/**
@@ -409,7 +420,7 @@ public class SchedulingFragmentController {
 		}
 
 		public CalendarEvent(String title, String start, String end, String surgeryUuid, boolean dateLocked,
-		                     int resourceId) {
+		                     int resourceId, String color) {
 			this.title = title;
 			this.start = start;
 			this.end = end;
@@ -417,6 +428,9 @@ public class SchedulingFragmentController {
 			this.dateLocked = dateLocked;
 			this.resourceId = resourceId;
 			annotation = false;
+			if (color != null) {
+				this.color = color;
+			}
 		}
 
 		public String getAvailableStart() {
