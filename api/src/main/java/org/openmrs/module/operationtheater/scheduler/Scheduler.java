@@ -90,13 +90,6 @@ public enum Scheduler {
 			solver = solverFactory.buildSolver();
 		}
 
-		try {
-			new PlannedSurgery().isOutsideAvailableTimes();
-		}
-		catch (Exception e) {
-		}
-		;
-
 		status = Status.RUNNING;
 
 		solverThread = Daemon.runInDaemonThread(new Runnable() {
