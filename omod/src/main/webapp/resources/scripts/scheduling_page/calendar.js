@@ -11,11 +11,11 @@
     var lastOTInWeeklyView;
 
     //public methods
-    calendar.create = function (resources, lookUp, eventURL) {
+    calendar.create = function (resources, lookUp) {
         calResources = resources;
         resourceLookUp = lookUp;
         lastOTInWeeklyView = calResources[0];
-        getEventsURL = eventURL;
+        getEventsURL = emr.fragmentActionLink("operationtheater", "scheduling", "getEvents", null);
 
         createFullCalendar();
         customizeDesign();

@@ -49,7 +49,7 @@
         return false;
     };
 
-    availableTimesDialog.createDialog = function (greaterThanErrorMsg) {
+    availableTimesDialog.createDialog = function () {
 
         dialog = emr.setupConfirmationDialog({
             selector: '#available-times-dialog',
@@ -101,6 +101,9 @@
         });
 
         //validation
+        var greaterThanErrorMsg = emrExt.message(emr.message("operationtheater.validation.error.greaterThan"),
+            emr.message("operationtheater.scheduling.page.availableTimesDialog.label.startTime"));
+
         jq.validator.addMethod("greaterThan", function (value, element, params) {
 
             if (!jq('#is-ot-available').is(':checked'))

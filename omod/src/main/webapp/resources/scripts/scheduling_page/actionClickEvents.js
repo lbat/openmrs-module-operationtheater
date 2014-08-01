@@ -7,10 +7,10 @@
     var executeSchedulerURL;
 
     //public methods
-    actionClickEvents.add = function (execSchedulerURL, solverStatusURL, resources) {
+    actionClickEvents.add = function (resources) {
         calResources = resources;
-        getSolverStatusURL = solverStatusURL;
-        executeSchedulerURL = execSchedulerURL;
+        getSolverStatusURL = emr.fragmentActionLink("operationtheater", "scheduling", "getSolverStatus", null);
+        executeSchedulerURL = emr.fragmentActionLink("operationtheater", "scheduling", "schedule", null);
 
         addSchedulerActionClickEvent();
         addShowFilterDialogClickEvent();

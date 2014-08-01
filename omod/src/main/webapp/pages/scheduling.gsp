@@ -11,11 +11,19 @@
     ui.includeJavascript("operationtheater", "scheduling_page/calendar.js")
     ui.includeJavascript("operationtheater", "scheduling_page/actionClickEvents.js")
     ui.includeJavascript("operationtheater", "bower_components/validation/jquery.validate.js")
+    ui.includeJavascript("operationtheater", "emrExt.js")
 
     ui.includeJavascript("uicommons", "emr.js")
     ui.includeJavascript("uicommons", "moment.min.js")
     ui.includeJavascript("uicommons", "datetimepicker/bootstrap-datetimepicker.min.js")
 %>
+
+<%=ui.includeFragment("appui", "messages", [codes: [
+        "operationtheater.validation.error.greaterThan",
+        "operationtheater.scheduling.page.availableTimesDialog.label.startTime",
+].flatten()
+])%>
+
 <script type="text/javascript">
 
     var breadcrumbs = [
@@ -33,18 +41,15 @@
         <% } %>
 
         //create dialogs
-        availableTimesDialog.createDialog("${ui.message("operationtheater.validation.error.greaterThan",
-            ui.message("operationtheater.scheduling.page.availableTimesDialog.label.startTime"))}");
+        availableTimesDialog.createDialog();
         adjustSurgeryScheduleDialog.createDialog(resourceLookUp);
         filterResourcesDialog.createDialog();
 
         //create calendar
-        calendar.create(calResources, resourceLookUp, '${ ui.actionLink("operationtheater", "scheduling", "getEvents") }');
+        calendar.create(calResources, resourceLookUp);
 
         //add action click events
-        var executeSchedulerURL = '${ ui.actionLink("operationtheater", "scheduling", "schedule") }';
-        var getSchedulerStatusURL = '${ ui.actionLink("operationtheater", "scheduling", "getSolverStatus") }';
-        actionClickEvents.add(executeSchedulerURL, getSchedulerStatusURL, calResources);
+        actionClickEvents.add(calResources);
 
         jq(window).resize(function () {
             calendar.resize();
