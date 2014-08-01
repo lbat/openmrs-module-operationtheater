@@ -198,7 +198,8 @@ body {
         <ul>
             <li class="info">
                 <span id="">${ui.message("operationtheater.scheduling.page.adjustScheduleDialog.info")}</span>
-                <h5 id="adjust-schedule-surgery"></h5>
+                <a href="javascript:adjustSurgeryScheduleDialog.openSurgery('${ui.pageLink("operationtheater", "surgery")}');"><h5
+                        style="color:#007fff" id="adjust-schedule-surgery"></h5></a>
             </li>
 
             <form id="adjust-schedule-form" class="simple-form-ui">

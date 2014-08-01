@@ -6,6 +6,8 @@
     var calEvent;
     var dateFormat = "DD-MM-YYYY HH:mm";
     var operationtheaters;
+    var patientUuid;
+    var surgeryUuid;
 
     //Public Method
     adjustSurgeryScheduleDialog.show = function (event) {
@@ -23,6 +25,9 @@
 
         //reset validation errors
         jq('#adjust-schedule-form').valid();
+
+        surgeryUuid = calEvent.surgeryUuid;
+        patientUuid = calEvent.patientUuid;
 
         dialog.show();
         return false;
@@ -91,5 +96,13 @@
                 jq(selector).hide();
             }
         });
+
+        adjustSurgeryScheduleDialog.openSurgery = function () {
+            emr.navigateTo({
+                provider: "operationtheater",
+                page: "surgery",
+                query: {patientId: patientUuid, surgeryId: surgeryUuid}
+            });
+        };
     };
 }(window.adjustSurgeryScheduleDialog = window.adjustSurgeryScheduleDialog || {}, jQuery));

@@ -146,6 +146,7 @@ public class SchedulingFragmentControllerTest {
 		Patient patient = Mockito.mock(Patient.class);
 		when(patient.getFamilyName()).thenReturn("family name");
 		when(patient.getGivenName()).thenReturn("given name");
+		when(patient.getUuid()).thenReturn("patient_uuid");
 		String pattern = "yyyy-MM-dd HH:mm";
 		DateTime begin = DateTime.parse("2014-06-09 12:00", DateTimeFormat.forPattern(pattern));
 		DateTime finish = DateTime.parse("2014-06-09 13:30", DateTimeFormat.forPattern(pattern));
@@ -181,20 +182,20 @@ public class SchedulingFragmentControllerTest {
 
 		assertThat(result, hasSize(6));
 		assertThat(result.get(0).toJson(),
-				is("{\"title\":\"\",\"start\":\"2014-06-09 00:00\",\"end\":\"2014-06-09 08:45\",\"availableStart\":\"2014-06-09 08:45\",\"availableEnd\":\"2014-06-09 19:16\",\"surgeryUuid\":null,\"dateLocked\":false,\"resourceId\":1,\"allDay\":false,\"editable\":false,\"annotation\":true,\"color\":\"grey\"}"));
+				is("{\"title\":\"\",\"start\":\"2014-06-09 00:00\",\"end\":\"2014-06-09 08:45\",\"availableStart\":\"2014-06-09 08:45\",\"availableEnd\":\"2014-06-09 19:16\",\"surgeryUuid\":null,\"patientUuid\":null,\"dateLocked\":false,\"resourceId\":1,\"allDay\":false,\"editable\":false,\"annotation\":true,\"color\":\"grey\"}"));
 		assertThat(result.get(1).toJson(), is(
-				"{\"title\":\"\",\"start\":\"2014-06-09 19:16\",\"end\":\"2014-06-09 23:59\",\"availableStart\":\"2014-06-09 08:45\",\"availableEnd\":\"2014-06-09 19:16\",\"surgeryUuid\":null,\"dateLocked\":false,\"resourceId\":1,\"allDay\":false,\"editable\":false,\"annotation\":true,\"color\":\"grey\"}"));
+				"{\"title\":\"\",\"start\":\"2014-06-09 19:16\",\"end\":\"2014-06-09 23:59\",\"availableStart\":\"2014-06-09 08:45\",\"availableEnd\":\"2014-06-09 19:16\",\"surgeryUuid\":null,\"patientUuid\":null,\"dateLocked\":false,\"resourceId\":1,\"allDay\":false,\"editable\":false,\"annotation\":true,\"color\":\"grey\"}"));
 
 		assertThat(result.get(2).toJson(), is(
-				"{\"title\":\"\",\"start\":\"2014-06-09 00:00\",\"end\":\"2014-06-09 07:35\",\"availableStart\":\"2014-06-09 07:35\",\"availableEnd\":\"2014-06-09 20:55\",\"surgeryUuid\":null,\"dateLocked\":false,\"resourceId\":2,\"allDay\":false,\"editable\":false,\"annotation\":true,\"color\":\"grey\"}"));
+				"{\"title\":\"\",\"start\":\"2014-06-09 00:00\",\"end\":\"2014-06-09 07:35\",\"availableStart\":\"2014-06-09 07:35\",\"availableEnd\":\"2014-06-09 20:55\",\"surgeryUuid\":null,\"patientUuid\":null,\"dateLocked\":false,\"resourceId\":2,\"allDay\":false,\"editable\":false,\"annotation\":true,\"color\":\"grey\"}"));
 		assertThat(result.get(3).toJson(), is(
-				"{\"title\":\"\",\"start\":\"2014-06-09 20:55\",\"end\":\"2014-06-09 23:59\",\"availableStart\":\"2014-06-09 07:35\",\"availableEnd\":\"2014-06-09 20:55\",\"surgeryUuid\":null,\"dateLocked\":false,\"resourceId\":2,\"allDay\":false,\"editable\":false,\"annotation\":true,\"color\":\"grey\"}"));
+				"{\"title\":\"\",\"start\":\"2014-06-09 20:55\",\"end\":\"2014-06-09 23:59\",\"availableStart\":\"2014-06-09 07:35\",\"availableEnd\":\"2014-06-09 20:55\",\"surgeryUuid\":null,\"patientUuid\":null,\"dateLocked\":false,\"resourceId\":2,\"allDay\":false,\"editable\":false,\"annotation\":true,\"color\":\"grey\"}"));
 
 		assertThat(result.get(4).toJson(), is(
-				"{\"title\":\"\",\"start\":\"2014-06-09 00:00\",\"end\":\"2014-06-09 23:59\",\"availableStart\":\"2014-06-09 00:00\",\"availableEnd\":\"2014-06-09 00:00\",\"surgeryUuid\":null,\"dateLocked\":false,\"resourceId\":3,\"allDay\":false,\"editable\":false,\"annotation\":true,\"color\":\"grey\"}"));
+				"{\"title\":\"\",\"start\":\"2014-06-09 00:00\",\"end\":\"2014-06-09 23:59\",\"availableStart\":\"2014-06-09 00:00\",\"availableEnd\":\"2014-06-09 00:00\",\"surgeryUuid\":null,\"patientUuid\":null,\"dateLocked\":false,\"resourceId\":3,\"allDay\":false,\"editable\":false,\"annotation\":true,\"color\":\"grey\"}"));
 
 		assertThat(result.get(5).toJson(), is(
-				"{\"title\":\"Procedure Name - family name given name\",\"start\":\"2014-06-09 12:00\",\"end\":\"2014-06-09 13:30\",\"availableStart\":\"\",\"availableEnd\":\"\",\"surgeryUuid\":\"uuid\",\"dateLocked\":true,\"resourceId\":1,\"allDay\":false,\"editable\":false,\"annotation\":false,\"color\":\"#00ffff\"}"));
+				"{\"title\":\"Procedure Name - family name given name\",\"start\":\"2014-06-09 12:00\",\"end\":\"2014-06-09 13:30\",\"availableStart\":\"\",\"availableEnd\":\"\",\"surgeryUuid\":\"uuid\",\"patientUuid\":\"patient_uuid\",\"dateLocked\":true,\"resourceId\":1,\"allDay\":false,\"editable\":false,\"annotation\":false,\"color\":\"#00ffff\"}"));
 	}
 
 	/**

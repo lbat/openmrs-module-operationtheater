@@ -40,7 +40,7 @@ public class SurgeryPageController {
 
 	public Object controller(PageModel model,
 	                         @RequestParam(value = "patientId", required = true) Patient patient,
-	                         @RequestParam(value = "surgeryId", required = false) Integer surgeryId,
+	                         @RequestParam(value = "surgeryId", required = false) Surgery surgery,
 	                         @SpringBean OperationTheaterService otService,
 	                         @InjectBeans PatientDomainWrapper patientDomainWrapper,
 	                         @SpringBean("adtService") AdtService adtService,
@@ -51,12 +51,9 @@ public class SurgeryPageController {
 			return new Redirect("coreapps", "patientdashboard/deletedPatient", "patientId=" + patient.getId());
 		}
 
-		//TODO is there a way to do this automatically - how is that done with patients - https://wiki.openmrs.org/display/docs/Flexible+Method+Signatures+for+UI+Framework+Controller+and+Action+Methods
-		Surgery surgery = new Surgery();
-		Procedure procedure = new Procedure();
-		surgery.setProcedure(procedure);
-		if (surgeryId != null) {
-			surgery = otService.getSurgery(surgeryId);
+		if (surgery == null) {
+			surgery = new Surgery();
+			surgery.setProcedure(new Procedure());
 		}
 		model.addAttribute("surgery", surgery);
 

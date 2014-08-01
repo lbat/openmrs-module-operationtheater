@@ -94,6 +94,7 @@ public class SchedulingFragmentController {
 
 		return SimpleObject
 				.fromCollection(events, ui, "title", "start", "end", "availableStart", "availableEnd", "surgeryUuid",
+						"patientUuid",
 						"dateLocked", "resourceId", "allDay", "editable", "annotation", "color");
 	}
 
@@ -251,10 +252,11 @@ public class SchedulingFragmentController {
 		String patientName = surgery.getPatient().getFamilyName() + " " + surgery.getPatient().getGivenName();
 		String procedure = surgery.getProcedure().getName();
 		String surgeryUuid = surgery.getUuid();
+		String patientUuid = surgery.getPatient().getUuid();
 		String color = getCalendarColor(scheduling.getLocation());
 		//convention: resourceId = element array index + 1 - TODO thats a bit hacky -> refactor that
 		int resourceId = resources.indexOf(scheduling.getLocation().getName()) + 1;
-		CalendarEvent event = new CalendarEvent(procedure + " - " + patientName, startStr, endStr, surgeryUuid,
+		CalendarEvent event = new CalendarEvent(procedure + " - " + patientName, startStr, endStr, surgeryUuid, patientUuid,
 				scheduling.getDateLocked(), resourceId, color);
 		return event;
 	}
@@ -454,6 +456,8 @@ public class SchedulingFragmentController {
 
 		private String surgeryUuid;
 
+		private String patientUuid;
+
 		private boolean dateLocked;
 
 		public CalendarEvent(String title, String start, String end, String availableStart, String availableEnd,
@@ -471,7 +475,8 @@ public class SchedulingFragmentController {
 			}
 		}
 
-		public CalendarEvent(String title, String start, String end, String surgeryUuid, boolean dateLocked,
+		public CalendarEvent(String title, String start, String end, String surgeryUuid, String patientUuid,
+		                     boolean dateLocked,
 		                     int resourceId, String color) {
 			this.title = title;
 			this.start = start;
@@ -483,6 +488,7 @@ public class SchedulingFragmentController {
 			if (color != null) {
 				this.color = color;
 			}
+			this.patientUuid = patientUuid;
 		}
 
 		public String getAvailableStart() {
@@ -577,6 +583,14 @@ public class SchedulingFragmentController {
 
 		public void setSurgeryUuid(String surgeryUuid) {
 			this.surgeryUuid = surgeryUuid;
+		}
+
+		public String getPatientUuid() {
+			return patientUuid;
+		}
+
+		public void setPatientUuid(String patientUuid) {
+			this.patientUuid = patientUuid;
 		}
 
 		public boolean isDateLocked() {
