@@ -14,34 +14,28 @@
 
     <!-- configuration of the optimization algorithm(s) -->
     <termination>
-        <maximumSecondsSpend>5</maximumSecondsSpend>
-        <scoreAttained>-0hard/0soft</scoreAttained>
+        <maximumSecondsSpend>10</maximumSecondsSpend>
+        <scoreAttained>0hard/0soft</scoreAttained>
     </termination>
     <constructionHeuristic>
-        <constructionHeuristicType>FIRST_FIT</constructionHeuristicType>
-        <!--<forager>-->
-        <!--<pickEarlyType>FIRST_NON_DETERIORATING_SCORE</pickEarlyType>-->
-        <!--</forager>-->
+        <constructionHeuristicType>FIRST_FIT_DECREASING</constructionHeuristicType>
     </constructionHeuristic>
     <localSearch>
         <unionMoveSelector>
-            <changeMoveSelector>
-                <valueSelector>
-                    <variableName>location</variableName>
-                </valueSelector>
-            </changeMoveSelector>
-            <changeMoveSelector>
-                <valueSelector>
-                    <variableName>start</variableName>
-                </valueSelector>
-            </changeMoveSelector>
+            <changeMoveSelector/>
+            <swapMoveSelector/>
+            <subChainChangeMoveSelector>
+                <selectReversingMoveToo>true</selectReversingMoveToo>
+            </subChainChangeMoveSelector>
+            <subChainSwapMoveSelector>
+                <selectReversingMoveToo>true</selectReversingMoveToo>
+            </subChainSwapMoveSelector>
         </unionMoveSelector>
-
         <acceptor>
-            <lateAcceptanceSize>600</lateAcceptanceSize>
+            <lateAcceptanceSize>400</lateAcceptanceSize>
         </acceptor>
         <forager>
-            <acceptedCountLimit>4</acceptedCountLimit>
+            <acceptedCountLimit>100</acceptedCountLimit>
         </forager>
     </localSearch>
 </solver>

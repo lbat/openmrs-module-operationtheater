@@ -21,7 +21,7 @@ import org.optaplanner.core.api.domain.variable.PlanningVariable;
  */
 @PlanningEntity(movableEntitySelectionFilter = MovablePlannedSurgerySelectionFilter.class,
 		difficultyComparatorClass = PlannedSurgeryDifficultyComparator.class)
-public class PlannedSurgery {
+public class PlannedSurgery implements TimetableEntry {
 
 	private OperationTheaterService otService; //= Context.getService(OperationTheaterService.class);
 
@@ -29,6 +29,8 @@ public class PlannedSurgery {
 	private Surgery surgery;
 
 	// Planning variables: will change during planning (between score calculations)
+	private TimetableEntry previousTimetableEntry;
+
 	private Location location;
 
 	private DateTime start;
@@ -84,7 +86,19 @@ public class PlannedSurgery {
 		this.surgery = surgery;
 	}
 
-	@PlanningVariable(valueRangeProviderRefs = { "locationRange" })
+	@PlanningVariable(chained = true, valueRangeProviderRefs = { "anchorRange", "plannedSurgeryRange" })
+	public TimetableEntry getPreviousTimetableEntry() {
+		return previousTimetableEntry;
+	}
+
+	public void setPreviousTimetableEntry(TimetableEntry previousTimetableEntry) {
+		this.previousTimetableEntry = previousTimetableEntry;
+		setStart(previousTimetableEntry.getEnd());
+		location = previousTimetableEntry.getLocation();
+		//		System.err.println(surgery+": set allocation: "+previousAllocation);
+	}
+
+	//	@PlanningVariable(valueRangeProviderRefs = { "locationRange" })
 	public Location getLocation() {
 		return location;
 	}
@@ -93,7 +107,7 @@ public class PlannedSurgery {
 		this.location = location;
 	}
 
-	@PlanningVariable(valueRangeProviderRefs = { "startDateRange" })
+	//	@PlanningVariable(valueRangeProviderRefs = { "startDateRange" })
 	public DateTime getStart() {
 		return start;
 	}
@@ -141,9 +155,10 @@ public class PlannedSurgery {
 		String endStr = end == null ? "null      " : fmt.print(end);
 		return "\n         PlannedSurgery {" +
 				"surgery=" + surgery +
-				", start=" + startStr +
-				", end=" + endStr +
-				", location=" + location +
+				"allocation=" + previousTimetableEntry +
+				//				", start=" + startStr +
+				//				", end=" + endStr +
+				//				", location=" + location +
 				'}';
 	}
 

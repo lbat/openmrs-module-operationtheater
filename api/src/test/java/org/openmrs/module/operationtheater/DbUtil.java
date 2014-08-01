@@ -148,7 +148,10 @@ public class DbUtil {
 		PATIENT("patient", "patient_id", 100, false, null, "uuid"),
 		PROCEDURE("prozedure", "procedure_id", 1, true, null),
 		SCHEDULING_DATA("scheduling_data", "scheduling_data_id", 1, false, null),
-		SURGERY("surgery", "surgery_id", 1, false, null);
+		SURGERY("surgery", "surgery_id", 1, false, null),
+		LOCATION_ATTRIBUTE_TYPE("location_attribute_type", "location_attribute_type_id", 100, true,
+				getLocationAttributeTypeValueGenerators()),
+		LOCATION_ATTRIBUTE("location_attribute", "location_attribute_id", 100, false, null);
 
 		private String tableName;
 
@@ -200,6 +203,17 @@ public class DbUtil {
 		private static Map<String, ValueGenerator<?>> getPersonValueGenerators() {
 			Map<String, ValueGenerator<?>> valueGeneratorMap = new HashMap<String, ValueGenerator<?>>();
 			valueGeneratorMap.put("dead", ValueGenerators.constant(false));
+			return valueGeneratorMap;
+		}
+
+		/**
+		 * method that returns additional ValueGenerators that are relevant for the table LOCATION_ATTRIBUTE_TYPE
+		 *
+		 * @return
+		 */
+		private static Map<String, ValueGenerator<?>> getLocationAttributeTypeValueGenerators() {
+			Map<String, ValueGenerator<?>> valueGeneratorMap = new HashMap<String, ValueGenerator<?>>();
+			valueGeneratorMap.put("min_occurs", ValueGenerators.constant(0));
 			return valueGeneratorMap;
 		}
 	}

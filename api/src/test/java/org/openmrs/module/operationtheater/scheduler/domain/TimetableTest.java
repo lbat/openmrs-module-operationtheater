@@ -1,10 +1,7 @@
 package org.openmrs.module.operationtheater.scheduler.domain;
 
-import org.joda.time.DateTime;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.openmrs.Location;
-import org.openmrs.module.operationtheater.Surgery;
 import org.openmrs.module.operationtheater.api.OperationTheaterService;
 
 import java.util.ArrayList;
@@ -30,27 +27,13 @@ public class TimetableTest {
 	public void getProblemFacts_shouldReturnAllProblemFactsWithoutThePlanningEntities() throws Exception {
 		Timetable timetable = new Timetable();
 
-		Surgery s1 = new Surgery();
-		Surgery s2 = new Surgery();
-		List<Surgery> surgeries = new ArrayList<Surgery>();
-		surgeries.add(s1);
-		surgeries.add(s2);
+		Anchor a1 = new Anchor(null, null);
+		Anchor a2 = new Anchor(null, null);
+		List<Anchor> anchors = new ArrayList<Anchor>();
+		anchors.add(a1);
+		anchors.add(a2);
 
-		Location l1 = new Location();
-		Location l2 = new Location();
-		List<Location> locations = new ArrayList<Location>();
-		locations.add(l1);
-		locations.add(l2);
-
-		DateTime t1 = new DateTime();
-		DateTime t2 = new DateTime();
-		List<DateTime> startTimes = new ArrayList<DateTime>();
-		startTimes.add(t1);
-		startTimes.add(t2);
-
-		timetable.setSurgeries(surgeries);
-		timetable.setLocations(locations);
-		timetable.setStartTimes(startTimes);
+		timetable.setAnchors(anchors);
 
 		PlannedSurgery ps1 = new PlannedSurgery();
 		PlannedSurgery ps2 = new PlannedSurgery();
@@ -64,10 +47,8 @@ public class TimetableTest {
 		Collection<?> problemFacts = timetable.getProblemFacts();
 
 		//verify contains all problem facts
-		assertThat(problemFacts, hasSize(6));
-		assertTrue(problemFacts.containsAll(surgeries));
-		assertTrue(problemFacts.containsAll(locations));
-		assertTrue(problemFacts.containsAll(startTimes));
+		assertThat(problemFacts, hasSize(2));
+		assertTrue(problemFacts.containsAll(anchors));
 
 		//verify contains NO planning entities
 		assertFalse(problemFacts.contains(ps1));

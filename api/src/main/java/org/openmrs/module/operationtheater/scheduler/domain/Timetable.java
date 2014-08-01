@@ -1,8 +1,5 @@
 package org.openmrs.module.operationtheater.scheduler.domain;
 
-import org.joda.time.DateTime;
-import org.openmrs.Location;
-import org.openmrs.module.operationtheater.Surgery;
 import org.openmrs.module.operationtheater.api.OperationTheaterService;
 import org.optaplanner.core.api.domain.solution.PlanningEntityCollectionProperty;
 import org.optaplanner.core.api.domain.solution.PlanningSolution;
@@ -20,15 +17,10 @@ import java.util.List;
  * Also used to act as a range provider for the planning variables
  */
 @PlanningSolution
-public class
-		Timetable implements Solution<HardSoftScore> {
+public class Timetable implements Solution<HardSoftScore> {
 
 	//problem facts  (don't change value during planning)
-	private List<Surgery> surgeries;
-
-	private List<Location> locations; // these are the operation theaters
-
-	private List<DateTime> startTimes;
+	private List<Anchor> anchors;
 
 	//planning entities
 	private List<PlannedSurgery> plannedSurgeries;
@@ -53,9 +45,7 @@ public class
 	public Collection<?> getProblemFacts() {
 		//planning entities are added automatically -> don't add them here
 		List<Object> facts = new ArrayList<Object>();
-		facts.addAll(surgeries);
-		facts.addAll(locations);
-		facts.addAll(startTimes);
+		facts.addAll(anchors);
 		return facts;
 	}
 
@@ -67,33 +57,17 @@ public class
 				'}';
 	}
 
-	public List<Surgery> getSurgeries() {
-		return surgeries;
+	@ValueRangeProvider(id = "anchorRange")
+	public List<Anchor> getAnchors() {
+		return anchors;
 	}
 
-	public void setSurgeries(List<Surgery> surgeries) {
-		this.surgeries = surgeries;
-	}
-
-	@ValueRangeProvider(id = "startDateRange")
-	public List<DateTime> getStartTimes() {
-		return startTimes;
-	}
-
-	public void setStartTimes(List<DateTime> startTimes) {
-		this.startTimes = startTimes;
-	}
-
-	@ValueRangeProvider(id = "locationRange")
-	public List<Location> getLocations() {
-		return locations;
-	}
-
-	public void setLocations(List<Location> locations) {
-		this.locations = locations;
+	public void setAnchors(List<Anchor> anchors) {
+		this.anchors = anchors;
 	}
 
 	@PlanningEntityCollectionProperty
+	@ValueRangeProvider(id = "plannedSurgeryRange")
 	public List<PlannedSurgery> getPlannedSurgeries() {
 		return plannedSurgeries;
 	}

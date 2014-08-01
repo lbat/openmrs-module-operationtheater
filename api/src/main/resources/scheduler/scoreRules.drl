@@ -8,7 +8,8 @@ import org.openmrs.module.operationtheater.scheduler.domain.PlannedSurgery;
 
 import org.joda.time.DateTime;
 import java.util.Date
-import org.joda.time.Period;
+import org.joda.time.Period
+import org.joda.time.Hours;
 
 global HardSoftScoreHolder scoreHolder;
 
@@ -45,7 +46,7 @@ rule "firstComeFirstServed"
         $surgery: PlannedSurgery($start : start, start != null)
     then
         DateTime $created = new DateTime($surgery.getSurgery().getDateCreated().getTime());
-        Period $period = new Period($created, $start);
+        int hours = Hours.hoursBetween($created, $start).getHours();
 
-        scoreHolder.addSoftConstraintMatch(kcontext, -$period.getDays()*24 -$period.getHours());
+        scoreHolder.addSoftConstraintMatch(kcontext, -hours);
 end
