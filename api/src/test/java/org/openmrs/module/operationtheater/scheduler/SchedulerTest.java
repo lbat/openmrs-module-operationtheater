@@ -32,6 +32,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 import static org.openmrs.module.operationtheater.DbUtil.Config;
 import static org.openmrs.module.operationtheater.DbUtil.insertInto;
@@ -61,12 +62,14 @@ public class SchedulerTest extends BaseModuleContextSensitiveTest {
 								false)
 						.values(refDate.plusHours(60).toDate(), refDate.plusHours(60).plusMinutes(35 + 25).toDate(), 100,
 								true)
+						.values(refDate.plusDays(200).toDate(), refDate.plusDays(200).plusHours(1).toDate(), 100, true)
 						.build(),
 				insertInto(Config.SURGERY, "date_created")
 						.columns("patient_id", "procedure_id", "surgery_completed", "scheduling_data_id", "date_created")
 						.values(100, 1, false, 1, refDate.minusWeeks(1).toDate())
 						.values(100, 1, false, 2, refDate.minusWeeks(2).toDate())
 						.values(100, 1, false, 3, refDate.minusWeeks(3).toDate())
+						.values(100, 1, false, 4, refDate.minusWeeks(3).toDate()) //outside planning period
 						.build()
 		);
 		DbSetup dbSetup = DbUtil.buildDBSetup(operation, getConnection(), useInMemoryDatabase());
@@ -154,27 +157,42 @@ public class SchedulerTest extends BaseModuleContextSensitiveTest {
 		Whitebox.setInternalState(Scheduler.INSTANCE, "locationService", locationService);
 
 		//call method under test
-		Timetable timetable = Scheduler.INSTANCE.setupInitialSolution(2);
+		Timetable timetable = Scheduler.INSTANCE.setupInitialSolution(3);
 
 		//verify
 		//anchors
 		List<Anchor> anchors = timetable.getAnchors();
-		assertThat(anchors, hasSize(5));
+		assertThat(anchors, hasSize(8));
 		int i = 0;
+		assertThat(anchors.get(i).getLocation(), is(nullValue()));
+		i++;
 		assertThat(anchors.get(i).getLocation().getName(), is("OT 1"));
 		assertThat(anchors.get(i).getStart().withMillis(0), equalTo(new DateTime().withMillis(0)));
+		assertThat(anchors.get(i).getRemainingTime(), is(360));
 		i++;
 		assertThat(anchors.get(i).getLocation().getName(), is("OT 1"));
 		assertThat(anchors.get(i).getStart(), equalTo(new DateTime().plusDays(1).withTime(8, 0, 0, 0)));
+		assertThat(anchors.get(i).getRemainingTime(), is(540));
+		i++;
+		assertThat(anchors.get(i).getLocation().getName(), is("OT 1"));
+		assertThat(anchors.get(i).getStart(), equalTo(new DateTime().plusDays(2).withTime(8, 0, 0, 0)));
+		assertThat(anchors.get(i).getRemainingTime(), is(240));
 		i++;
 		assertThat(anchors.get(i).getLocation().getName(), is("OT 1"));
 		assertThat(anchors.get(i).getStart(), equalTo(new DateTime().plusDays(2).withTime(12, 0, 0, 0)));
+		assertThat(anchors.get(i).getRemainingTime(), is(300));
 		i++;
 		assertThat(anchors.get(i).getLocation().getName(), is("OT 2"));
 		assertThat(anchors.get(i).getStart().withMillis(0), equalTo(new DateTime().withMillis(0)));
+		assertThat(anchors.get(i).getRemainingTime(), is(360));
 		i++;
 		assertThat(anchors.get(i).getLocation().getName(), is("OT 2"));
 		assertThat(anchors.get(i).getStart(), equalTo(new DateTime().plusDays(1).withTime(8, 0, 0, 0)));
+		assertThat(anchors.get(i).getRemainingTime(), is(540));
+		i++;
+		assertThat(anchors.get(i).getLocation().getName(), is("OT 2"));
+		assertThat(anchors.get(i).getStart(), equalTo(new DateTime().plusDays(2).withTime(8, 0, 0, 0)));
+		assertThat(anchors.get(i).getRemainingTime(), is(540));
 
 		//planned surgeries
 		List<PlannedSurgery> plannedSurgeries = timetable.getPlannedSurgeries();
@@ -185,7 +203,7 @@ public class SchedulerTest extends BaseModuleContextSensitiveTest {
 		assertThat(plannedSurgeries.get(i).getStart(),
 				is(refDate.plusDays(1).plusHours(8))); //start time is not the same as in db - determined by anchor
 		assertThat(plannedSurgeries.get(i).getEnd(), is(refDate.plusDays(1).plusHours(9)));
-		assertThat(plannedSurgeries.get(i).getPreviousTimetableEntry(), is((TimetableEntry) anchors.get(1)));
+		assertThat(plannedSurgeries.get(i).getPreviousTimetableEntry(), is((TimetableEntry) anchors.get(2)));
 		i++;
 		assertThat(plannedSurgeries.get(i).getSurgery().getUuid(), is("surgery2"));
 		assertThat(plannedSurgeries.get(i).getLocation().getName(), is("OT 1"));
@@ -198,6 +216,6 @@ public class SchedulerTest extends BaseModuleContextSensitiveTest {
 		assertThat(plannedSurgeries.get(i).getLocation().getName(), is("OT 1"));
 		assertThat(plannedSurgeries.get(i).getStart(), is(refDate.plusHours(60)));
 		assertThat(plannedSurgeries.get(i).getEnd(), is(refDate.plusHours(61)));
-		assertThat(plannedSurgeries.get(i).getPreviousTimetableEntry(), is((TimetableEntry) anchors.get(2)));
+		assertThat(plannedSurgeries.get(i).getPreviousTimetableEntry(), is((TimetableEntry) anchors.get(4)));
 	}
 }

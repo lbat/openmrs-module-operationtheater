@@ -5,6 +5,7 @@ import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScoreHolder;
 
 import org.joda.time.Interval;
 import org.openmrs.module.operationtheater.scheduler.domain.PlannedSurgery;
+import org.openmrs.module.operationtheater.scheduler.domain.Anchor;
 
 import org.joda.time.DateTime;
 import java.util.Date
@@ -12,6 +13,11 @@ import org.joda.time.Period
 import org.joda.time.Hours;
 
 global HardSoftScoreHolder scoreHolder;
+
+// Optaplanner 6.0.1.Final doesn't support chained and nullable planning variables
+// As a workaround a "null"-Anchor has been created with location=null
+// All planning entities that have a location==null are considered unscheduled and must be excluded
+// form score calculation - exception: rule preventUnscheduledSurgeriesIfTimeLeft
 
 // ############################################################################
 // Hard constraints
@@ -21,7 +27,7 @@ global HardSoftScoreHolder scoreHolder;
 //Operation Theater occupancy: two PlannedSurgeries in the same Location with overlapping periods
 rule "overlappingSurgeriesInSameOperationTheater"
     when
-        $left: PlannedSurgery($location: location)
+        $left: PlannedSurgery($location: location, location != null)
         $right: PlannedSurgery(this != $left, location == $location, isOverlapping($left))
         //prevent the double execution of this rule (AB, BA)
         eval( System.identityHashCode($left) < System.identityHashCode($right))
@@ -32,7 +38,16 @@ end
 //It is not allowed to have surgeries outside available times
 rule "surgeriesOutsideAvailableTimes"
     when
-        PlannedSurgery(isOutsideAvailableTimes())
+        PlannedSurgery(isOutsideAvailableTimes(), location != null)
+    then
+        scoreHolder.addHardConstraintMatch(kcontext, -1);
+end
+
+//It is not allowed to have unscheduled surgeries if there are OTs within the planning window that are not fully utilized
+rule "preventUnscheduledSurgeriesIfTimeLeft"
+    when
+        $surgery: PlannedSurgery(location == null, $procedure: surgery.procedure)
+        Anchor(getRemainingTime() >= $procedure.otPreparationDuration + $procedure.interventionDuration)
     then
         scoreHolder.addHardConstraintMatch(kcontext, -1);
 end
@@ -43,7 +58,7 @@ end
 
 rule "firstComeFirstServed"
     when
-        $surgery: PlannedSurgery($start : start, start != null)
+        $surgery: PlannedSurgery($start : start, start != null, location != null)
     then
         DateTime $created = new DateTime($surgery.getSurgery().getDateCreated().getTime());
         int hours = Hours.hoursBetween($created, $start).getHours();

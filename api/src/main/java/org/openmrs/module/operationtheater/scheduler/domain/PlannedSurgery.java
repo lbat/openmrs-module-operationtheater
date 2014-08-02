@@ -5,6 +5,7 @@ import org.joda.time.Interval;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.openmrs.Location;
+import org.openmrs.module.operationtheater.Procedure;
 import org.openmrs.module.operationtheater.SchedulingData;
 import org.openmrs.module.operationtheater.Surgery;
 import org.openmrs.module.operationtheater.api.OperationTheaterService;
@@ -31,13 +32,15 @@ public class PlannedSurgery implements TimetableEntry {
 	// Planning variables: will change during planning (between score calculations)
 	private TimetableEntry previousTimetableEntry;
 
-	private Location location;
-
-	private DateTime start;
-
 	//shadow variable - automatically calculated if the underlying genuine planning variable (start) changes its value
 	//not changed by the solver
+	private DateTime start;
+
 	private DateTime end;
+
+	private Location location;
+
+	private TimetableEntry nextTimetableEntry;
 
 	public PlannedSurgery(OperationTheaterService otService) {
 		this.otService = otService;
@@ -95,10 +98,18 @@ public class PlannedSurgery implements TimetableEntry {
 		this.previousTimetableEntry = previousTimetableEntry;
 		setStart(previousTimetableEntry.getEnd());
 		location = previousTimetableEntry.getLocation();
-		//		System.err.println(surgery+": set allocation: "+previousAllocation);
 	}
 
-	//	@PlanningVariable(valueRangeProviderRefs = { "locationRange" })
+	@Override
+	public TimetableEntry getNextTimetableEntry() {
+		return nextTimetableEntry;
+	}
+
+	@Override
+	public void setNextTimetableEntry(TimetableEntry nextTimeTableEntry) {
+		this.nextTimetableEntry = nextTimeTableEntry;
+	}
+
 	public Location getLocation() {
 		return location;
 	}
@@ -107,7 +118,6 @@ public class PlannedSurgery implements TimetableEntry {
 		this.location = location;
 	}
 
-	//	@PlanningVariable(valueRangeProviderRefs = { "startDateRange" })
 	public DateTime getStart() {
 		return start;
 	}
@@ -146,6 +156,18 @@ public class PlannedSurgery implements TimetableEntry {
 
 	public void setEnd(DateTime end) {
 		this.end = end;
+	}
+
+	/**
+	 * @return
+	 * @should return the entire duration this surgery occupies the ot when nextTimeTableEntry is null
+	 * @should return value from its successor in the chain added to the entire duration this surgery occupies the ot
+	 */
+	@Override
+	public int getChainLengthInMinutes() {
+		Procedure procedure = surgery.getProcedure();
+		int duration = procedure.getInterventionDuration() + procedure.getOtPreparationDuration();
+		return nextTimetableEntry == null ? duration : nextTimetableEntry.getChainLengthInMinutes() + duration;
 	}
 
 	@Override
@@ -199,7 +221,8 @@ public class PlannedSurgery implements TimetableEntry {
 	 * and stores it in the db
 	 *
 	 * @param service
-	 * @should update schedulingData object and store persist it into the db
+	 * @should update schedulingData object and persist it into the db if location is not null
+	 * @should set set start end and location fields to null if location is null
 	 */
 	public void persist(OperationTheaterService service) {
 		SchedulingData scheduling = surgery.getSchedulingData();
@@ -207,9 +230,16 @@ public class PlannedSurgery implements TimetableEntry {
 			scheduling = new SchedulingData();
 			surgery.setSchedulingData(scheduling);
 		}
-		scheduling.setStart(start);
-		scheduling.setEnd(end);
-		scheduling.setLocation(location);
+		if (location != null) {
+			scheduling.setStart(start);
+			scheduling.setEnd(end);
+			scheduling.setLocation(location);
+
+		} else {
+			scheduling.setStart(null);
+			scheduling.setEnd(null);
+			scheduling.setLocation(null);
+		}
 		service.saveSurgery(surgery);
 	}
 }

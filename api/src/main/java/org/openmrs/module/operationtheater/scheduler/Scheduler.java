@@ -4,6 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
+import org.joda.time.Minutes;
 import org.openmrs.Location;
 import org.openmrs.LocationTag;
 import org.openmrs.api.LocationService;
@@ -19,7 +20,7 @@ import org.openmrs.module.operationtheater.scheduler.domain.Anchor;
 import org.openmrs.module.operationtheater.scheduler.domain.PlannedSurgery;
 import org.openmrs.module.operationtheater.scheduler.domain.Timetable;
 import org.openmrs.module.operationtheater.scheduler.domain.TimetableEntry;
-import org.openmrs.module.operationtheater.scheduler.solver.InterventionComparator;
+import org.openmrs.module.operationtheater.scheduler.solver.TimetableEntryComparator;
 import org.optaplanner.core.api.solver.Solver;
 import org.optaplanner.core.api.solver.SolverFactory;
 import org.optaplanner.core.config.solver.XmlSolverFactory;
@@ -110,6 +111,7 @@ public enum Scheduler {
 					locationService = Context.getLocationService();
 
 					// Load problem
+					//TODO add parameter for the planning window
 					final Timetable unsolvedTimetable = setupInitialSolution(14);
 
 					// Solve problem
@@ -153,6 +155,8 @@ public enum Scheduler {
 	 * @return
 	 */
 	Timetable setupInitialSolution(int planningWindowLength) {
+		DateTime lastPlannedDay = time.now().plusDays(planningWindowLength);
+
 		//get all uncompleted surgeries
 		List<Surgery> surgeries = otService.getAllUncompletedSurgeries();
 
@@ -161,10 +165,10 @@ public enum Scheduler {
 		List<Location> locations = locationService.getLocationsByTag(tag);
 
 		//generate chain anchors
-		List<Anchor> anchors = getChainAnchors(surgeries, locations, planningWindowLength);
+		List<Anchor> anchors = getChainAnchors(surgeries, locations, lastPlannedDay);
 
 		//set up plannedSurgeries chains
-		List<PlannedSurgery> plannedSurgeries = setupPlannedSurgeryChains(surgeries, anchors);
+		List<PlannedSurgery> plannedSurgeries = setupPlannedSurgeryChains(surgeries, anchors, lastPlannedDay);
 
 		return setupTimetable(anchors, plannedSurgeries);
 	}
@@ -176,12 +180,10 @@ public enum Scheduler {
 	 *
 	 * @param surgeries
 	 * @param locations
-	 * @param planningWindowLength
+	 * @param lastPlannedDay
 	 * @return
 	 */
-	private List<Anchor> getChainAnchors(List<Surgery> surgeries, List<Location> locations, int planningWindowLength) {
-		//TODO add parameter for the planning window
-
+	private List<Anchor> getChainAnchors(List<Surgery> surgeries, List<Location> locations, DateTime lastPlannedDay) {
 		List<Anchor> anchors = new ArrayList<Anchor>();
 
 		//now
@@ -189,14 +191,13 @@ public enum Scheduler {
 		for (Location location : locations) {
 			Interval available = otService.getLocationAvailableTime(location, now);
 			if (now.isBefore(available.getEnd())) {
-				//TODO if a surgery is currently performed in an operation theater set the anchor to its expected finishing time
+				//FIXME if a surgery is currently performed in an operation theater set the anchor to its expected finishing time
 				DateTime start = now.isAfter(available.getStart()) ? now : available.getStart();
 				anchors.add(new Anchor(location, start));
 			}
 		}
 
 		//remaining planning period
-		DateTime lastPlannedDay = time.now().plusDays(planningWindowLength);
 		for (DateTime day = time.now().plusDays(1); day.isBefore(lastPlannedDay); day = day.plusDays(1)) {
 			for (Location location : locations) {
 				Interval available = otService.getLocationAvailableTime(location, day);
@@ -204,13 +205,49 @@ public enum Scheduler {
 			}
 		}
 
-		//fixed surgeries also need an anchor
+		//fixed surgeries also need an anchor (also have to be inside the planning window)
 		for (Surgery surgery : surgeries) {
 			SchedulingData schedulingData = surgery.getSchedulingData();
-			if (schedulingData.getDateLocked()) {
+			if (schedulingData.getDateLocked() && schedulingData.getStart().isBefore(lastPlannedDay)) {
 				anchors.add(new Anchor(schedulingData.getLocation(), schedulingData.getStart()));
 			}
 		}
+
+		if (anchors.size() == 0) {
+			return anchors;
+		}
+
+		//calculate entire available time for an anchor (determines the maximum length of the chain)
+		Collections.sort(anchors, new TimetableEntryComparator());
+		ListIterator<Anchor> iterator = anchors.listIterator();
+		Anchor anchor = iterator.next();
+		Anchor next = anchor;
+		while (next != null) {
+
+			anchor = next;
+			if (iterator.hasNext()) {
+				next = iterator.next();
+			} else {
+				next = null;
+			}
+
+			DateTime end = null;
+			if (next != null && anchor.getLocation().equals(next.getLocation()) && anchor.getStart().withTimeAtStartOfDay()
+					.equals(next.getStart().withTimeAtStartOfDay())) {
+				//chain end determined by start time of next anchor
+				end = next.getStart();
+			} else {
+				//chain end determined by end of available time at this day
+				end = otService.getLocationAvailableTime(anchor.getLocation(), anchor.getStart()).getEnd();
+			}
+			int minutes = Minutes.minutesBetween(anchor.getStart(), end).getMinutes();
+			anchor.setMaxChainLengthInMinutes(minutes);
+		}
+
+		//add null anchor - is workaround because Optaplanner 6.0.1.Final doesn't support chained and nullable planning
+		// variables. PlannedSurgeries that are attached to this anchor are considered unscheduled.
+		anchors.add(new Anchor(null, time.now()));
+
 		return anchors;
 	}
 
@@ -238,7 +275,7 @@ public enum Scheduler {
 	 * @param anchors
 	 * @return
 	 */
-	private List<PlannedSurgery> setupPlannedSurgeryChains(List<Surgery> surgeries, List<Anchor> anchors) {
+	private List<PlannedSurgery> setupPlannedSurgeryChains(List<Surgery> surgeries, List<Anchor> anchors, DateTime lastPlannedDay) {
 		List<PlannedSurgery> plannedSurgeries = new ArrayList<PlannedSurgery>();
 
 		//set location start and end time of last solution
@@ -251,12 +288,15 @@ public enum Scheduler {
 				plannedSurgery.setEnd(scheduling.getEnd());
 				plannedSurgery.setLocation(scheduling.getLocation());
 			}
-			plannedSurgeries.add(plannedSurgery);
+			//only add surgeries that are unscheduled or within the planning window
+			if (plannedSurgery.getStart() == null || plannedSurgery.getStart().isBefore(lastPlannedDay)) {
+				plannedSurgeries.add(plannedSurgery);
+			}
 		}
 
 		//sort anchors and plannedSurgeries by location and start time
-		Collections.sort(anchors, new InterventionComparator());
-		Collections.sort(plannedSurgeries, new InterventionComparator());
+		Collections.sort(anchors, new TimetableEntryComparator());
+		Collections.sort(plannedSurgeries, new TimetableEntryComparator());
 
 		//build chains
 		ListIterator<Anchor> anchorIterator = anchors.listIterator();
@@ -272,7 +312,8 @@ public enum Scheduler {
 			}
 
 			//plannedSurgery location different than anchor location -> goto next anchor
-			while (!currentAnchor.getLocation().equals(ps.getLocation())) {
+			while ((currentAnchor.getLocation() == null && ps.getLocation() != null) ||
+					!currentAnchor.getLocation().equals(ps.getLocation())) {
 				//connect elements
 				connectChain(chain, currentAnchor);
 				chain.clear();

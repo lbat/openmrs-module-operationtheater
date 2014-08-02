@@ -7,7 +7,6 @@ import org.drools.core.RuleBase;
 import org.drools.core.RuleBaseFactory;
 import org.drools.core.StatefulSession;
 import org.drools.core.base.RuleNameEqualsAgendaFilter;
-import org.drools.core.base.RuleNameStartsWithAgendaFilter;
 import org.joda.time.DateTime;
 import org.junit.After;
 import org.junit.Before;
@@ -15,8 +14,10 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.Whitebox;
 import org.openmrs.Location;
+import org.openmrs.module.operationtheater.Procedure;
 import org.openmrs.module.operationtheater.Surgery;
 import org.openmrs.module.operationtheater.api.OperationTheaterService;
+import org.openmrs.module.operationtheater.scheduler.domain.Anchor;
 import org.openmrs.module.operationtheater.scheduler.domain.PlannedSurgery;
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScoreHolder;
 
@@ -100,21 +101,49 @@ public class DrlRuleTest {
 	public void testRule_firstComeFirstServed() {
 
 		DateTime now = new DateTime();
-		int waitingTime = 5;
-		DateTime surgeryCreated = now.minusDays(waitingTime);
+		int waitingTime = 54;
+		DateTime surgeryCreated = now.minusHours(waitingTime);
 
 		PlannedSurgery plannedSurgery = new PlannedSurgery();
 		Surgery surgery = new Surgery();
 		surgery.setDateCreated(surgeryCreated.toDate());
 		plannedSurgery.setSurgery(surgery);
 		plannedSurgery.setStart(now, false);
+		plannedSurgery.setLocation(new Location());
 
 		session.insert(plannedSurgery);
-		session.fireAllRules(new RuleNameStartsWithAgendaFilter("firstComeFirstServed"));
-		HardSoftScoreHolder scoreHolder = (HardSoftScoreHolder) session.getGlobal("scoreHolder");
 
+		//call method under test
+		session.fireAllRules(new RuleNameEqualsAgendaFilter("firstComeFirstServed"));
+
+		//verify
+		HardSoftScoreHolder scoreHolder = (HardSoftScoreHolder) session.getGlobal("scoreHolder");
 		assertThat(scoreHolder.getHardScore(), is(0));
-		//		assertThat(scoreHolder.getSoftScore(), is(-1 * waitingTime));
-		//		FIXME insert and edit expected result after rules have been revised
+		assertThat(scoreHolder.getSoftScore(), is(-1 * waitingTime));
+	}
+
+	@Test
+	public void testRule_preventUnscheduledSurgeriesIfTimeLeft() {
+		Anchor anchor = new Anchor(null, null);
+		anchor.setMaxChainLengthInMinutes(75);
+
+		PlannedSurgery plannedSurgery = new PlannedSurgery();
+		Surgery surgery = new Surgery();
+		Procedure procedure = new Procedure();
+		procedure.setInterventionDuration(60);
+		procedure.setOtPreparationDuration(15);
+		surgery.setProcedure(procedure);
+		plannedSurgery.setSurgery(surgery);
+
+		session.insert(plannedSurgery);
+		session.insert(anchor);
+
+		//call method under test
+		session.fireAllRules(new RuleNameEqualsAgendaFilter("preventUnscheduledSurgeriesIfTimeLeft"));
+
+		//verify
+		HardSoftScoreHolder scoreHolder = (HardSoftScoreHolder) session.getGlobal("scoreHolder");
+		assertThat(scoreHolder.getHardScore(), is(-1));
+		assertThat(scoreHolder.getSoftScore(), is(0));
 	}
 }

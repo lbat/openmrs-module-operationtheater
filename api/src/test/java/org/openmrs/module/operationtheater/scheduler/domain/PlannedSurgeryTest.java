@@ -14,6 +14,7 @@ import org.openmrs.module.operationtheater.api.OperationTheaterService;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -134,11 +135,11 @@ public class PlannedSurgeryTest {
 	}
 
 	/**
-	 * @verifies update schedulingData object and store persist it into the db
+	 * @verifies update schedulingData object and persist it into the db if location is not null
 	 * @see PlannedSurgery#persist(org.openmrs.module.operationtheater.api.OperationTheaterService)
 	 */
 	@Test
-	public void persist_shouldUpdateSchedulingDataObjectAndStorePersistItIntoTheDb() throws Exception {
+	public void persist_shouldUpdateSchedulingDataObjectAndPersistItIntoTheDbIfLocationIsNotNull() throws Exception {
 		OperationTheaterService mock = Mockito.mock(OperationTheaterService.class);
 
 		Surgery surgery = new Surgery();
@@ -146,6 +147,7 @@ public class PlannedSurgeryTest {
 		plannedSurgery.setSurgery(surgery);
 		plannedSurgery.setStart(new DateTime(), false);
 		plannedSurgery.setEnd(new DateTime().plusHours(2));
+		plannedSurgery.setLocation(new Location());
 
 		//call function under test
 		plannedSurgery.persist(mock);
@@ -158,6 +160,36 @@ public class PlannedSurgeryTest {
 		assertThat(result.getStart(), is(plannedSurgery.getStart()));
 		assertThat(result.getEnd(), is(plannedSurgery.getEnd()));
 		assertThat(result.getLocation(), is(plannedSurgery.getLocation()));
+	}
+
+	/**
+	 * @verifies set set start end and location fields to null if location is null
+	 * @see PlannedSurgery#persist(org.openmrs.module.operationtheater.api.OperationTheaterService)
+	 */
+	@Test
+	public void persist_shouldSetSetStartEndAndLocationFieldsToNullIfLocationIsNull() throws Exception {
+		OperationTheaterService mock = Mockito.mock(OperationTheaterService.class);
+
+		SchedulingData schedulingData = new SchedulingData();
+		schedulingData.setLocation(new Location());
+		schedulingData.setStart(new DateTime());
+		schedulingData.setEnd(new DateTime().plusHours(1));
+
+		PlannedSurgery plannedSurgery = new PlannedSurgery();
+		plannedSurgery.setLocation(null);
+		plannedSurgery.setSurgery(new Surgery());
+
+		//call method under test
+		plannedSurgery.persist(mock);
+
+		ArgumentCaptor<Surgery> captor = ArgumentCaptor.forClass(Surgery.class);
+		verify(mock).saveSurgery(captor.capture());
+
+		//verify
+		SchedulingData result = captor.getValue().getSchedulingData();
+		assertThat(result.getStart(), is(nullValue()));
+		assertThat(result.getEnd(), is(nullValue()));
+		assertThat(result.getLocation(), is(nullValue()));
 	}
 
 	/**
@@ -227,5 +259,56 @@ public class PlannedSurgeryTest {
 
 		//verify
 		assertThat(result, is(false));
+	}
+
+	/**
+	 * @verifies return the entire duration this surgery occupies the ot when nextTimeTableEntry is null
+	 * @see PlannedSurgery#getChainLengthInMinutes()
+	 */
+	@Test
+	public void getChainLengthInMinutes_shouldReturnTheEntireDurationThisSurgeryOccupiesTheOtWhenNextTimeTableEntryIsNull()
+			throws Exception {
+		PlannedSurgery plannedSurgery = new PlannedSurgery();
+		Surgery surgery = new Surgery();
+		Procedure procedure = new Procedure();
+		procedure.setInterventionDuration(33);
+		procedure.setOtPreparationDuration(14);
+		surgery.setProcedure(procedure);
+		plannedSurgery.setSurgery(surgery);
+
+		plannedSurgery.setNextTimetableEntry(null);
+
+		//call method under test
+		int result = plannedSurgery.getChainLengthInMinutes();
+
+		//verify
+		assertThat(result, is(47));
+	}
+
+	/**
+	 * @verifies return value from its successor in the chain added to the entire duration this surgery occupies the ot
+	 * @see PlannedSurgery#getChainLengthInMinutes()
+	 */
+	@Test
+	public void getChainLengthInMinutes_shouldReturnValueFromItsSuccessorInTheChainAddedToTheEntireDurationThisSurgeryOccupiesTheOt()
+			throws Exception {
+		PlannedSurgery mock = Mockito.mock(PlannedSurgery.class);
+		when(mock.getChainLengthInMinutes()).thenReturn(120);
+
+		PlannedSurgery ps = new PlannedSurgery();
+		Surgery surgery = new Surgery();
+		Procedure procedure = new Procedure();
+		procedure.setInterventionDuration(60);
+		procedure.setOtPreparationDuration(20);
+		surgery.setProcedure(procedure);
+		ps.setSurgery(surgery);
+
+		Whitebox.setInternalState(ps, "nextTimetableEntry", mock);
+
+		//call method under test
+		int result = ps.getChainLengthInMinutes();
+
+		//verify
+		assertThat(result, is(200));
 	}
 }

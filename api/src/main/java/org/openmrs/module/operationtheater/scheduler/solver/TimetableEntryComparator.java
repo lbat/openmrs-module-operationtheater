@@ -5,10 +5,7 @@ import org.openmrs.module.operationtheater.scheduler.domain.TimetableEntry;
 
 import java.util.Comparator;
 
-/**
- * Created by lukas on 30.07.14.
- */
-public class InterventionComparator implements Comparator<TimetableEntry> {
+public class TimetableEntryComparator implements Comparator<TimetableEntry> {
 
 	/**
 	 * @param left
@@ -22,8 +19,10 @@ public class InterventionComparator implements Comparator<TimetableEntry> {
 	 */
 	@Override
 	public int compare(TimetableEntry left, TimetableEntry right) {
+		String leftLocationUuid = left.getLocation() != null ? left.getLocation().getUuid() : "aaaaa";
+		String rightLocationUuid = right.getLocation() != null ? right.getLocation().getUuid() : "aaaaa";
 		return new CompareToBuilder()
-				.append(left.getLocation().getUuid(), right.getLocation().getUuid())
+				.append(leftLocationUuid, rightLocationUuid)
 				.append(left.getStart().getMillis(), right.getStart().getMillis())
 				.build();
 	}
