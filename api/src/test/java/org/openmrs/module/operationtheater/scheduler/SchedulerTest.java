@@ -86,7 +86,7 @@ public class SchedulerTest extends BaseModuleContextSensitiveTest {
 
 	/**
 	 * @verifies solve operation theater planning problem
-	 * @see Scheduler#solve()
+	 * @see Scheduler#solve(int)
 	 */
 	@Test
 	public void solve_shouldSolveOperationTheaterPlanningProblem() throws Exception {
@@ -100,7 +100,7 @@ public class SchedulerTest extends BaseModuleContextSensitiveTest {
 		Scheduler.INSTANCE.setSolverFactory(solverFactory);
 
 		//call method under test
-		Scheduler.INSTANCE.solve();
+		Scheduler.INSTANCE.solve(14);
 
 		//wait until a solution has been found
 		long max_waiting_time = 180000;//3min
@@ -131,14 +131,14 @@ public class SchedulerTest extends BaseModuleContextSensitiveTest {
 
 	/**
 	 * @verifies throw IllegalStateException if solve has already been started but not finished
-	 * @see Scheduler#solve()
+	 * @see Scheduler#solve(int)
 	 */
 	@Test(expected = IllegalStateException.class)
 	public void solve_shouldThrowIllegalStateExceptionIfSolveHasAlreadyBeenStartedButNotFinished() throws Exception {
 		Whitebox.setInternalState(Scheduler.INSTANCE, "status", Scheduler.Status.RUNNING);
 
 		//call method under test
-		Scheduler.INSTANCE.solve();
+		Scheduler.INSTANCE.solve(7);
 	}
 
 	/**

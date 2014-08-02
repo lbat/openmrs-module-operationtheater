@@ -92,7 +92,7 @@ public enum Scheduler {
 	 * @should throw IllegalStateException if solve has already been started but not finished
 	 */
 	//FIXME add privilege level
-	public void solve() throws IllegalStateException {
+	public void solve(final int planningWindow) throws IllegalStateException {
 		if (status == Status.RUNNING) {
 			throw new IllegalStateException("Already solving");
 		}
@@ -111,8 +111,7 @@ public enum Scheduler {
 					locationService = Context.getLocationService();
 
 					// Load problem
-					//TODO add parameter for the planning window
-					final Timetable unsolvedTimetable = setupInitialSolution(14);
+					final Timetable unsolvedTimetable = setupInitialSolution(planningWindow);
 
 					// Solve problem
 					solver.setPlanningProblem(unsolvedTimetable);

@@ -19,6 +19,14 @@
     <!-- Module Activator -->
     <activator>${project.parent.groupId}.${project.parent.artifactId}.OperationTheaterModuleActivator</activator>
 
+    <!-- / Module Properties -->
+    <globalProperty>
+        <property>${project.parent.artifactId}.continuousPlanningWindow
+        </property>
+        <defaultValue>14</defaultValue>
+        <description>Number of days of the continuous planning window used by the automatic scheduler
+        </description>
+    </globalProperty>
 
     <!-- Adds link to admin page -->
     <extension>

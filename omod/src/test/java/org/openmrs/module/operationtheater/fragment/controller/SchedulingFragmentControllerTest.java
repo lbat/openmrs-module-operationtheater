@@ -13,6 +13,7 @@ import org.openmrs.LocationAttributeType;
 import org.openmrs.LocationTag;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
+import org.openmrs.api.AdministrationService;
 import org.openmrs.api.LocationService;
 import org.openmrs.module.appointmentscheduling.AppointmentBlock;
 import org.openmrs.module.appointmentscheduling.AppointmentType;
@@ -47,6 +48,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
@@ -68,7 +70,7 @@ public class SchedulingFragmentControllerTest {
 	 */
 	@Test
 	public void getEvents_shouldReturnScheduledSurgeriesAndAvailableTimesForAllOperatingTheaters() throws Exception {
-		//FIXME refactor this test and use dbunit!!
+		//FIXME refactor this test and use dbunit!! - turned out that BaseModuleContextSensitiveTest doesn't work with Powermockito
 
 		//prepare parameters
 		Date start = new DateTime(2014, 6, 9, 0, 0).toDate();
@@ -398,10 +400,13 @@ public class SchedulingFragmentControllerTest {
 	public void schedule_shouldReturnSuccessResultIfSolveMethodDoesntThrowAnIllegalStateException() throws Exception {
 		Scheduler mockInstance = PowerMockito.mock(Scheduler.class);
 		Whitebox.setInternalState(Scheduler.class, "INSTANCE", mockInstance);
-		PowerMockito.doNothing().when(mockInstance).solve();
+		PowerMockito.doNothing().when(mockInstance).solve(anyInt());
+
+		AdministrationService administrationService = Mockito.mock(AdministrationService.class);
+		when(administrationService.getGlobalProperty("operationtheater.continuousPlanningWindow")).thenReturn("7");
 
 		//call method under test
-		FragmentActionResult result = new SchedulingFragmentController().schedule(new TestUiUtils());
+		FragmentActionResult result = new SchedulingFragmentController().schedule(new TestUiUtils(), administrationService);
 
 		//verify
 		assertThat(result, instanceOf(SuccessResult.class));
@@ -416,10 +421,13 @@ public class SchedulingFragmentControllerTest {
 	public void schedule_shouldReturnFailureResultIfSolveMethodThrowsAnIllegalStateException() throws Exception {
 		Scheduler mockInstance = PowerMockito.mock(Scheduler.class);
 		Whitebox.setInternalState(Scheduler.class, "INSTANCE", mockInstance);
-		PowerMockito.doThrow(new IllegalStateException()).when(mockInstance).solve();
+		PowerMockito.doThrow(new IllegalStateException()).when(mockInstance).solve(anyInt());
+
+		AdministrationService administrationService = Mockito.mock(AdministrationService.class);
+		when(administrationService.getGlobalProperty("operationtheater.continuousPlanningWindow")).thenReturn("7");
 
 		//call method under test
-		FragmentActionResult result = new SchedulingFragmentController().schedule(new TestUiUtils());
+		FragmentActionResult result = new SchedulingFragmentController().schedule(new TestUiUtils(), administrationService);
 
 		//verify
 		assertThat(result, instanceOf(FailureResult.class));

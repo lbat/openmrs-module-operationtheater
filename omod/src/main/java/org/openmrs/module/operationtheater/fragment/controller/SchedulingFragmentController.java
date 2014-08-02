@@ -8,6 +8,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
 import org.openmrs.LocationTag;
+import org.openmrs.api.AdministrationService;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointmentscheduling.AppointmentBlock;
@@ -102,9 +103,11 @@ public class SchedulingFragmentController {
 	 * @should return SuccessResult if solve method doesnt throw an IllegalStateException
 	 * @should return FailureResult if solve method throws an IllegalStateException
 	 */
-	public FragmentActionResult schedule(UiUtils ui) {
+	public FragmentActionResult schedule(UiUtils ui, @SpringBean AdministrationService administrationService) {
 		try {
-			Scheduler.INSTANCE.solve();
+			int planningWindow = Integer.parseInt(administrationService.getGlobalProperty(
+					OTMetadata.GP_CONTINUOUS_PLANNING_WINDOW));
+			Scheduler.INSTANCE.solve(planningWindow);
 			return new SuccessResult(ui.message("operationtheater.scheduling.startedSuccessfully"));
 		}
 		catch (IllegalStateException e) {
