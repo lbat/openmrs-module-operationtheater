@@ -88,7 +88,8 @@ public enum Scheduler {
 	 * non blocking (solver runs in new thread)
 	 * use isSolving method to determine if solving process has already finished
 	 *
-	 * @should solve operation theater planning problem
+	 * @should solve 2 normal 1 locked and 1 outside planning period surgery
+	 * @should solve 2 conflicting surgeries
 	 * @should throw IllegalStateException if solve has already been started but not finished
 	 */
 	//FIXME add privilege level
@@ -128,6 +129,7 @@ public enum Scheduler {
 							+ solvedTimetable);
 				}
 				catch (Exception e) {
+					e.printStackTrace();
 					status = Status.FAILED;
 					log.error(e);
 				}
@@ -150,8 +152,8 @@ public enum Scheduler {
 	 * operation theater scheduling is a continuous planning problem. This means that the input
 	 * for the next planning is the last scheduling result (including deviations from the last result)
 	 *
-	 * @should properly setup the initial solution
 	 * @return
+	 * @should properly setup the initial solution
 	 */
 	Timetable setupInitialSolution(int planningWindowLength) {
 		DateTime lastPlannedDay = time.now().plusDays(planningWindowLength);
@@ -274,7 +276,8 @@ public enum Scheduler {
 	 * @param anchors
 	 * @return
 	 */
-	private List<PlannedSurgery> setupPlannedSurgeryChains(List<Surgery> surgeries, List<Anchor> anchors, DateTime lastPlannedDay) {
+	private List<PlannedSurgery> setupPlannedSurgeryChains(List<Surgery> surgeries, List<Anchor> anchors,
+	                                                       DateTime lastPlannedDay) {
 		List<PlannedSurgery> plannedSurgeries = new ArrayList<PlannedSurgery>();
 
 		//set location start and end time of last solution
@@ -318,7 +321,7 @@ public enum Scheduler {
 				chain.clear();
 				//update anchors
 				currentAnchor = nextAnchor;
-				nextAnchor = anchorIterator.next();
+				nextAnchor = anchorIterator.hasNext() ? anchorIterator.next() : null;
 				nextAnchorSameLocation = getNextAnchorInSameLocation(currentAnchor, nextAnchor);
 			}
 
@@ -329,7 +332,7 @@ public enum Scheduler {
 				chain.clear();
 				//update anchors
 				currentAnchor = nextAnchor;
-				nextAnchor = anchorIterator.next();
+				nextAnchor = anchorIterator.hasNext() ? anchorIterator.next() : null;
 				nextAnchorSameLocation = getNextAnchorInSameLocation(currentAnchor, nextAnchor);
 			}
 

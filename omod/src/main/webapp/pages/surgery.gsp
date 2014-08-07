@@ -1,6 +1,8 @@
 <%
     ui.decorateWith("appui", "standardEmrPage")
 
+    ui.includeJavascript("operationtheater", "surgery_page/surgicalTeam.js")
+
     ui.includeJavascript("uicommons", "typeahead.js");
     ui.includeJavascript("operationtheater", "bower_components/validation/jquery.validate.js")
 
@@ -16,6 +18,13 @@
     ]
     var patient = { id: ${ patient.id } };
 </script>
+
+<%=ui.includeFragment("appui", "messages", [codes: [
+        "coreapps.delete",
+        "operationtheater.procedure.notFound",
+        "operationtheater.provider.notFound",
+].flatten()
+])%>
 
 ${ui.includeFragment("coreapps", "patientHeader", [patient: patient.patient, activeVisit: activeVisit])}
 
@@ -38,27 +47,59 @@ input.error {
         procedureMap['${procedure.name}'] = '${procedure.uuid}';
         <% } %>
         var options = { source: Object.keys(procedureMap) };
-        //var options = { source: ["Antepartum Ward", "Central Archives", "Clinic Registration", "Community Health", "Dental", "Emergency", "Emergency Reception", "ICU", "Isolation", "Labor and Delivery", "Main Laboratory", "Men's Internal Medicine", "NICU", "Operating Rooms", "Outpatient Clinic", "Pediatrics", "Post-op GYN", "Postpartum Ward", "Pre-op/PACU", "Radiology", "Surgical Ward", "Women's Clinic", "Women's Internal Medicine", "Women's Outpatient Laboratory", "Women's Triage"], items: 3 };
         jq('#surgeryProcedure-field').typeahead(options);
 
-        jq.validator.addMethod("procedureCheck", function (value, element) {
-            return jq.inArray(value, options.source) != -1;
+        jq('#setProcedureButton').click(function () {
+            if (!jq('#surgeryProcedure-field').valid()) {
+                return;
+            }
 
-        }, '${ui.message('operationtheater.surgeryPage.fieldError.procedureDoesNotExist')}');
+            var procedureUuid = procedureMap[jq('#surgeryProcedure-field').val()];
+            emr.getFragmentActionWithCallback("operationtheater", "surgery", "updateProcedure",
+                    {surgery: "${surgery.uuid}", procedure: procedureUuid}
+                    , function (data) {
+                        emr.successMessage(data.message);
+                    }, function (err) {
+                        emr.handleError(err);
+                    }
+            );
+        });
+
+        //surgical team
+        var providerMap = {};
+        <% providerList.each{ provider ->%>
+        providerMap['${provider.name}'] = '${provider.uuid}';
+        <% } %>
+        var providerOptions = { source: Object.keys(providerMap) };
+
+        surgicalTeam.init("${surgery.uuid}", providerMap, providerOptions);
+        surgicalTeam.get();
+
+
+        //validation
+        jq.validator.addMethod("procedureCheck", function (value, element) {
+            console.log("procedureCheck");
+            return jq.inArray(value, options.source) != -1;
+        }, emr.message('operationtheater.procedure.notFound'));
+
+        jq.validator.addMethod("providerCheck", function (value, element) {
+            console.log("providerCheck");
+            return jq.inArray(value, providerOptions.source) != -1;
+        }, emr.message('operationtheater.provider.notFound'));
 
         //TODO set error messages to support internationalization
-        jq("#surgeryForm").validate({
+        window.validator = jq("#surgeryForm").validate({
             rules: {
                 "surgeryProcedure": {
                     required: true,
                     procedureCheck: true
+                },
+                "addProviderTextfield": {
+                    providerCheck: true
                 }
             },
             errorClass: "error",
             validClass: "",
-            onfocusout: function (element) {
-                jq(element).valid();
-            },
             errorPlacement: function (error, element) {
                 var errorEl = jq(element).next();
                 while (errorEl.prop('tagName') != 'SPAN') {
@@ -85,43 +126,56 @@ input.error {
                 errorEl.hide();
             }
         });
-
-        //submit function
-        jq('#surgeryForm').submit(function () {
-            jq('#procedureUuid').val(procedureMap[jq('#surgeryProcedure-field').val()])
-
-            // ... continue work
-        });
-
     });
 </script>
 
 <h2>
-    ${ui.message("operationtheater.procedure.title")}
+    ${ui.message("operationtheater.surgery.page.title")}
 </h2>
 
-<form class="simple-form-ui" method="post" id="surgeryForm" autocomplete="off">
+<form class="simple-form-ui" id="surgeryForm" autocomplete="off">
+    <fieldset>
+        <legend>${ui.message("operationtheater.surgery.page.fieldset.procedure")}</legend>
+        <!-- TODO maxlength should be managed centrally in the POJO-->
+        ${ui.includeFragment("uicommons", "field/text", [
+                label        : ui.message("general.name"),
+                formFieldName: "surgeryProcedure",
+                id           : "surgeryProcedure",
+                maxLength    : 101,
+                initialValue : (surgery.procedure.name ?: '')
+        ])}
+        <a class="button" id="setProcedureButton">${ui.message("general.save")}</a>
 
-    <!--<p>
-        <input id="typeahead" formField data-provide="typeahead" placeholder="Auto Suggest" type="text" />
-    </p>-->
+    </fieldset>
 
-    <!-- TODO maxlength should be managed centrally in the POJO-->
-    ${ui.includeFragment("uicommons", "field/text", [
-            label        : ui.message("general.name"),
-            formFieldName: "",
-            id           : "surgeryProcedure",
-            maxLength    : 101,
-            initialValue : (surgery.procedure.name ?: '')
-    ])}
+    <fieldset>
+        <legend>${ui.message("operationtheater.surgery.page.fieldset.surgicalTeam")}</legend>
 
-    <input type="hidden" value="${surgery.uuid}" name="surgeryUuid">
-    <input type="hidden" value="${surgery.procedure.uuid ?: ''}" name="procedureUuid" id="procedureUuid">
+        <div id="surgical-team-list">
+            <table id="surgical-team-table" empty-value-message='${ui.message("uicommons.dataTable.emptyTable")}'>
+                <thead>
+                <tr>
+                    <th style="width: 80%">${ui.message("general.name")}</th>
+                    <th style="width: 20%">${ui.message("general.action")}</th>
+                </tr>
+                </thead>
+                <tbody>
 
-    <div>
-        <!--<input type="button" class="cancel" value="${ui.message("emr.cancel")}"
-               onclick="javascript:window.location = '${ui.pageLink("operationtheater", "manageProcedures")}'"/>-->
-        <input type="submit" class="confirm" id="save-button" value="${ui.message("general.save")}"/>
-    </div>
+                </tbody>
+            </table>
+        </div>
+
+        <p>
+            ${ui.includeFragment("uicommons", "field/text", [
+                    label        : "Add Provider",
+                    formFieldName: "addProviderTextfield",
+                    id           : "addProviderTextfield",
+                    maxLength    : 101,
+                    initialValue : ""
+            ])}
+            <a class="button" id="addProviderButton">${ui.message("general.add")}</a>
+        </p>
+
+    </fieldset>
 
 </form>

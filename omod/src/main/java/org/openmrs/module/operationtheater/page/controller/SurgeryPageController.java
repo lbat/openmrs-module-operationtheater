@@ -17,6 +17,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Location;
 import org.openmrs.Patient;
+import org.openmrs.Provider;
+import org.openmrs.api.ProviderService;
 import org.openmrs.module.appframework.context.AppContextModel;
 import org.openmrs.module.appui.UiSessionContext;
 import org.openmrs.module.emrapi.adt.AdtService;
@@ -42,6 +44,7 @@ public class SurgeryPageController {
 	                         @RequestParam(value = "patientId", required = true) Patient patient,
 	                         @RequestParam(value = "surgeryId", required = false) Surgery surgery,
 	                         @SpringBean OperationTheaterService otService,
+	                         @SpringBean("providerService") ProviderService providerService,
 	                         @InjectBeans PatientDomainWrapper patientDomainWrapper,
 	                         @SpringBean("adtService") AdtService adtService,
 	                         @SpringBean("applicationEventService") ApplicationEventService applicationEventService,
@@ -59,6 +62,11 @@ public class SurgeryPageController {
 
 		List<Procedure> procedureList = otService.getAllProcedures(false);
 		model.addAttribute("procedureList", procedureList);
+
+		//get list of providers and remove those that are already part of the surgical team
+		List<Provider> providerList = providerService.getAllProviders();
+		providerList.removeAll(surgery.getSurgicalTeam());
+		model.addAttribute("providerList", providerList);
 
 		patientDomainWrapper.setPatient(patient);
 		model.addAttribute("patient", patientDomainWrapper);
@@ -85,85 +93,4 @@ public class SurgeryPageController {
 
 		return null;
 	}
-
-	public String post(PageModel model,
-	                   @RequestParam("patientId") Patient patient,
-	                   @RequestParam("surgeryUuid") String surgeryUuid,
-	                   @RequestParam("procedureUuid") String procedureUuid,
-	                   @InjectBeans PatientDomainWrapper patientDomainWrapper,
-	                   @SpringBean OperationTheaterService otService,
-	                   @SpringBean("adtService") AdtService adtService,
-	                   @SpringBean("applicationEventService") ApplicationEventService applicationEventService,
-	                   UiSessionContext sessionContext) {
-
-		//		Errors newErrors = new BindException(procedure, "procedure");
-		//		procedureValidator.validate(procedure, newErrors);
-		//		if (!newErrors.hasErrors()) {
-		//			System.err.println("HAS NO ERRORS");
-		//			try {
-		//				service.saveProcedure(procedure);
-		//				System.err.println("saved successfully: redirecting");
-		//				return "redirect:/operationtheater/manageProcedures.page";
-		//			}
-		//			catch (Exception e) {
-		//				log.warn("Some error occurred while saving surgery details:", e);
-		//			}
-		//		}
-		//
-		//		System.err.println("NOT saved successfully");
-		//		for (ObjectError error : newErrors.getAllErrors()) {
-		//			System.err.println(error.toString());
-		//			for (String e : error.getCodes()) {
-		//				System.err.println("    " + e);
-		//			}
-		//		}
-
-		//		model.addAttribute("errors", newErrors);
-
-		Surgery surgery = otService.getSurgeryByUuid(surgeryUuid);
-		Procedure procedure = otService.getProcedureByUuid(procedureUuid);
-
-		//FIXME validate and check input params
-		if (surgery == null) {
-			surgery = new Surgery();
-			surgery.setPatient(patient);
-		} else {
-			patient = surgery.getPatient();
-		}
-
-		surgery.setProcedure(procedure);
-		surgery = otService.saveSurgery(surgery);
-
-		model.addAttribute("surgery", surgery);
-
-		List<Procedure> procedureList = otService.getAllProcedures(false);
-		model.addAttribute("procedureList", procedureList);
-
-		patientDomainWrapper.setPatient(patient);
-		model.addAttribute("patient", patientDomainWrapper);
-
-		Location visitLocation = null;
-		try {
-			visitLocation = adtService.getLocationThatSupportsVisits(sessionContext.getSessionLocation());
-		}
-		catch (IllegalArgumentException ex) {
-			// location does not support visits
-		}
-
-		VisitDomainWrapper activeVisit = null;
-		if (visitLocation != null) {
-			activeVisit = adtService.getActiveVisit(patient, visitLocation);
-		}
-		model.addAttribute("activeVisit", activeVisit);
-
-		AppContextModel contextModel = sessionContext.generateAppContextModel();
-		contextModel.put("patientId", patient.getId());
-		contextModel.put("patientDead", patient.isDead());
-
-		applicationEventService.patientViewed(patient, sessionContext.getCurrentUser());
-
-		return "surgery";
-
-	}
-
 }

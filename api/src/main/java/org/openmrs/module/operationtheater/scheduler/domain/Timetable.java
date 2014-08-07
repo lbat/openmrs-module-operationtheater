@@ -1,6 +1,8 @@
 package org.openmrs.module.operationtheater.scheduler.domain;
 
+import org.openmrs.Provider;
 import org.openmrs.module.operationtheater.api.OperationTheaterService;
+import org.openmrs.module.operationtheater.scheduler.solver.SurgeryConflict;
 import org.optaplanner.core.api.domain.solution.PlanningEntityCollectionProperty;
 import org.optaplanner.core.api.domain.solution.PlanningSolution;
 import org.optaplanner.core.api.domain.value.ValueRangeProvider;
@@ -10,6 +12,7 @@ import org.optaplanner.core.impl.solution.Solution;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 /**
  * This class represents the planning solution
@@ -46,6 +49,7 @@ public class Timetable implements Solution<HardSoftScore> {
 		//planning entities are added automatically -> don't add them here
 		List<Object> facts = new ArrayList<Object>();
 		facts.addAll(anchors);
+		facts.addAll(calculatePlannedSurgeryConflictList());
 		return facts;
 	}
 
@@ -55,6 +59,35 @@ public class Timetable implements Solution<HardSoftScore> {
 				"plannedSurgeries=" + plannedSurgeries +
 				", score=" + score +
 				'}';
+	}
+
+	private Collection<?> calculatePlannedSurgeryConflictList() {
+		List<SurgeryConflict> conflicts = new ArrayList<SurgeryConflict>();
+		for (PlannedSurgery left : plannedSurgeries) {
+			for (PlannedSurgery right : plannedSurgeries) {
+				if (left.getSurgery().equals(right.getSurgery())) {
+					continue;
+				}
+				int conflictingPersons = 0;
+				Set<Provider> leftSurgicalTeam = left.getSurgery().getSurgicalTeam();
+				if (leftSurgicalTeam == null) {
+					continue;
+				}
+				for (Provider provider : leftSurgicalTeam) {
+					Set<Provider> rightSurgicalTeam = right.getSurgery().getSurgicalTeam();
+					if (rightSurgicalTeam != null && rightSurgicalTeam.contains(provider)) {
+						conflictingPersons++;
+					}
+				}
+				SurgeryConflict conflict = new SurgeryConflict(left.getSurgery(), right.getSurgery(), conflictingPersons);
+				SurgeryConflict mirroredConflict = new SurgeryConflict(right.getSurgery(), left.getSurgery(),
+						conflictingPersons);
+				if (conflictingPersons > 0 && !conflicts.contains(conflict) && !conflicts.contains(mirroredConflict)) {
+					conflicts.add(conflict);
+				}
+			}
+		}
+		return conflicts;
 	}
 
 	@ValueRangeProvider(id = "anchorRange")

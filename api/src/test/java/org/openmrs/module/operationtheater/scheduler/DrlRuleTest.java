@@ -1,5 +1,6 @@
 package org.openmrs.module.operationtheater.scheduler;
 
+import org.drools.compiler.compiler.DroolsError;
 import org.drools.compiler.compiler.DroolsParserException;
 import org.drools.compiler.compiler.PackageBuilder;
 import org.drools.compiler.compiler.PackageBuilderErrors;
@@ -19,6 +20,7 @@ import org.openmrs.module.operationtheater.Surgery;
 import org.openmrs.module.operationtheater.api.OperationTheaterService;
 import org.openmrs.module.operationtheater.scheduler.domain.Anchor;
 import org.openmrs.module.operationtheater.scheduler.domain.PlannedSurgery;
+import org.openmrs.module.operationtheater.scheduler.solver.SurgeryConflict;
 import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScoreHolder;
 
 import java.io.IOException;
@@ -44,6 +46,9 @@ public class DrlRuleTest {
 		builder.addPackageFromDrl(new InputStreamReader(stream));
 
 		PackageBuilderErrors errors = builder.getErrors();
+		for (DroolsError error : errors.getErrors()) {
+			System.err.println(error.getMessage());
+		}
 		assertThat(errors, hasSize(0));
 
 		RuleBase ruleBase = RuleBaseFactory.newRuleBase();
@@ -82,7 +87,8 @@ public class DrlRuleTest {
 		ps1.setEnd(end1);
 		ps2.setEnd(end2);
 
-		//it seems that all methods are called on inserts -> we have to mock OperationTheaterService
+		//it seems that all rule when conditions are evaluated on insert -> we have to mock OperationTheaterService
+		//mocking PlannedSurgery itself lead to weird errors
 		Whitebox.setInternalState(ps1, "otService", otService);
 		Whitebox.setInternalState(ps2, "otService", otService);
 
@@ -144,6 +150,94 @@ public class DrlRuleTest {
 		//verify
 		HardSoftScoreHolder scoreHolder = (HardSoftScoreHolder) session.getGlobal("scoreHolder");
 		assertThat(scoreHolder.getHardScore(), is(-1));
+		assertThat(scoreHolder.getSoftScore(), is(0));
+	}
+
+	@Test
+	public void testRule_conflictingAndOverlappingPlannedSurgeries() {
+		OperationTheaterService otService = Mockito.mock(OperationTheaterService.class);
+		when(otService.getLocationAvailableTime(any(Location.class), any(DateTime.class))).thenReturn(null);
+
+		PlannedSurgery ps1 = new PlannedSurgery();
+		PlannedSurgery ps2 = new PlannedSurgery();
+
+		Surgery surgery1 = new Surgery();
+		Surgery surgery2 = new Surgery();
+
+		ps1.setSurgery(surgery1);
+		ps2.setSurgery(surgery2);
+
+		ps1.setStart(new DateTime(), false);
+		ps2.setStart(new DateTime(), false);
+		ps1.setEnd(new DateTime().plusHours(1));
+		ps2.setEnd(new DateTime().plusHours(1));
+
+		Location location = new Location();
+		ps1.setLocation(location);
+		ps2.setLocation(location);
+
+		//it seems that all rule when conditions are evaluated on insert -> we have to mock OperationTheaterService
+		//mocking PlannedSurgery itself lead to weird errors
+		Whitebox.setInternalState(ps1, "otService", otService);
+		Whitebox.setInternalState(ps2, "otService", otService);
+
+		int numberOfPersons = 3;
+		SurgeryConflict conflict = new SurgeryConflict(ps1.getSurgery(), ps2.getSurgery(), numberOfPersons);
+
+		session.insert(conflict);
+		session.insert(ps1);
+		session.insert(ps2);
+
+		//call method under test
+		session.fireAllRules(new RuleNameEqualsAgendaFilter("conflictingAndOverlappingPlannedSurgeries"));
+
+		//verify
+		HardSoftScoreHolder scoreHolder = (HardSoftScoreHolder) session.getGlobal("scoreHolder");
+		assertThat(scoreHolder.getHardScore(), is(-numberOfPersons));
+		assertThat(scoreHolder.getSoftScore(), is(0));
+	}
+
+	@Test
+	public void testRule_conflictingButNotOverlappingPlannedSurgeries() {
+		OperationTheaterService otService = Mockito.mock(OperationTheaterService.class);
+		when(otService.getLocationAvailableTime(any(Location.class), any(DateTime.class))).thenReturn(null);
+
+		PlannedSurgery ps1 = new PlannedSurgery();
+		PlannedSurgery ps2 = new PlannedSurgery();
+
+		Surgery surgery1 = new Surgery();
+		Surgery surgery2 = new Surgery();
+
+		ps1.setSurgery(surgery1);
+		ps2.setSurgery(surgery2);
+
+		ps1.setStart(new DateTime(), false);
+		ps1.setEnd(new DateTime().plusHours(1));
+		ps2.setStart(ps1.getEnd(), false);
+		ps2.setEnd(ps1.getStart().plusHours(1));
+
+		Location location = new Location();
+		ps1.setLocation(location);
+		ps2.setLocation(location);
+
+		//it seems that all rule when conditions are evaluated on insert -> we have to mock OperationTheaterService
+		//mocking PlannedSurgery itself lead to weird errors
+		Whitebox.setInternalState(ps1, "otService", otService);
+		Whitebox.setInternalState(ps2, "otService", otService);
+
+		int numberOfPersons = 3;
+		SurgeryConflict conflict = new SurgeryConflict(ps1.getSurgery(), ps2.getSurgery(), numberOfPersons);
+
+		session.insert(conflict);
+		session.insert(ps1);
+		session.insert(ps2);
+
+		//call method under test
+		session.fireAllRules(new RuleNameEqualsAgendaFilter("conflictingAndOverlappingPlannedSurgeries"));
+
+		//verify
+		HardSoftScoreHolder scoreHolder = (HardSoftScoreHolder) session.getGlobal("scoreHolder");
+		assertThat(scoreHolder.getHardScore(), is(0));
 		assertThat(scoreHolder.getSoftScore(), is(0));
 	}
 }

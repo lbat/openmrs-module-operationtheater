@@ -18,7 +18,7 @@
         <scoreAttained>0hard/0soft</scoreAttained>
     </termination>
     <constructionHeuristic>
-        <constructionHeuristicType>FIRST_FIT_DECREASING</constructionHeuristicType>
+        <constructionHeuristicType>FIRST_FIT</constructionHeuristicType>
     </constructionHeuristic>
     <localSearch>
         <unionMoveSelector>
@@ -32,10 +32,12 @@
             </subChainSwapMoveSelector>
         </unionMoveSelector>
         <acceptor>
-            <lateAcceptanceSize>400</lateAcceptanceSize>
+            <!--<entityTabuSize>7</entityTabuSize>-->
+            <lateAcceptanceSize>1000</lateAcceptanceSize>
         </acceptor>
         <forager>
-            <acceptedCountLimit>100</acceptedCountLimit>
+            <acceptedCountLimit>200</acceptedCountLimit>
         </forager>
+
     </localSearch>
 </solver>

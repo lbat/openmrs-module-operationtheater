@@ -76,10 +76,10 @@ public class Anchor implements TimetableEntry {
 	public String toString() {
 		DateTimeFormatter fmt = DateTimeFormat.forPattern("dd.MM HH:mm");
 		String startStr = start == null ? "null      " : fmt.print(start);
-		String locationName = location != null ? location.getName() : "null" ;
+		String locationName = location != null ? location.getName() : "null";
 		return "Anchor{" +
-				"location=" + locationName +
-				", start=" + startStr +
+				" " + locationName +
+				", " + startStr +
 				'}';
 	}
 }

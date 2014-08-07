@@ -74,8 +74,7 @@ public class PlannedSurgeryTest {
 		assertTrue(ps2.isOverlapping(ps1));
 
 		//intervals do not overlap
-		DateTime startTomorrow = start.plusDays(1);
-		ps2.setStart(startTomorrow);
+		ps2.setStart(ps1.getEnd());
 
 		//call function under test;
 		assertFalse(ps1.isOverlapping(ps2));

@@ -103,10 +103,12 @@ public class SchedulingFragmentController {
 	 * @should return SuccessResult if solve method doesnt throw an IllegalStateException
 	 * @should return FailureResult if solve method throws an IllegalStateException
 	 */
-	public FragmentActionResult schedule(UiUtils ui, @SpringBean AdministrationService administrationService) {
+	public FragmentActionResult schedule(UiUtils ui,
+	                                     @SpringBean("adminService") AdministrationService administrationService) {
 		try {
 			int planningWindow = Integer.parseInt(administrationService.getGlobalProperty(
 					OTMetadata.GP_CONTINUOUS_PLANNING_WINDOW));
+			planningWindow = 1;
 			Scheduler.INSTANCE.solve(planningWindow);
 			return new SuccessResult(ui.message("operationtheater.scheduling.startedSuccessfully"));
 		}
@@ -143,7 +145,6 @@ public class SchedulingFragmentController {
 	 * @param lockedDate
 	 * @param locationService
 	 * @param otService
-	 *
 	 * @should update SchedulingData with provided values and return SuccessResult
 	 * @should throw IllegalArgumentException if there is no Surgery for the given uuid
 	 * @should return FailureResult if SchedulingData validation fails
@@ -296,8 +297,10 @@ public class SchedulingFragmentController {
 				.getAppointmentBlocks(midnight.toDate(), midnight.plusDays(1).minusSeconds(1).toDate(),
 						String.valueOf(location.getId()), null, null);
 		if (blocks.size() > 1) {
-			throw new IllegalStateException("There should only be one AppointmentBlock per Location and day, but returned " + blocks
-					.size());
+			throw new IllegalStateException(
+					"There should only be one AppointmentBlock per Location and day, but returned " + blocks
+							.size()
+			);
 		}
 		if (blocks.size() == 1) {
 			block = blocks.get(0);

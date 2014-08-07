@@ -6,6 +6,7 @@ import org.optaplanner.core.api.score.buildin.hardsoft.HardSoftScoreHolder;
 import org.joda.time.Interval;
 import org.openmrs.module.operationtheater.scheduler.domain.PlannedSurgery;
 import org.openmrs.module.operationtheater.scheduler.domain.Anchor;
+import org.openmrs.module.operationtheater.scheduler.solver.SurgeryConflict;
 
 import org.joda.time.DateTime;
 import java.util.Date
@@ -35,7 +36,7 @@ rule "overlappingSurgeriesInSameOperationTheater"
         scoreHolder.addHardConstraintMatch(kcontext, -1);
 end
 
-//It is not allowed to have surgeries outside available times
+////It is not allowed to have surgeries outside available times
 rule "surgeriesOutsideAvailableTimes"
     when
         PlannedSurgery(isOutsideAvailableTimes(), location != null)
@@ -50,6 +51,16 @@ rule "preventUnscheduledSurgeriesIfTimeLeft"
         Anchor(getRemainingTime() >= $procedure.otPreparationDuration + $procedure.interventionDuration)
     then
         scoreHolder.addHardConstraintMatch(kcontext, -1);
+end
+
+// Two overlapping PlannedSurgeries that share the same persons.
+rule "conflictingAndOverlappingPlannedSurgeries"
+    when
+        $conflict : SurgeryConflict($leftSurgery : left, $rightSurgery : right)
+        $left: PlannedSurgery($leftSurgery == surgery, location != null)
+        PlannedSurgery($rightSurgery == surgery, location != null, isOverlapping($left))
+    then
+        scoreHolder.addHardConstraintMatch(kcontext, -$conflict.getNumberOfPersons());
 end
 
 //// ############################################################################

@@ -1,16 +1,21 @@
 package org.openmrs.module.operationtheater;
 
 import org.openmrs.Patient;
+import org.openmrs.Provider;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import java.util.Set;
 
 /**
  * Defines a Surgery in the system.
@@ -38,6 +43,12 @@ public class Surgery extends BaseOpenmrsDataJPA {
 	@OneToOne(cascade = { CascadeType.ALL })
 	@JoinColumn(name = "scheduling_data_id")
 	private SchedulingData schedulingData;
+
+	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@JoinTable(name = "surgical_team",
+			joinColumns = { @JoinColumn(name = "surgery_id", nullable = false, updatable = false) },
+			inverseJoinColumns = { @JoinColumn(name = "provider_id", nullable = false, updatable = false) })
+	private Set<Provider> surgicalTeam;
 
 	public int getSurgeryId() {
 		return surgeryId;
@@ -87,5 +98,13 @@ public class Surgery extends BaseOpenmrsDataJPA {
 
 	public void setSchedulingData(SchedulingData schedulingData) {
 		this.schedulingData = schedulingData;
+	}
+
+	public Set<Provider> getSurgicalTeam() {
+		return surgicalTeam;
+	}
+
+	public void setSurgicalTeam(Set<Provider> surgicalTeam) {
+		this.surgicalTeam = surgicalTeam;
 	}
 }

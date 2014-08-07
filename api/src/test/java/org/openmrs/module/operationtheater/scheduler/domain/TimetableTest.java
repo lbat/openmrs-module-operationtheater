@@ -2,10 +2,15 @@ package org.openmrs.module.operationtheater.scheduler.domain;
 
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.openmrs.Provider;
+import org.openmrs.module.operationtheater.Surgery;
 import org.openmrs.module.operationtheater.api.OperationTheaterService;
+import org.openmrs.module.operationtheater.scheduler.solver.SurgeryConflict;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -35,11 +40,25 @@ public class TimetableTest {
 
 		timetable.setAnchors(anchors);
 
+		//create two surgeries that are in conflict
 		PlannedSurgery ps1 = new PlannedSurgery();
 		PlannedSurgery ps2 = new PlannedSurgery();
+		Surgery surgery1 = new Surgery();
+		Surgery surgery2 = new Surgery();
+		Provider[] surgicalTeam = new Provider[] { new Provider(), new Provider() };
+		surgery1.setSurgicalTeam(new HashSet<org.openmrs.Provider>(Arrays.asList(surgicalTeam)));
+		surgery2.setSurgicalTeam(new HashSet<org.openmrs.Provider>(Arrays.asList(surgicalTeam)));
+		ps1.setSurgery(surgery1);
+		ps2.setSurgery(surgery2);
+
+		//surgery without conflicts
+		PlannedSurgery ps3 = new PlannedSurgery();
+		ps3.setSurgery(new Surgery());
+
 		List<PlannedSurgery> plannedSurgeries = new ArrayList<PlannedSurgery>();
 		plannedSurgeries.add(ps1);
 		plannedSurgeries.add(ps2);
+		plannedSurgeries.add(ps3);
 
 		timetable.setPlannedSurgeries(plannedSurgeries);
 
@@ -47,8 +66,9 @@ public class TimetableTest {
 		Collection<?> problemFacts = timetable.getProblemFacts();
 
 		//verify contains all problem facts
-		assertThat(problemFacts, hasSize(2));
+		assertThat(problemFacts, hasSize(3));
 		assertTrue(problemFacts.containsAll(anchors));
+		assertTrue(problemFacts.contains(new SurgeryConflict(surgery1, surgery2, 2)));
 
 		//verify contains NO planning entities
 		assertFalse(problemFacts.contains(ps1));

@@ -8,6 +8,37 @@
         See http://www.liquibase.org/manual/home#available_database_refactorings
         for a list of supported elements and attributes
     -->
+    <changeSet author="Lukas Breitwieser" id="operationtheater-201408021830">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="surgical_team"/>
+            </not>
+        </preConditions>
+        <comment>
+            Create the surgical_team table
+        </comment>
+        <createTable tableName="surgical_team">
+
+            <column name="surgical_team_id" type="integer" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="surgery_id" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="provider_id" type="integer">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint constraintName="surgical_team_surgery_id"
+                                 baseTableName="surgical_team" baseColumnNames="surgery_id"
+                                 referencedTableName="surgery" referencedColumnNames="surgery_id"/>
+
+        <addForeignKeyConstraint constraintName="surgical_team_person_id"
+                                 baseTableName="surgical_team" baseColumnNames="provider_id"
+                                 referencedTableName="provider" referencedColumnNames="provider_id"/>
+    </changeSet>
+
     <changeSet author="Lukas Breitwieser" id="operationtheater-201407250935">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">

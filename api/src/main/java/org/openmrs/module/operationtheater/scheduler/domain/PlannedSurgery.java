@@ -1,5 +1,7 @@
 package org.openmrs.module.operationtheater.scheduler.domain;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.format.DateTimeFormat;
@@ -59,6 +61,7 @@ public class PlannedSurgery implements TimetableEntry {
 		if (start == null || end == null || other.start == null || other.end == null) {
 			return false;
 		}
+
 		//if Interval is constructed with a null parameter it assumes a current timestamp
 		return new Interval(this.start, this.end).overlaps(new Interval(other.start, other.end));
 	}
@@ -175,45 +178,40 @@ public class PlannedSurgery implements TimetableEntry {
 		DateTimeFormatter fmt = DateTimeFormat.forPattern("dd.MM HH:mm");
 		String startStr = start == null ? "null      " : fmt.print(start);
 		String endStr = end == null ? "null      " : fmt.print(end);
-		return "\n         PlannedSurgery {" +
-				"surgery=" + surgery +
-				"allocation=" + previousTimetableEntry +
-				//				", start=" + startStr +
-				//				", end=" + endStr +
-				//				", location=" + location +
-				'}';
+		return "\n         PS {" +
+				"surgery=" + surgery.getUuid() +
+				"} -> " + previousTimetableEntry;
 	}
 
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) {
 			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
+		} else if (o instanceof PlannedSurgery) {
+			PlannedSurgery other = (PlannedSurgery) o;
+			return new EqualsBuilder()
+					.append(surgery, other.surgery)
+					.append(previousTimetableEntry, other.previousTimetableEntry)
+					.append(nextTimetableEntry, other.nextTimetableEntry)
+					.append(start, other.start)
+					.append(end, other.end)
+					.append(location, other.location)
+					.isEquals();
+		} else {
 			return false;
 		}
-
-		PlannedSurgery that = (PlannedSurgery) o;
-
-		if (end != null ? !end.equals(that.end) : that.end != null) {
-			return false;
-		}
-		if (start != null ? !start.equals(that.start) : that.start != null) {
-			return false;
-		}
-		if (surgery != null ? !surgery.equals(that.surgery) : that.surgery != null) {
-			return false;
-		}
-
-		return true;
 	}
 
 	@Override
 	public int hashCode() {
-		int result = surgery != null ? surgery.hashCode() : 0;
-		result = 31 * result + (start != null ? start.hashCode() : 0);
-		result = 31 * result + (end != null ? end.hashCode() : 0);
-		return result;
+		return new HashCodeBuilder()
+				.append(surgery)
+				.append(previousTimetableEntry)
+				.append(nextTimetableEntry)
+				.append(start)
+				.append(end)
+				.append(location)
+				.toHashCode();
 	}
 
 	/**
