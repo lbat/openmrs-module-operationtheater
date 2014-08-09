@@ -41,7 +41,7 @@
         );
     };
 
-    function getDataFromServer() {
+    workflow.getDataFromServer = function () {
         emr.getFragmentActionWithCallback("operationtheater", "surgery", "getSurgeryTimes", {surgery: surgeryUuid}
             , function (data) {
                 insertDataIntoTable(data);

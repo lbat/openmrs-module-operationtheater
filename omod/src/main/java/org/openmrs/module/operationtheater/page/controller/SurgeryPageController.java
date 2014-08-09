@@ -65,7 +65,9 @@ public class SurgeryPageController {
 
 		//get list of providers and remove those that are already part of the surgical team
 		List<Provider> providerList = providerService.getAllProviders();
-		providerList.removeAll(surgery.getSurgicalTeam());
+		if (surgery.getSurgicalTeam() != null) {
+			providerList.removeAll(surgery.getSurgicalTeam());
+		}
 		model.addAttribute("providerList", providerList);
 
 		patientDomainWrapper.setPatient(patient);

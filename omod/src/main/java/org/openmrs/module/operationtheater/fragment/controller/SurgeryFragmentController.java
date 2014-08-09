@@ -1,6 +1,7 @@
 package org.openmrs.module.operationtheater.fragment.controller;
 
 import org.joda.time.DateTime;
+import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.api.ProviderService;
 import org.openmrs.module.operationtheater.OTMetadata;
@@ -147,6 +148,45 @@ public class SurgeryFragmentController {
 
 		otService.saveSurgery(surgery);
 		return new SuccessResult(ui.message("operationtheater.surgery.updated.procedure", procedure.getName()));
+	}
+
+	/**
+	 * @param ui
+	 * @param surgeryUuid
+	 * @param patient
+	 * @param procedure
+	 * @param otService
+	 * @return
+	 * @should return FailureResult if surgeryUuid is null
+	 * @should return FailureResult if patient is null
+	 * @should return FailureResult if procedure is null
+	 * @should return FailureResult if surgery already exists
+	 * @should return SuccessResult if surgery has been created successfully
+	 */
+	public FragmentActionResult createNewSurgery(UiUtils ui,
+	                                             @RequestParam("surgery") String surgeryUuid,
+	                                             @RequestParam("patient") Patient patient,
+	                                             @RequestParam("procedure") Procedure procedure,
+	                                             @SpringBean OperationTheaterService otService) {
+		if (surgeryUuid == null) {
+			return new FailureResult(ui.message("operationtheater.surgery.nullUuid"));
+		}
+		if (patient == null) {
+			return new FailureResult(ui.message("operationtheater.patient.notFound"));
+		}
+		if (procedure == null) {
+			return new FailureResult(ui.message("operationtheater.procedure.notFound"));
+		}
+		if (otService.getSurgeryByUuid(surgeryUuid) != null) {
+			return new FailureResult(ui.message("operationtheater.surgery.alreadyExists"));
+		}
+		Surgery surgery = new Surgery();
+		surgery.setUuid(surgeryUuid);
+		surgery.setPatient(patient);
+		surgery.setProcedure(procedure);
+
+		otService.saveSurgery(surgery);
+		return new SuccessResult(ui.message("operationtheater.surgery.createdSuccessfully"));
 	}
 
 	/**

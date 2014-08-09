@@ -24,6 +24,7 @@
 
 <%=ui.includeFragment("appui", "messages", [codes: [
         "coreapps.delete",
+        "general.save",
         "operationtheater.procedure.notFound",
         "operationtheater.provider.notFound",
         "uicommons.dataTable.emptyTable",
@@ -52,22 +53,42 @@ input.error {
         <% } %>
         var options = { source: Object.keys(procedureMap) };
         jq('#surgeryProcedure-field').typeahead(options);
+        var newSurgery = ${surgery.procedure.name == null};
+        var patientId = ${patient.id}
 
-        jq('#setProcedureButton').click(function () {
-            if (!jq('#surgeryProcedure-field').valid()) {
-                return;
-            }
-
-            var procedureUuid = procedureMap[jq('#surgeryProcedure-field').val()];
-            emr.getFragmentActionWithCallback("operationtheater", "surgery", "updateProcedure",
-                    {surgery: "${surgery.uuid}", procedure: procedureUuid}
-                    , function (data) {
-                        emr.successMessage(data.message);
-                    }, function (err) {
-                        emr.handleError(err);
+                jq('#setProcedureButton').click(function () {
+                    if (!jq('#surgeryProcedure-field').valid()) {
+                        return;
                     }
-            );
-        });
+
+                    var procedureUuid = procedureMap[jq('#surgeryProcedure-field').val()];
+
+                    if (newSurgery) {
+                        emr.getFragmentActionWithCallback("operationtheater", "surgery", "createNewSurgery",
+                                {surgery: "${surgery.uuid}", procedure: procedureUuid, patient: patientId}
+                                , function (data) {
+                                    emr.successMessage(data.message);
+                                    //show other fieldsets
+                                    jq('#surgicalTeamFieldset').show();
+                                    jq('#workflowFieldset').show();
+                                    //change button text
+                                    jq('#setProcedureButton').text(emr.message("general.save"));
+                                    workflow.getDataFromServer();
+                                }, function (err) {
+                                    emr.handleError(err);
+                                }
+                        );
+                    } else {
+                        emr.getFragmentActionWithCallback("operationtheater", "surgery", "updateProcedure",
+                                {surgery: "${surgery.uuid}", procedure: procedureUuid}
+                                , function (data) {
+                                    emr.successMessage(data.message);
+                                }, function (err) {
+                                    emr.handleError(err);
+                                }
+                        );
+                    }
+                });
 
         //surgical team
         var providerMap = {};
@@ -150,11 +171,12 @@ input.error {
                 maxLength    : 101,
                 initialValue : (surgery.procedure.name ?: '')
         ])}
-        <a class="button" id="setProcedureButton">${ui.message("general.save")}</a>
+        <a class="button"
+           id="setProcedureButton">${surgery.procedure.name == null ? ui.message("operationtheater.surgery.page.button.createSurgery") : ui.message("general.save")}</a>
 
     </fieldset>
 
-    <fieldset>
+    <fieldset id="surgicalTeamFieldset" ${surgery.procedure.name ?: 'style="display:none"'}>
         <legend>${ui.message("operationtheater.surgery.page.fieldset.surgicalTeam")}</legend>
 
         <div id="surgical-team-list">
@@ -184,7 +206,7 @@ input.error {
 
     </fieldset>
 
-    <fieldset>
+    <fieldset id="workflowFieldset" ${surgery.procedure.name ?: 'style="display:none"'}>
         <legend>${ui.message("operationtheater.surgery.page.fieldset.workflow")}</legend>
         <a class="button" id="startSurgeryButton">${ui.message("operationtheater.surgery.page.button.beginSurgery")}</a>
         <a class="button" id="finishSurgeryButton">${ui.message("operationtheater.surgery.page.button.finishSurgery")}</a>

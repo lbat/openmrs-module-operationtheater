@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.openmrs.Location;
+import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.api.ProviderService;
 import org.openmrs.module.appui.TestUiUtils;
@@ -28,6 +29,7 @@ import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
@@ -622,5 +624,99 @@ public class SurgeryFragmentControllerTest {
 		assertThat(captor.getValue().getDateFinished().withMillisOfSecond(0), is(new DateTime().withMillisOfSecond(0)));
 		assertThat(result, instanceOf(SuccessResult.class));
 		assertThat(((SuccessResult) result).getMessage(), is("operationtheater.surgery.finished"));
+	}
+
+	/**
+	 * @verifies return FailureResult if surgeryUuid is null
+	 * @see SurgeryFragmentController#createNewSurgery(org.openmrs.ui.framework.UiUtils, String, org.openmrs.Patient, org.openmrs.module.operationtheater.Procedure, org.openmrs.module.operationtheater.api.OperationTheaterService)
+	 */
+	@Test
+	public void createNewSurgery_shouldReturnFailureResultIfSurgeryUuidIsNull() throws Exception {
+		//call method under test
+		FragmentActionResult result = new SurgeryFragmentController()
+				.createNewSurgery(new TestUiUtils(), null, new Patient(), new Procedure(), null);
+
+		//verify
+		assertThat(result, instanceOf(FailureResult.class));
+		assertThat(((FailureResult) result).getSingleError(), is("operationtheater.surgery.nullUuid"));
+	}
+
+	/**
+	 * @verifies return FailureResult if patient is null
+	 * @see SurgeryFragmentController#createNewSurgery(org.openmrs.ui.framework.UiUtils, String, org.openmrs.Patient, org.openmrs.module.operationtheater.Procedure, org.openmrs.module.operationtheater.api.OperationTheaterService)
+	 */
+	@Test
+	public void createNewSurgery_shouldReturnFailureResultIfPatientIsNull() throws Exception {
+		//call method under test
+		FragmentActionResult result = new SurgeryFragmentController()
+				.createNewSurgery(new TestUiUtils(), "surgeryUuid", null, new Procedure(), null);
+
+		//verify
+		assertThat(result, instanceOf(FailureResult.class));
+		assertThat(((FailureResult) result).getSingleError(), is("operationtheater.patient.notFound"));
+	}
+
+	/**
+	 * @verifies return FailureResult if procedure is null
+	 * @see SurgeryFragmentController#createNewSurgery(org.openmrs.ui.framework.UiUtils, String, org.openmrs.Patient, org.openmrs.module.operationtheater.Procedure, org.openmrs.module.operationtheater.api.OperationTheaterService)
+	 */
+	@Test
+	public void createNewSurgery_shouldReturnFailureResultIfProcedureIsNull() throws Exception {
+		//call method under test
+		FragmentActionResult result = new SurgeryFragmentController()
+				.createNewSurgery(new TestUiUtils(), "surgeryUuid", new Patient(), null, null);
+
+		//verify
+		assertThat(result, instanceOf(FailureResult.class));
+		assertThat(((FailureResult) result).getSingleError(), is("operationtheater.procedure.notFound"));
+	}
+
+	/**
+	 * @verifies return FailureResult if surgery already exists
+	 * @see SurgeryFragmentController#createNewSurgery(org.openmrs.ui.framework.UiUtils, String, org.openmrs.Patient, org.openmrs.module.operationtheater.Procedure, org.openmrs.module.operationtheater.api.OperationTheaterService)
+	 */
+	@Test
+	public void createNewSurgery_shouldReturnFailureResultIfSurgeryAlreadyExists() throws Exception {
+		//prepare
+		String surgeryUuid = "surgeryUuid";
+		OperationTheaterService otService = Mockito.mock(OperationTheaterService.class);
+		when(otService.getSurgeryByUuid(surgeryUuid)).thenReturn(new Surgery());
+
+		//call method under test
+		FragmentActionResult result = new SurgeryFragmentController()
+				.createNewSurgery(new TestUiUtils(), surgeryUuid, new Patient(), new Procedure(), otService);
+
+		//verify
+		assertThat(result, instanceOf(FailureResult.class));
+		assertThat(((FailureResult) result).getSingleError(), is("operationtheater.surgery.alreadyExists"));
+	}
+
+	/**
+	 * @verifies return SuccessResult if surgery has been created successfully
+	 * @see SurgeryFragmentController#createNewSurgery(org.openmrs.ui.framework.UiUtils, String, org.openmrs.Patient, org.openmrs.module.operationtheater.Procedure, org.openmrs.module.operationtheater.api.OperationTheaterService)
+	 */
+	@Test
+	public void createNewSurgery_shouldReturnSuccessResultIfSurgeryHasBeenCreatedSuccessfully() throws Exception {
+		//prepare
+		String surgeryUuid = "surgeryUuid";
+		OperationTheaterService otService = Mockito.mock(OperationTheaterService.class);
+		when(otService.getSurgeryByUuid(surgeryUuid)).thenReturn(null);
+
+		Patient patient = new Patient();
+		Procedure procedure = new Procedure();
+
+		//call method under test
+		FragmentActionResult result = new SurgeryFragmentController()
+				.createNewSurgery(new TestUiUtils(), surgeryUuid, patient, procedure, otService);
+
+		ArgumentCaptor<Surgery> captor = ArgumentCaptor.forClass(Surgery.class);
+
+		//verify
+		verify(otService).saveSurgery(captor.capture());
+		assertThat(result, instanceOf(SuccessResult.class));
+		assertThat(((SuccessResult) result).getMessage(), is("operationtheater.surgery.createdSuccessfully"));
+		assertThat(captor.getValue().getUuid(), equalTo(surgeryUuid));
+		assertThat(captor.getValue().getPatient(), equalTo(patient));
+		assertThat(captor.getValue().getProcedure(), equalTo(procedure));
 	}
 }
