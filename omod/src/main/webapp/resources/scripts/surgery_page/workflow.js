@@ -16,14 +16,14 @@
             }
         });
 
-        getDataFromServer();
+        workflow.getDataFromServer();
     };
 
     workflow.startSurgery = function () {
         emr.getFragmentActionWithCallback("operationtheater", "surgery", "startSurgery", {surgery: surgeryUuid}
             , function (data) {
                 emr.successMessage(data.message);
-                getDataFromServer();
+                workflow.getDataFromServer();
             }, function (err) {
                 emr.handleError(err); //TODO server errors (StatusCode 500) are not handled - only if response was created from FailureResult
             }
@@ -34,7 +34,7 @@
         emr.getFragmentActionWithCallback("operationtheater", "surgery", "finishSurgery", {surgery: surgeryUuid}
             , function (data) {
                 emr.successMessage(data.message);
-                getDataFromServer();
+                workflow.getDataFromServer();
             }, function (err) {
                 emr.handleError(err); //TODO server errors (StatusCode 500) are not handled - only if response was created from FailureResult
             }

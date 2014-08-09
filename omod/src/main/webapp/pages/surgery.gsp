@@ -1,6 +1,7 @@
 <%
     ui.decorateWith("appui", "standardEmrPage")
 
+    ui.includeJavascript("operationtheater", "surgery_page/surgery.js")
     ui.includeJavascript("operationtheater", "surgery_page/surgicalTeam.js")
     ui.includeJavascript("operationtheater", "surgery_page/workflow.js")
 
@@ -56,39 +57,11 @@ input.error {
         var newSurgery = ${surgery.procedure.name == null};
         var patientId = ${patient.id}
 
-                jq('#setProcedureButton').click(function () {
-                    if (!jq('#surgeryProcedure-field').valid()) {
-                        return;
-                    }
+            //procedure
+                surgery.initProcedureButton("${surgery.uuid}", procedureMap, newSurgery, patientId);
 
-                    var procedureUuid = procedureMap[jq('#surgeryProcedure-field').val()];
-
-                    if (newSurgery) {
-                        emr.getFragmentActionWithCallback("operationtheater", "surgery", "createNewSurgery",
-                                {surgery: "${surgery.uuid}", procedure: procedureUuid, patient: patientId}
-                                , function (data) {
-                                    emr.successMessage(data.message);
-                                    //show other fieldsets
-                                    jq('#surgicalTeamFieldset').show();
-                                    jq('#workflowFieldset').show();
-                                    //change button text
-                                    jq('#setProcedureButton').text(emr.message("general.save"));
-                                    workflow.getDataFromServer();
-                                }, function (err) {
-                                    emr.handleError(err);
-                                }
-                        );
-                    } else {
-                        emr.getFragmentActionWithCallback("operationtheater", "surgery", "updateProcedure",
-                                {surgery: "${surgery.uuid}", procedure: procedureUuid}
-                                , function (data) {
-                                    emr.successMessage(data.message);
-                                }, function (err) {
-                                    emr.handleError(err);
-                                }
-                        );
-                    }
-                });
+        //validation
+        surgery.setUpValidation(options, providerOptions);
 
         //surgical team
         var providerMap = {};
@@ -102,57 +75,6 @@ input.error {
 
         //workflow
         workflow.init("${surgery.uuid}");
-
-        //validation
-        jq.validator.addMethod("procedureCheck", function (value, element) {
-            console.log("procedureCheck");
-            return jq.inArray(value, options.source) != -1;
-        }, emr.message('operationtheater.procedure.notFound'));
-
-        jq.validator.addMethod("providerCheck", function (value, element) {
-            console.log("providerCheck");
-            return jq.inArray(value, providerOptions.source) != -1;
-        }, emr.message('operationtheater.provider.notFound'));
-
-        //TODO set error messages to support internationalization
-        window.validator = jq("#surgeryForm").validate({
-            rules: {
-                "surgeryProcedure": {
-                    required: true,
-                    procedureCheck: true
-                },
-                "addProviderTextfield": {
-                    providerCheck: true
-                }
-            },
-            errorClass: "error",
-            validClass: "",
-            errorPlacement: function (error, element) {
-                var errorEl = jq(element).next();
-                while (errorEl.prop('tagName') != 'SPAN') {
-                    errorEl = jq(errorEl).next();
-                }
-                errorEl.text(error.text());
-            },
-            highlight: function (element, errorClass, validClass) {
-                jq(element).addClass(errorClass);
-                var errorEl = jq(element).next();
-                while (errorEl.prop('tagName') != 'SPAN') {
-                    errorEl = jq(errorEl).next();
-                }
-                errorEl.addClass(errorClass);
-                errorEl.show();
-            },
-            unhighlight: function (element, errorClass, validClass) {
-                jq(element).removeClass(errorClass);
-                var errorEl = jq(element).next();
-                while (errorEl.prop('tagName') != 'SPAN') {
-                    errorEl = jq(errorEl).next();
-                }
-                errorEl.removeClass(errorClass);
-                errorEl.hide();
-            }
-        });
     });
 </script>
 
