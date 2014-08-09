@@ -60,12 +60,12 @@ public class SurgeryDAOTest extends BaseModuleContextSensitiveTest {
 						.values(refDate.toDate(), refDate.plusHours(1).toDate(), 100)
 						.build(),
 				insertInto(DbUtil.Config.SURGERY, "voided")
-						.columns("patient_id", "procedure_id", "scheduling_data_id", "voided", "surgery_completed")
-						.values(100, 1, 1, false, true)
-						.values(100, 1, 2, true, false)
-						.values(101, 2, 3, false, false)
-						.values(101, 2, 3, true, false)
-						.values(101, 2, null, false, false)
+						.columns("patient_id", "procedure_id", "scheduling_data_id", "voided", "date_finished")
+						.values(100, 1, 1, false, new DateTime().toDate())
+						.values(100, 1, 2, true, null)
+						.values(101, 2, 3, false, null)
+						.values(101, 2, 3, true, null)
+						.values(101, 2, null, false, null)
 						.build()
 		);
 		DbSetup dbSetup = DbUtil.buildDBSetup(operation, getConnection(), useInMemoryDatabase());
@@ -85,7 +85,6 @@ public class SurgeryDAOTest extends BaseModuleContextSensitiveTest {
 		Procedure procedure = new Procedure();
 		procedure.setId(1);
 		surgery.setProcedure(procedure);
-		surgery.setSurgeryCompleted(false);
 
 		Surgery savedSurgery = surgeryDAO.saveOrUpdate(surgery);
 		assertThat(savedSurgery.getId(), is(TOTAL_SURGERIES + 1));
@@ -128,7 +127,6 @@ public class SurgeryDAOTest extends BaseModuleContextSensitiveTest {
 		Procedure procedure = new Procedure();
 		procedure.setId(1);
 		surgery.setProcedure(procedure);
-		surgery.setSurgeryCompleted(false);
 
 		Patient patient = service.getPatient(2);
 		surgery.setPatient(patient);
@@ -178,18 +176,18 @@ public class SurgeryDAOTest extends BaseModuleContextSensitiveTest {
 	}
 
 	/**
-	 * @verifies return all surgeries in the db that have not yet been performed
+	 * @verifies return all unvoided surgeries in the db that have not yet been performed
 	 * @see SurgeryDAO#getAllUncompletedSurgeries()
 	 */
 	@Test
-	public void getAllUncompletedSurgeries_shouldReturnAllSurgeriesInTheDbThatHaveNotYetBeenPerformed() throws Exception {
+	public void getAllUncompletedSurgeries_shouldReturnAllUnvoidedSurgeriesInTheDbThatHaveNotYetBeenPerformed()
+			throws Exception {
 
 		List<Surgery> surgeryList = surgeryDAO.getAllUncompletedSurgeries();
 
-		assertThat(surgeryList, hasSize(4));
-		assertThat(surgeryList.get(0).getId(), is(2));
-		assertThat(surgeryList.get(1).getId(), is(3));
-		assertThat(surgeryList.get(2).getId(), is(4));
+		assertThat(surgeryList, hasSize(2));
+		assertThat(surgeryList.get(0).getId(), is(3));
+		assertThat(surgeryList.get(1).getId(), is(5));
 	}
 
 	/**

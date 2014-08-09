@@ -6,7 +6,7 @@
     ui.includeCss("operationtheater", "bower_components/fullcalendar/fullcalendar.css")
     ui.includeJavascript("operationtheater", "bower_components/fullcalendar/fullcalendar.js")
     ui.includeJavascript("operationtheater", "scheduling_page/adjustAvailableTimesDialog.js")
-    ui.includeJavascript("operationtheater", "scheduling_page/adjustSurgeryScheduleDialog.js")
+    ui.includeJavascript("operationtheater", "scheduling_page/surgeryDialog.js")
     ui.includeJavascript("operationtheater", "scheduling_page/filterOperationTheatersInDailyView.js")
     ui.includeJavascript("operationtheater", "scheduling_page/calendar.js")
     ui.includeJavascript("operationtheater", "scheduling_page/actionClickEvents.js")
@@ -41,9 +41,9 @@
         <% } %>
 
         //create dialogs
-        availableTimesDialog.createDialog();
-        adjustSurgeryScheduleDialog.createDialog(resourceLookUp);
-        filterResourcesDialog.createDialog();
+        availableTimesDialog.create();
+        surgeryDialog.create(resourceLookUp);
+        filterResourcesDialog.create();
 
         //create calendar
         calendar.create(calResources, resourceLookUp);
@@ -77,7 +77,6 @@ body {
     margin: 0 auto;
     margin-top: 20px;
 }
-
 </style>
 
 <h1>
@@ -203,7 +202,7 @@ body {
         <ul>
             <li class="info">
                 <span id="">${ui.message("operationtheater.scheduling.page.adjustScheduleDialog.info")}</span>
-                <a href="javascript:adjustSurgeryScheduleDialog.openSurgery('${ui.pageLink("operationtheater", "surgery")}');"><h5
+                <a href="javascript:surgeryDialog.openSurgery('${ui.pageLink("operationtheater", "surgery")}');"><h5
                         style="color:#007fff" id="adjust-schedule-surgery"></h5></a>
             </li>
 
@@ -227,7 +226,7 @@ body {
                             label        : '',
                             formFieldName: 'startTime',
                             useTime      : true,
-                            format: "dd-mm-yyyy hh:ii",
+                            format       : "dd-mm-yyyy hh:ii",
                             startView    : 2])}
                 </p>
 
@@ -241,5 +240,21 @@ body {
         <button class="confirm right">${ui.message("emr.save")}
             <i class="icon-spinner icon-spin icon-2x" style="display: none; margin-left: 10px;"></i></button>
         <button class="cancel">${ui.message("emr.cancel")}</button>
+    </div>
+</div>
+
+<!-- open surgery record -->
+<div id="open-surgery-dialog" class="dialog simplemodal-data" style="">
+    <div class="dialog-header">
+        <i class="icon-link"></i>
+
+        <h3>${ui.message("operationtheater.scheduling.page.openSurgeryDialog.heading")}</h3>
+    </div>
+
+    <div class="dialog-content">
+        <p class="dialog-instructions">${ui.message("operationtheater.scheduling.page.openSurgeryDialog.question")}</p>
+
+        <button class="confirm right">${ui.message("emr.yes")}
+            <button class="cancel">${ui.message("emr.cancel")}</button>
     </div>
 </div>

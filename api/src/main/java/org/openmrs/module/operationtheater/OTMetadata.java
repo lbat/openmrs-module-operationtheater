@@ -13,6 +13,8 @@ public class OTMetadata {
 
 	public static final DateTimeFormatter AVAILABLE_TIME_FORMATTER = DateTimeFormat.forPattern("HH:mm");
 
+	public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormat.forPattern("d MMMM YYYY hh:mm a");
+
 	public static final String LOCATION_TAG_OPERATION_THEATER_UUID = "af3e9ed5-2de2-4a10-9956-9cb2ad5f84f2";
 
 	public static final String APPT_TYPE_UUID = "93263567-286d-4567-8596-0611d9800206";

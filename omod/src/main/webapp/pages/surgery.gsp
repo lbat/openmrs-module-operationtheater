@@ -2,10 +2,13 @@
     ui.decorateWith("appui", "standardEmrPage")
 
     ui.includeJavascript("operationtheater", "surgery_page/surgicalTeam.js")
+    ui.includeJavascript("operationtheater", "surgery_page/workflow.js")
 
+    ui.includeJavascript("uicommons", "emr.js")
     ui.includeJavascript("uicommons", "typeahead.js");
     ui.includeJavascript("operationtheater", "bower_components/validation/jquery.validate.js")
 
+    ui.includeCss("referenceapplication", "referenceapplication.css")
 %>
 <script type="text/javascript">
     var breadcrumbs = [
@@ -23,6 +26,7 @@
         "coreapps.delete",
         "operationtheater.procedure.notFound",
         "operationtheater.provider.notFound",
+        "uicommons.dataTable.emptyTable",
 ].flatten()
 ])%>
 
@@ -75,6 +79,8 @@ input.error {
         surgicalTeam.init("${surgery.uuid}", providerMap, providerOptions);
         surgicalTeam.get();
 
+        //workflow
+        workflow.init("${surgery.uuid}");
 
         //validation
         jq.validator.addMethod("procedureCheck", function (value, element) {
@@ -178,4 +184,23 @@ input.error {
 
     </fieldset>
 
+    <fieldset>
+        <legend>${ui.message("operationtheater.surgery.page.fieldset.workflow")}</legend>
+        <a class="button" id="startSurgeryButton">${ui.message("operationtheater.surgery.page.button.beginSurgery")}</a>
+        <a class="button" id="finishSurgeryButton">${ui.message("operationtheater.surgery.page.button.finishSurgery")}</a>
+
+        <p>
+        <table id="timestamp-table">
+            <thead>
+            <tr>
+                <th>${ui.message("operationtheater.surgery.page.tableColumn.event")}</th>
+                <th>${ui.message("operationtheater.surgery.page.tableColumn.date")}</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+    </p>
+    </fieldset>
 </form>

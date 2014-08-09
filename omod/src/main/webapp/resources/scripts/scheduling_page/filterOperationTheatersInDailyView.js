@@ -48,7 +48,7 @@
         return false;
     };
 
-    filterResourcesDialog.createDialog = function () {
+    filterResourcesDialog.create = function () {
 
         dialog = emr.setupConfirmationDialog({
             selector: '#filter-resources-dialog',

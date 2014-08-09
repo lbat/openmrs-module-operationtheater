@@ -8,6 +8,21 @@
         See http://www.liquibase.org/manual/home#available_database_refactorings
         for a list of supported elements and attributes
     -->
+    <changeSet id="operationtheater-2014080721725" author="Lukas Breitwieser">
+        <preConditions>
+            <tableExists tableName="surgery"/>
+        </preConditions>
+        <comment>
+            Add columns: dateStarted, dateFinished
+            Remove columns: surgery_completed
+        </comment>
+        <addColumn tableName="surgery">
+            <column name="date_started" type="datetime"/>
+            <column name="date_finished" type="datetime"/>
+        </addColumn>
+        <dropColumn tableName="surgery" columnName="surgery_completed"/>
+    </changeSet>
+
     <changeSet author="Lukas Breitwieser" id="operationtheater-201408021830">
         <preConditions onFail="MARK_RAN">
             <not>

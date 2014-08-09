@@ -1,23 +1,32 @@
 package org.openmrs.module.operationtheater.fragment.controller;
 
+import org.joda.time.DateTime;
 import org.openmrs.Provider;
 import org.openmrs.api.ProviderService;
+import org.openmrs.module.operationtheater.OTMetadata;
 import org.openmrs.module.operationtheater.Procedure;
 import org.openmrs.module.operationtheater.Surgery;
+import org.openmrs.module.operationtheater.Time;
 import org.openmrs.module.operationtheater.api.OperationTheaterService;
+import org.openmrs.module.operationtheater.validator.SurgeryValidator;
 import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.ui.framework.annotation.SpringBean;
 import org.openmrs.ui.framework.fragment.action.FailureResult;
 import org.openmrs.ui.framework.fragment.action.FragmentActionResult;
 import org.openmrs.ui.framework.fragment.action.SuccessResult;
+import org.springframework.validation.BindException;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 public class SurgeryFragmentController {
+
+	private final Time time = new Time();
 
 	/**
 	 * @param ui
@@ -28,7 +37,7 @@ public class SurgeryFragmentController {
 	 */
 	public List<SimpleObject> getSurgicalTeam(UiUtils ui, @RequestParam("surgery") Surgery surgery) {
 		if (surgery == null) {
-			throw new IllegalArgumentException("");
+			throw new IllegalArgumentException("Surgery doesn't exist");
 		}
 		return SimpleObject.fromCollection(surgery.getSurgicalTeam(), ui, "name", "uuid");
 	}
@@ -138,5 +147,144 @@ public class SurgeryFragmentController {
 
 		otService.saveSurgery(surgery);
 		return new SuccessResult(ui.message("operationtheater.surgery.updated.procedure", procedure.getName()));
+	}
+
+	/**
+	 * @param ui
+	 * @param surgery
+	 * @return
+	 * @should throw IllegalArgumentException if surgery is null
+	 * @should return all surgery times of this surgery if it has already been finished
+	 * @should return created and start times of this surgery if it hasn't been finished
+	 * @should return created time of this surgery if it hasn't been started
+	 */
+	public List<SimpleObject> getSurgeryTimes(UiUtils ui, @RequestParam("surgery") Surgery surgery) {
+		if (surgery == null) {
+			throw new IllegalArgumentException("Surgery doesn't exist");
+		}
+		List<SurgeryTime> surgeryTimes = new ArrayList<SurgeryTime>();
+
+		//date created
+		if (surgery.getDateCreated() != null) {
+			String dateCreated = OTMetadata.DATE_TIME_FORMATTER.print(new DateTime(surgery.getDateCreated()));
+			String displayName = ui.message("operationtheater.surgery.dateCreated.displayName");
+			surgeryTimes.add(new SurgeryTime(SurgeryTimeType.CREATED, displayName, dateCreated));
+		}
+
+		//date started
+		if (surgery.getDateStarted() != null) {
+			String dateStarted = OTMetadata.DATE_TIME_FORMATTER.print(surgery.getDateStarted());
+			String displayName = ui.message("operationtheater.surgery.dateStarted.displayName");
+			surgeryTimes.add(new SurgeryTime(SurgeryTimeType.STARTED, displayName, dateStarted));
+		}
+
+		//date finished
+		if (surgery.getDateFinished() != null) {
+			String dateFinished = OTMetadata.DATE_TIME_FORMATTER.print(surgery.getDateFinished());
+			String displayName = ui.message("operationtheater.surgery.dateFinished.displayName");
+			surgeryTimes.add(new SurgeryTime(SurgeryTimeType.FINISHED, displayName, dateFinished));
+		}
+
+		return SimpleObject.fromCollection(surgeryTimes, ui, "type", "displayName", "dateTimeStr");
+	}
+
+	/**
+	 * @param ui
+	 * @param surgery
+	 * @param otService
+	 * @param validator
+	 * @return
+	 * @should return FailureResult if surgery is null
+	 * @should return FailureResult if surgery has already been finished
+	 * @should return FailureResult if surgery has already been started
+	 * @should return FailureResult if validation fails
+	 * @should return SuccessResult if dateStarted has been successfully set
+	 */
+	public FragmentActionResult startSurgery(UiUtils ui, @RequestParam("surgery") Surgery surgery,
+	                                         @SpringBean OperationTheaterService otService,
+	                                         @SpringBean SurgeryValidator validator) {
+		if (surgery == null) {
+			return new FailureResult(ui.message("operationtheater.surgery.notFound"));
+		}
+		if (surgery.getDateFinished() != null) {
+			return new FailureResult(ui.message("operationtheater.surgery.alreadyFinished"));
+		}
+		if (surgery.getDateStarted() != null) {
+			return new FailureResult(ui.message("operationtheater.surgery.alreadyStarted"));
+		}
+
+		surgery.setDateStarted(time.now());
+
+		//validate
+		Errors errors = new BindException(surgery, "surgery");
+		validator.validate(surgery, errors);
+		if (errors.hasErrors()) {
+			return new FailureResult(errors);
+		}
+		otService.saveSurgery(surgery);
+		String otName = surgery.getSchedulingData().getLocation().getName();
+		return new SuccessResult(ui.message("operationtheater.surgery.started", otName));
+	}
+
+	/**
+	 * @param ui
+	 * @param surgery
+	 * @param otService
+	 * @param validator
+	 * @return
+	 * @should return FailureResult if surgery is null
+	 * @should return FailureResult if validation fails
+	 * @should return FailureResult if surgery has already been finished
+	 * @should return SuccessResult if dateFinished has been successfully set
+	 */
+	public FragmentActionResult finishSurgery(UiUtils ui, @RequestParam("surgery") Surgery surgery,
+	                                          @SpringBean OperationTheaterService otService,
+	                                          @SpringBean SurgeryValidator validator) {
+		if (surgery == null) {
+			return new FailureResult(ui.message("operationtheater.surgery.notFound"));
+		}
+		if (surgery.getDateFinished() != null) {
+			return new FailureResult(ui.message("operationtheater.surgery.alreadyFinished"));
+		}
+
+		surgery.setDateFinished(time.now());
+
+		//validate
+		Errors errors = new BindException(surgery, "surgery");
+		validator.validate(surgery, errors);
+		if (errors.hasErrors()) {
+			return new FailureResult(errors);
+		}
+		otService.saveSurgery(surgery);
+		return new SuccessResult(ui.message("operationtheater.surgery.finished"));
+	}
+
+	static enum SurgeryTimeType {CREATED, STARTED, FINISHED}
+
+	static class SurgeryTime {
+
+		public SurgeryTimeType type;
+
+		public String displayName = "";
+
+		public String dateTimeStr;
+
+		SurgeryTime(SurgeryTimeType type, String displayName, String dateTimeStr) {
+			this.type = type;
+			this.displayName = displayName;
+			this.dateTimeStr = dateTimeStr;
+		}
+
+		public SurgeryTimeType getType() {
+			return type;
+		}
+
+		public String getDisplayName() {
+			return displayName;
+		}
+
+		public String getDateTimeStr() {
+			return dateTimeStr;
+		}
 	}
 }

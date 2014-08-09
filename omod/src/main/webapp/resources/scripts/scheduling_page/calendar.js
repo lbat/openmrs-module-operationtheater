@@ -72,14 +72,17 @@
                 } else if (event.dateLocked) {
                     jq(element).addClass("icon-lock");
                 }
+                if (event.state === "STARTED") {
+                    jq(element).css("box-shadow", " 3px 3px 3px rgb(143, 143, 143)");
+                } else if (event.state === "FINISHED") {
+                    jq(element).css("opacity", " 0.7");
+                }
             },
             eventClick: function (calEvent, jsEvent, view) {
                 if (calEvent.annotation) {
                     availableTimesDialog.show(calEvent);
                 } else {
-                    //FIXME remove this hack - just for demonstration purpose
-                    //window.location.href = '${ui.pageLink("operationtheater", "surgery", [surgeryId:2, patientId:6])}';
-                    adjustSurgeryScheduleDialog.show(calEvent);
+                    surgeryDialog.show(calEvent);
                 }
             },
             resources: calResources,

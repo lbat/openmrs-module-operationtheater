@@ -95,8 +95,7 @@ public class SchedulingFragmentController {
 
 		return SimpleObject
 				.fromCollection(events, ui, "title", "start", "end", "availableStart", "availableEnd", "surgeryUuid",
-						"patientUuid",
-						"dateLocked", "resourceId", "allDay", "editable", "annotation", "color");
+						"patientUuid", "dateLocked", "resourceId", "allDay", "editable", "annotation", "color", "state");
 	}
 
 	/**
@@ -262,6 +261,12 @@ public class SchedulingFragmentController {
 		int resourceId = resources.indexOf(scheduling.getLocation().getName()) + 1;
 		CalendarEvent event = new CalendarEvent(procedure + " - " + patientName, startStr, endStr, surgeryUuid, patientUuid,
 				scheduling.getDateLocked(), resourceId, color);
+		if (surgery.getDateStarted() != null) {
+			event.setState("STARTED");
+		}
+		if (surgery.getDateFinished() != null) {
+			event.setState("FINISHED");
+		}
 		return event;
 	}
 
@@ -466,6 +471,8 @@ public class SchedulingFragmentController {
 
 		private boolean dateLocked;
 
+		private String State;
+
 		public CalendarEvent(String title, String start, String end, String availableStart, String availableEnd,
 		                     int resourceId,
 		                     boolean annotation) {
@@ -607,20 +614,12 @@ public class SchedulingFragmentController {
 			this.dateLocked = dateLocked;
 		}
 
-		@Override
-		public String toString() {
-			return "CalendarEvent{" +
-					"title='" + title + '\'' +
-					", start='" + start + '\'' +
-					", end='" + end + '\'' +
-					", availableStart='" + availableStart + '\'' +
-					", availableEnd='" + availableEnd + '\'' +
-					", resourceId=" + resourceId +
-					", allDay=" + allDay +
-					", editable=" + editable +
-					", annotation=" + annotation +
-					", color='" + color + '\'' +
-					'}';
+		public String getState() {
+			return State;
+		}
+
+		public void setState(String state) {
+			State = state;
 		}
 	}
 }

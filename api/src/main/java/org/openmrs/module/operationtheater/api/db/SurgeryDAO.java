@@ -24,7 +24,7 @@ public interface SurgeryDAO extends GenericDAO<Surgery> {
 	 * returns all surgeries in the db that haven't yet been performed
 	 *
 	 * @return
-	 * @should return all surgeries in the db that have not yet been performed
+	 * @should return all unvoided surgeries in the db that have not yet been performed
 	 */
 	public List<Surgery> getAllUncompletedSurgeries();
 

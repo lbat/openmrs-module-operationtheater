@@ -6,6 +6,7 @@ import com.ninja_squad.dbsetup.Operations;
 import com.ninja_squad.dbsetup.operation.Operation;
 import org.joda.time.DateTime;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.Whitebox;
@@ -47,6 +48,24 @@ public class SchedulerTest extends BaseModuleContextSensitiveTest {
 
 	private DateTime refDate = new DateTime().withTimeAtStartOfDay();
 
+	private DateTime now;
+
+	@Before
+	public void setUp() {
+		DaemonTokenUtil.passDaemonTokenToModule();
+
+		Time timeMock = Mockito.mock(Time.class);
+		now = refDate.withTime(11, 0, 0, 0);
+		when(timeMock.now()).thenReturn(now);
+		Whitebox.setInternalState(Scheduler.INSTANCE, "time", timeMock);
+	}
+
+	@After
+	public void tearDown() {
+		//don't influence other tests
+		Scheduler.INSTANCE.reset();
+	}
+
 	public void setUpDB_2Normal1LockedAnd1OutsidePlanningPeriodSurgery() throws Exception {
 		Operation operation = sequenceOf(
 				DbUtilDefaultInserts.get(),
@@ -65,17 +84,15 @@ public class SchedulerTest extends BaseModuleContextSensitiveTest {
 						.values(refDate.plusDays(200).toDate(), refDate.plusDays(200).plusHours(1).toDate(), 100, true)
 						.build(),
 				insertInto(Config.SURGERY, "date_created")
-						.columns("patient_id", "procedure_id", "surgery_completed", "scheduling_data_id", "date_created")
-						.values(100, 1, false, 1, refDate.minusWeeks(1).toDate())
-						.values(100, 1, false, 2, refDate.minusWeeks(2).toDate())
-						.values(100, 1, false, 3, refDate.minusWeeks(3).toDate()) //locked
-						.values(100, 1, false, 4, refDate.minusWeeks(3).toDate()) //outside planning period
+						.columns("patient_id", "procedure_id", "scheduling_data_id", "date_created")
+						.values(100, 1, 1, refDate.minusWeeks(1).toDate())
+						.values(100, 1, 2, refDate.minusWeeks(2).toDate())
+						.values(100, 1, 3, refDate.minusWeeks(3).toDate()) //locked
+						.values(100, 1, 4, refDate.minusWeeks(3).toDate()) //outside planning period
 						.build()
 		);
 		DbSetup dbSetup = DbUtil.buildDBSetup(operation, getConnection(), useInMemoryDatabase());
 		dbSetupTracker.launchIfNecessary(dbSetup);
-
-		DaemonTokenUtil.passDaemonTokenToModule();
 	}
 
 	public void setUpDB_2ConflictingSurgeries() throws Exception {
@@ -93,9 +110,9 @@ public class SchedulerTest extends BaseModuleContextSensitiveTest {
 								refDate.plusHours(14).plusMinutes(35 + 25).toDate(), 100, false)
 						.build(),
 				insertInto(Config.SURGERY, "date_created")
-						.columns("patient_id", "procedure_id", "surgery_completed", "scheduling_data_id", "date_created")
-						.values(100, 1, false, 1, refDate.minusWeeks(1).toDate())
-						.values(100, 1, false, 2, refDate.minusWeeks(2).toDate())
+						.columns("patient_id", "procedure_id", "scheduling_data_id", "date_created")
+						.values(100, 1, 1, refDate.minusWeeks(1).toDate())
+						.values(100, 1, 2, refDate.minusWeeks(2).toDate())
 						.build(),
 				Operations.insertInto("surgical_team")
 						.columns("surgery_id", "provider_id")
@@ -105,14 +122,30 @@ public class SchedulerTest extends BaseModuleContextSensitiveTest {
 		);
 		DbSetup dbSetup = DbUtil.buildDBSetup(operation, getConnection(), useInMemoryDatabase());
 		dbSetupTracker.launchIfNecessary(dbSetup);
-
-		DaemonTokenUtil.passDaemonTokenToModule();
 	}
 
-	@After
-	public void tearDown() {
-		//don't influence other tests
-		Scheduler.INSTANCE.reset();
+	public void setUpDb_OneSurgeryStarted() throws Exception {
+		Operation operation = sequenceOf(
+				DbUtilDefaultInserts.get(),
+				insertInto(Config.PROCEDURE)
+						.columns("name", "intervention_duration", "ot_preparation_duration", "inpatient_stay")
+						.values("Appendectomy", 35, 25, 4)
+						.build(),
+				insertInto(Config.SCHEDULING_DATA)
+						.columns("start", "end", "location_id", "date_locked")
+						.values(now.toDate(), now.plusMinutes(35 + 25).toDate(), 100, false)
+						.values(refDate.plusHours(13).toDate(),
+								refDate.plusHours(14).plusMinutes(35 + 25).toDate(), 100, false)
+						.build(),
+				insertInto(Config.SURGERY, "date_created")
+						.columns("patient_id", "procedure_id", "scheduling_data_id", "date_created", "date_started")
+								//surgery started with 15min delay
+						.values(100, 1, 1, refDate.minusWeeks(1).toDate(), now.minusMinutes(15).toDate())
+						.values(100, 1, 2, refDate.minusWeeks(2).toDate(), null)
+						.build()
+		);
+		DbSetup dbSetup = DbUtil.buildDBSetup(operation, getConnection(), useInMemoryDatabase());
+		dbSetupTracker.launchIfNecessary(dbSetup);
 	}
 
 	/**
@@ -122,10 +155,6 @@ public class SchedulerTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void solve_shouldSolve2Normal1LockedAnd1OutsidePlanningPeriodSurgery() throws Exception {
 		setUpDB_2Normal1LockedAnd1OutsidePlanningPeriodSurgery();
-
-		Time timeMock = Mockito.mock(Time.class);
-		when(timeMock.now()).thenReturn(refDate.withTime(11, 0, 0, 0));
-		Whitebox.setInternalState(Scheduler.INSTANCE, "time", timeMock);
 
 		//modify solverFactory to come up with reproducible results
 		SolverFactory solverFactory = Scheduler.INSTANCE.getSolverFactory();
@@ -169,10 +198,6 @@ public class SchedulerTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void solve_shouldSolve2ConflictingSurgeries() throws Exception {
 		setUpDB_2ConflictingSurgeries();
-
-		Time timeMock = Mockito.mock(Time.class);
-		when(timeMock.now()).thenReturn(refDate.withTime(11, 0, 0, 0));
-		Whitebox.setInternalState(Scheduler.INSTANCE, "time", timeMock);
 
 		//modify solverFactory to come up with reproducible results
 		SolverFactory solverFactory = Scheduler.INSTANCE.getSolverFactory();
@@ -227,10 +252,6 @@ public class SchedulerTest extends BaseModuleContextSensitiveTest {
 
 		OperationTheaterService otService = Context.getService(OperationTheaterService.class);
 		LocationService locationService = Context.getLocationService();
-		Time timeMock = Mockito.mock(Time.class);
-		when(timeMock.now()).thenReturn(refDate.withTime(11, 0, 0, 0));
-
-		Whitebox.setInternalState(Scheduler.INSTANCE, "time", timeMock);
 		Whitebox.setInternalState(Scheduler.INSTANCE, "otService", otService);
 		Whitebox.setInternalState(Scheduler.INSTANCE, "locationService", locationService);
 
@@ -245,31 +266,31 @@ public class SchedulerTest extends BaseModuleContextSensitiveTest {
 		assertThat(anchors.get(i).getLocation(), is(nullValue()));
 		i++;
 		assertThat(anchors.get(i).getLocation().getName(), is("OT 1"));
-		assertThat(anchors.get(i).getStart().withMillis(0), equalTo(new DateTime().withMillis(0)));
+		assertThat(anchors.get(i).getStart(), equalTo(now));
 		assertThat(anchors.get(i).getRemainingTime(), is(360));
 		i++;
 		assertThat(anchors.get(i).getLocation().getName(), is("OT 1"));
-		assertThat(anchors.get(i).getStart(), equalTo(new DateTime().plusDays(1).withTime(8, 0, 0, 0)));
+		assertThat(anchors.get(i).getStart(), equalTo(refDate.plusDays(1).plusHours(8)));
 		assertThat(anchors.get(i).getRemainingTime(), is(540));
 		i++;
 		assertThat(anchors.get(i).getLocation().getName(), is("OT 1"));
-		assertThat(anchors.get(i).getStart(), equalTo(new DateTime().plusDays(2).withTime(8, 0, 0, 0)));
+		assertThat(anchors.get(i).getStart(), equalTo(refDate.plusDays(2).plusHours(8)));
 		assertThat(anchors.get(i).getRemainingTime(), is(240));
 		i++;
 		assertThat(anchors.get(i).getLocation().getName(), is("OT 1"));
-		assertThat(anchors.get(i).getStart(), equalTo(new DateTime().plusDays(2).withTime(12, 0, 0, 0)));
+		assertThat(anchors.get(i).getStart(), equalTo(refDate.plusDays(2).plusHours(12)));
 		assertThat(anchors.get(i).getRemainingTime(), is(300));
 		i++;
 		assertThat(anchors.get(i).getLocation().getName(), is("OT 2"));
-		assertThat(anchors.get(i).getStart().withMillis(0), equalTo(new DateTime().withMillis(0)));
+		assertThat(anchors.get(i).getStart(), equalTo(now));
 		assertThat(anchors.get(i).getRemainingTime(), is(360));
 		i++;
 		assertThat(anchors.get(i).getLocation().getName(), is("OT 2"));
-		assertThat(anchors.get(i).getStart(), equalTo(new DateTime().plusDays(1).withTime(8, 0, 0, 0)));
+		assertThat(anchors.get(i).getStart(), equalTo(refDate.plusDays(1).plusHours(8)));
 		assertThat(anchors.get(i).getRemainingTime(), is(540));
 		i++;
 		assertThat(anchors.get(i).getLocation().getName(), is("OT 2"));
-		assertThat(anchors.get(i).getStart(), equalTo(new DateTime().plusDays(2).withTime(8, 0, 0, 0)));
+		assertThat(anchors.get(i).getStart(), equalTo(refDate.plusDays(2).plusHours(8)));
 		assertThat(anchors.get(i).getRemainingTime(), is(540));
 
 		//planned surgeries
@@ -295,5 +316,56 @@ public class SchedulerTest extends BaseModuleContextSensitiveTest {
 		assertThat(plannedSurgeries.get(i).getStart(), is(refDate.plusHours(60)));
 		assertThat(plannedSurgeries.get(i).getEnd(), is(refDate.plusHours(61)));
 		assertThat(plannedSurgeries.get(i).getPreviousTimetableEntry(), is((TimetableEntry) anchors.get(4)));
+	}
+
+	/**
+	 * @verifies setup the initial solution if a surgery is currently performed
+	 * @see Scheduler#setupInitialSolution(int)
+	 */
+	@Test
+	public void setupInitialSolution_shouldSetupTheInitialSolutionIfASurgeryIsCurrentlyPerformed() throws Exception {
+		//prepare
+		setUpDb_OneSurgeryStarted();
+
+		OperationTheaterService otService = Context.getService(OperationTheaterService.class);
+		LocationService locationService = Context.getLocationService();
+		Whitebox.setInternalState(Scheduler.INSTANCE, "otService", otService);
+		Whitebox.setInternalState(Scheduler.INSTANCE, "locationService", locationService);
+
+		//call method under test
+		Timetable timetable = Scheduler.INSTANCE.setupInitialSolution(1);
+
+		//verify
+		//anchors
+		List<Anchor> anchors = timetable.getAnchors();
+		assertThat(anchors, hasSize(3));
+		int i = 0;
+		assertThat(anchors.get(i).getLocation(), is(nullValue()));
+		i++;
+		assertThat(anchors.get(i).getStart(), is(now.minusMinutes(15)));
+		assertThat(anchors.get(i).getLocation().getId(), is(100));
+		assertThat(anchors.get(i).getRemainingTime(), is(375));
+		i++;
+		assertThat(anchors.get(i).getStart(), is(now));
+		assertThat(anchors.get(i).getLocation().getId(), is(101));
+		assertThat(anchors.get(i).getRemainingTime(), is(360));
+
+		//planned surgeries
+		List<PlannedSurgery> plannedSurgeries = timetable.getPlannedSurgeries();
+		assertThat(plannedSurgeries, hasSize(2));
+		i = 0;
+		assertThat(plannedSurgeries.get(i).getSurgery().getUuid(), is("surgery1"));
+		assertThat(plannedSurgeries.get(i).getLocation().getName(), is("OT 1"));
+		assertThat(plannedSurgeries.get(i).getStart(),
+				is(now.minusMinutes(15))); //start time is not the same as in db - determined by anchor
+		assertThat(plannedSurgeries.get(i).getEnd(), is(now.minusMinutes(15).plusMinutes(35)));
+		assertThat(plannedSurgeries.get(i).getPreviousTimetableEntry(), is((TimetableEntry) anchors.get(1)));
+		i++;
+		assertThat(plannedSurgeries.get(i).getSurgery().getUuid(), is("surgery2"));
+		assertThat(plannedSurgeries.get(i).getLocation().getName(), is("OT 1"));
+		assertThat(plannedSurgeries.get(i).getStart(),
+				is(now.plusMinutes(20))); //start time is not the same as in db - determined by anchor
+		assertThat(plannedSurgeries.get(i).getEnd(), is(now.plusMinutes(20).plusHours(1)));
+		assertThat(plannedSurgeries.get(i).getPreviousTimetableEntry(), is((TimetableEntry) plannedSurgeries.get(0)));
 	}
 }

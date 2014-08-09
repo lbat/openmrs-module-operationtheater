@@ -154,6 +154,7 @@ public enum Scheduler {
 	 *
 	 * @return
 	 * @should properly setup the initial solution
+	 * @should setup the initial solution if a surgery is currently performed
 	 */
 	Timetable setupInitialSolution(int planningWindowLength) {
 		DateTime lastPlannedDay = time.now().plusDays(planningWindowLength);
@@ -192,8 +193,12 @@ public enum Scheduler {
 		for (Location location : locations) {
 			Interval available = otService.getLocationAvailableTime(location, now);
 			if (now.isBefore(available.getEnd())) {
-				//FIXME if a surgery is currently performed in an operation theater set the anchor to its expected finishing time
 				DateTime start = now.isAfter(available.getStart()) ? now : available.getStart();
+				//if a surgery has already been started set anchor to the start time
+				Surgery alreadyStarted = getStartedSurgery(surgeries, location);
+				if (alreadyStarted != null) {
+					start = alreadyStarted.getDateStarted();
+				}
 				anchors.add(new Anchor(location, start));
 			}
 		}
@@ -253,6 +258,22 @@ public enum Scheduler {
 	}
 
 	/**
+	 * return already started surgery for this location<br />
+	 *
+	 * @param surgeries
+	 * @param location
+	 * @return
+	 */
+	private Surgery getStartedSurgery(List<Surgery> surgeries, Location location) {
+		for (Surgery surgery : surgeries) {
+			if (location.equals(surgery.getSchedulingData().getLocation()) && surgery.getDateStarted() != null) {
+				return surgery;
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * creates a Timetable object that represents the solution and calls that appropriate setter methods for each param
 	 *
 	 * @param anchors
@@ -280,14 +301,13 @@ public enum Scheduler {
 	                                                       DateTime lastPlannedDay) {
 		List<PlannedSurgery> plannedSurgeries = new ArrayList<PlannedSurgery>();
 
-		//set location start and end time of last solution
+		//set location start time and location of last solution
 		for (Surgery surgery : surgeries) {
 			PlannedSurgery plannedSurgery = new PlannedSurgery(otService);
 			plannedSurgery.setSurgery(surgery);
 			SchedulingData scheduling = surgery.getSchedulingData();
 			if (scheduling != null && scheduling.getStart() != null) {
 				plannedSurgery.setStart(scheduling.getStart());
-				plannedSurgery.setEnd(scheduling.getEnd());
 				plannedSurgery.setLocation(scheduling.getLocation());
 			}
 			//only add surgeries that are unscheduled or within the planning window

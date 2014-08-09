@@ -49,7 +49,7 @@
         return false;
     };
 
-    availableTimesDialog.createDialog = function () {
+    availableTimesDialog.create = function () {
 
         dialog = emr.setupConfirmationDialog({
             selector: '#available-times-dialog',

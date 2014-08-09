@@ -57,7 +57,7 @@ public class HibernateSurgeryDAO extends HibernateGenericDAO<Surgery> implements
 				.getCurrentSession()
 				.createQuery(
 						"from " + mappedClass.getSimpleName()
-								+ " at where at.surgeryCompleted = false"
+								+ " at where at.dateFinished = null and at.voided=false"
 				).list();
 	}
 

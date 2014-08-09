@@ -1,14 +1,19 @@
 package org.openmrs.module.operationtheater.fragment.controller;
 
+import org.joda.time.DateTime;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.openmrs.Location;
 import org.openmrs.Provider;
 import org.openmrs.api.ProviderService;
 import org.openmrs.module.appui.TestUiUtils;
+import org.openmrs.module.operationtheater.MockUtil;
 import org.openmrs.module.operationtheater.Procedure;
+import org.openmrs.module.operationtheater.SchedulingData;
 import org.openmrs.module.operationtheater.Surgery;
 import org.openmrs.module.operationtheater.api.OperationTheaterService;
+import org.openmrs.module.operationtheater.validator.SurgeryValidator;
 import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.ui.framework.fragment.action.FailureResult;
@@ -28,6 +33,7 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -332,5 +338,289 @@ public class SurgeryFragmentControllerTest {
 		assertThat(result, instanceOf(SuccessResult.class));
 		assertThat(((SuccessResult) result).getMessage(),
 				is("operationtheater.surgery.updated.procedure:procedureName"));
+	}
+
+	/**
+	 * @verifies throw IllegalArgumentException if surgery is null
+	 * @see SurgeryFragmentController#getSurgeryTimes(org.openmrs.ui.framework.UiUtils, org.openmrs.module.operationtheater.Surgery)
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void getSurgeryTimes_shouldThrowIllegalArgumentExceptionIfSurgeryIsNull() throws Exception {
+
+		//call method under test
+		new SurgeryFragmentController().getSurgeryTimes(new TestUiUtils(), null);
+	}
+
+	/**
+	 * @verifies return all surgery times of this surgery if it has already been finished
+	 * @see SurgeryFragmentController#getSurgeryTimes(org.openmrs.ui.framework.UiUtils, org.openmrs.module.operationtheater.Surgery)
+	 */
+	@Test
+	public void getSurgeryTimes_shouldReturnAllSurgeryTimesOfThisSurgeryIfItHasAlreadyBeenFinished() throws Exception {
+		DateTime refDate = new DateTime(2014, 8, 10, 17, 0, 0);
+		DateTime created = refDate.minusDays(1);
+		DateTime started = refDate;
+		DateTime finished = refDate.plusHours(1);
+
+		Surgery surgery = new Surgery();
+		surgery.setDateCreated(created.toDate());
+		surgery.setDateStarted(started);
+		surgery.setDateFinished(finished);
+
+		//call method under test
+		List<SimpleObject> result = new SurgeryFragmentController().getSurgeryTimes(new TestUiUtils(), surgery);
+
+		//verify
+		assertThat(result, hasSize(3));
+		int i = 0;
+		assertThat((String) result.get(i).get("type"), is("CREATED"));
+		assertThat((String) result.get(i).get("displayName"), is("operationtheater.surgery.dateCreated.displayName"));
+		assertThat((String) result.get(i).get("dateTimeStr"), is("9 August 2014 05:00 PM"));
+		i++;
+		assertThat((String) result.get(i).get("type"), is("STARTED"));
+		assertThat((String) result.get(i).get("displayName"), is("operationtheater.surgery.dateStarted.displayName"));
+		assertThat((String) result.get(i).get("dateTimeStr"), is("10 August 2014 05:00 PM"));
+		i++;
+		assertThat((String) result.get(i).get("type"), is("FINISHED"));
+		assertThat((String) result.get(i).get("displayName"), is("operationtheater.surgery.dateFinished.displayName"));
+		assertThat((String) result.get(i).get("dateTimeStr"), is("10 August 2014 06:00 PM"));
+	}
+
+	/**
+	 * @verifies return created and start times of this surgery if it hasn't been finished
+	 * @see SurgeryFragmentController#getSurgeryTimes(org.openmrs.ui.framework.UiUtils, org.openmrs.module.operationtheater.Surgery)
+	 */
+	@Test
+	public void getSurgeryTimes_shouldReturnCreatedAndStartTimesOfThisSurgeryIfItHasntBeenFinished() throws Exception {
+		DateTime refDate = new DateTime(2014, 8, 10, 17, 0, 0);
+		DateTime created = refDate.minusDays(1);
+		DateTime started = refDate;
+
+		Surgery surgery = new Surgery();
+		surgery.setDateCreated(created.toDate());
+		surgery.setDateStarted(started);
+
+		//call method under test
+		List<SimpleObject> result = new SurgeryFragmentController().getSurgeryTimes(new TestUiUtils(), surgery);
+
+		//verify
+		assertThat(result, hasSize(2));
+		int i = 0;
+		assertThat((String) result.get(i).get("type"), is("CREATED"));
+		assertThat((String) result.get(i).get("displayName"), is("operationtheater.surgery.dateCreated.displayName"));
+		assertThat((String) result.get(i).get("dateTimeStr"), is("9 August 2014 05:00 PM"));
+		i++;
+		assertThat((String) result.get(i).get("type"), is("STARTED"));
+		assertThat((String) result.get(i).get("displayName"), is("operationtheater.surgery.dateStarted.displayName"));
+		assertThat((String) result.get(i).get("dateTimeStr"), is("10 August 2014 05:00 PM"));
+	}
+
+	/**
+	 * @verifies return created time of this surgery if it hasn't been started
+	 * @see SurgeryFragmentController#getSurgeryTimes(org.openmrs.ui.framework.UiUtils, org.openmrs.module.operationtheater.Surgery)
+	 */
+	@Test
+	public void getSurgeryTimes_shouldReturnCreatedTimeOfThisSurgeryIfItHasntBeenStarted() throws Exception {
+		DateTime refDate = new DateTime(2014, 8, 10, 17, 0, 0);
+		DateTime created = refDate.minusDays(1);
+
+		Surgery surgery = new Surgery();
+		surgery.setDateCreated(created.toDate());
+
+		//call method under test
+		List<SimpleObject> result = new SurgeryFragmentController().getSurgeryTimes(new TestUiUtils(), surgery);
+
+		//verify
+		assertThat(result, hasSize(1));
+		int i = 0;
+		assertThat((String) result.get(i).get("type"), is("CREATED"));
+		assertThat((String) result.get(i).get("displayName"), is("operationtheater.surgery.dateCreated.displayName"));
+		assertThat((String) result.get(i).get("dateTimeStr"), is("9 August 2014 05:00 PM"));
+	}
+
+	/**
+	 * @verifies return FailureResult if surgery is null
+	 * @see SurgeryFragmentController#startSurgery(org.openmrs.ui.framework.UiUtils, org.openmrs.module.operationtheater.Surgery, org.openmrs.module.operationtheater.api.OperationTheaterService, org.openmrs.module.operationtheater.validator.SurgeryValidator)
+	 */
+	@Test
+	public void startSurgery_shouldReturnFailureResultIfSurgeryIsNull() throws Exception {
+		//call method under test
+		FragmentActionResult result = new SurgeryFragmentController().startSurgery(new TestUiUtils(), null, null, null);
+
+		//verify
+		assertThat(result, instanceOf(FailureResult.class));
+		assertThat(((FailureResult) result).getSingleError(), is("operationtheater.surgery.notFound"));
+	}
+
+	/**
+	 * @verifies return FailureResult if validation fails
+	 * @see SurgeryFragmentController#startSurgery(org.openmrs.ui.framework.UiUtils, org.openmrs.module.operationtheater.Surgery, org.openmrs.module.operationtheater.api.OperationTheaterService, org.openmrs.module.operationtheater.validator.SurgeryValidator)
+	 */
+	@Test
+	public void startSurgery_shouldReturnFailureResultIfValidationFails() throws Exception {
+		Surgery surgery = new Surgery();
+
+		//mock validator - add validation error on field procedure
+		SurgeryValidator validator = (SurgeryValidator) MockUtil
+				.mockValidator(false, SurgeryValidator.class, surgery, "procedure", "errorCode");
+		OperationTheaterService service = Mockito.mock(OperationTheaterService.class);
+
+		//call method under test
+		FragmentActionResult result = new SurgeryFragmentController()
+				.startSurgery(new TestUiUtils(), surgery, service, validator);
+
+		//verify
+		assertThat(result, instanceOf(FailureResult.class));
+		assertThat(((FailureResult) result).getErrors().getFieldErrors("procedure").get(0).getCode(), is("errorCode"));
+	}
+
+	/**
+	 * @verifies return FailureResult if surgery has already been finished
+	 * @see SurgeryFragmentController#startSurgery(org.openmrs.ui.framework.UiUtils, org.openmrs.module.operationtheater.Surgery, org.openmrs.module.operationtheater.api.OperationTheaterService, org.openmrs.module.operationtheater.validator.SurgeryValidator)
+	 */
+	@Test
+	public void startSurgery_shouldReturnFailureResultIfSurgeryHasAlreadyBeenFinished() throws Exception {
+		Surgery surgery = new Surgery();
+		surgery.setDateStarted(new DateTime().minusMinutes(2));
+		surgery.setDateFinished(new DateTime().minusMinutes(1));
+
+		//call method under test
+		FragmentActionResult result = new SurgeryFragmentController().startSurgery(new TestUiUtils(), surgery, null, null);
+
+		//verify
+		assertThat(result, instanceOf(FailureResult.class));
+		assertThat(((FailureResult) result).getSingleError(), is("operationtheater.surgery.alreadyFinished"));
+	}
+
+	/**
+	 * @verifies return FailureResult if surgery has already been started
+	 * @see SurgeryFragmentController#startSurgery(org.openmrs.ui.framework.UiUtils, org.openmrs.module.operationtheater.Surgery, org.openmrs.module.operationtheater.api.OperationTheaterService, org.openmrs.module.operationtheater.validator.SurgeryValidator)
+	 */
+	@Test
+	public void startSurgery_shouldReturnFailureResultIfSurgeryHasAlreadyBeenStarted() throws Exception {
+		Surgery surgery = new Surgery();
+		surgery.setDateStarted(new DateTime().minusMinutes(1));
+
+		//call method under test
+		FragmentActionResult result = new SurgeryFragmentController().startSurgery(new TestUiUtils(), surgery, null, null);
+
+		//verify
+		assertThat(result, instanceOf(FailureResult.class));
+		assertThat(((FailureResult) result).getSingleError(), is("operationtheater.surgery.alreadyStarted"));
+	}
+
+	/**
+	 * @verifies return SuccessResult if dateStarted has been successfully set
+	 * @see SurgeryFragmentController#startSurgery(org.openmrs.ui.framework.UiUtils, org.openmrs.module.operationtheater.Surgery, org.openmrs.module.operationtheater.api.OperationTheaterService, org.openmrs.module.operationtheater.validator.SurgeryValidator)
+	 */
+	@Test
+	public void startSurgery_shouldReturnSuccessResultIfDateStartedHasBeenSuccessfullySet() throws Exception {
+		Surgery surgery = new Surgery();
+		Location location = new Location();
+		location.setName("locationName");
+		SchedulingData schedulingData = new SchedulingData();
+		schedulingData.setLocation(location);
+		surgery.setSchedulingData(schedulingData);
+
+		SurgeryValidator validator = (SurgeryValidator) MockUtil
+				.mockValidator(true, SurgeryValidator.class, surgery, null, null);
+		OperationTheaterService service = Mockito.mock(OperationTheaterService.class);
+		when(service.saveSurgery(eq(surgery))).thenReturn(surgery);
+
+		//call method under test
+		FragmentActionResult result = new SurgeryFragmentController()
+				.startSurgery(new TestUiUtils(), surgery, service, validator);
+
+		ArgumentCaptor<Surgery> captor = ArgumentCaptor.forClass(Surgery.class);
+		verify(service).saveSurgery(captor.capture());
+
+		//verify
+		assertThat(captor.getValue().getDateStarted().withMillisOfSecond(0), is(new DateTime().withMillisOfSecond(0)));
+		assertThat(result, instanceOf(SuccessResult.class));
+		assertThat(((SuccessResult) result).getMessage(), is("operationtheater.surgery.started:locationName"));
+	}
+
+	/**
+	 * @verifies return FailureResult if surgery is null
+	 * @see SurgeryFragmentController#finishSurgery(org.openmrs.ui.framework.UiUtils, org.openmrs.module.operationtheater.Surgery, org.openmrs.module.operationtheater.api.OperationTheaterService, org.openmrs.module.operationtheater.validator.SurgeryValidator)
+	 */
+	@Test
+	public void finishSurgery_shouldReturnFailureResultIfSurgeryIsNull() throws Exception {
+		//call method under test
+		FragmentActionResult result = new SurgeryFragmentController().finishSurgery(new TestUiUtils(), null, null, null);
+
+		//verify
+		assertThat(result, instanceOf(FailureResult.class));
+		assertThat(((FailureResult) result).getSingleError(), is("operationtheater.surgery.notFound"));
+	}
+
+	/**
+	 * @verifies return FailureResult if validation fails
+	 * @see SurgeryFragmentController#finishSurgery(org.openmrs.ui.framework.UiUtils, org.openmrs.module.operationtheater.Surgery, org.openmrs.module.operationtheater.api.OperationTheaterService, org.openmrs.module.operationtheater.validator.SurgeryValidator)
+	 */
+	@Test
+	public void finishSurgery_shouldReturnFailureResultIfValidationFails() throws Exception {
+		Surgery surgery = new Surgery();
+
+		//mock validator - add validation error on field procedure
+		SurgeryValidator validator = (SurgeryValidator) MockUtil
+				.mockValidator(false, SurgeryValidator.class, surgery, "procedure", "errorCode");
+		OperationTheaterService service = Mockito.mock(OperationTheaterService.class);
+
+		//call method under test
+		FragmentActionResult result = new SurgeryFragmentController()
+				.finishSurgery(new TestUiUtils(), surgery, service, validator);
+
+		//verify
+		assertThat(result, instanceOf(FailureResult.class));
+		assertThat(((FailureResult) result).getErrors().getFieldErrors("procedure").get(0).getCode(), is("errorCode"));
+	}
+
+	/**
+	 * @verifies return FailureResult if surgery has already been finished
+	 * @see SurgeryFragmentController#finishSurgery(org.openmrs.ui.framework.UiUtils, org.openmrs.module.operationtheater.Surgery, org.openmrs.module.operationtheater.api.OperationTheaterService, org.openmrs.module.operationtheater.validator.SurgeryValidator)
+	 */
+	@Test
+	public void finishSurgery_shouldReturnFailureResultIfSurgeryHasAlreadyBeenFinished() throws Exception {
+		Surgery surgery = new Surgery();
+		surgery.setDateFinished(new DateTime().minusMinutes(1));
+
+		//call method under test
+		FragmentActionResult result = new SurgeryFragmentController().finishSurgery(new TestUiUtils(), surgery, null, null);
+
+		//verify
+		assertThat(result, instanceOf(FailureResult.class));
+		assertThat(((FailureResult) result).getSingleError(), is("operationtheater.surgery.alreadyFinished"));
+	}
+
+	/**
+	 * @verifies return SuccessResult if dateFinished has been successfully set
+	 * @see SurgeryFragmentController#finishSurgery(org.openmrs.ui.framework.UiUtils, org.openmrs.module.operationtheater.Surgery, org.openmrs.module.operationtheater.api.OperationTheaterService, org.openmrs.module.operationtheater.validator.SurgeryValidator)
+	 */
+	@Test
+	public void finishSurgery_shouldReturnSuccessResultIfDateFinishedHasBeenSuccessfullySet() throws Exception {
+		Surgery surgery = new Surgery();
+		Location location = new Location();
+		location.setName("locationName");
+		SchedulingData schedulingData = new SchedulingData();
+		schedulingData.setLocation(location);
+		surgery.setSchedulingData(schedulingData);
+
+		SurgeryValidator validator = (SurgeryValidator) MockUtil
+				.mockValidator(true, SurgeryValidator.class, surgery, null, null);
+		OperationTheaterService service = Mockito.mock(OperationTheaterService.class);
+		when(service.saveSurgery(eq(surgery))).thenReturn(surgery);
+
+		//call method under test
+		FragmentActionResult result = new SurgeryFragmentController()
+				.finishSurgery(new TestUiUtils(), surgery, service, validator);
+
+		ArgumentCaptor<Surgery> captor = ArgumentCaptor.forClass(Surgery.class);
+		verify(service).saveSurgery(captor.capture());
+
+		//verify
+		assertThat(captor.getValue().getDateFinished().withMillisOfSecond(0), is(new DateTime().withMillisOfSecond(0)));
+		assertThat(result, instanceOf(SuccessResult.class));
+		assertThat(((SuccessResult) result).getMessage(), is("operationtheater.surgery.finished"));
 	}
 }

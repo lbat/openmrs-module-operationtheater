@@ -100,6 +100,11 @@ public class PlannedSurgery implements TimetableEntry {
 	public void setPreviousTimetableEntry(TimetableEntry previousTimetableEntry) {
 		this.previousTimetableEntry = previousTimetableEntry;
 		setStart(previousTimetableEntry.getEnd());
+		//if surgery has already been started correct surgery end time, because otPreparation has already been performed
+		if (surgery.getDateStarted() != null) {
+			int interventionDuration = surgery.getProcedure().getInterventionDuration();
+			end = start.plusMinutes(interventionDuration);
+		}
 		location = previousTimetableEntry.getLocation();
 	}
 

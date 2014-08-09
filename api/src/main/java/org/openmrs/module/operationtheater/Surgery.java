@@ -1,5 +1,7 @@
 package org.openmrs.module.operationtheater;
 
+import org.hibernate.annotations.Type;
+import org.joda.time.DateTime;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
 
@@ -37,8 +39,13 @@ public class Surgery extends BaseOpenmrsDataJPA {
 	@JoinColumn(name = "procedure_id", nullable = false)
 	private Procedure procedure;
 
-	@Column(name = "surgery_completed", columnDefinition = "boolean default false", nullable = false)
-	private Boolean surgeryCompleted = false;
+	@Column(name = "date_started")
+	@Type(type = "org.joda.time.contrib.hibernate.PersistentDateTime")
+	private DateTime dateStarted;
+
+	@Column(name = "date_finished")
+	@Type(type = "org.joda.time.contrib.hibernate.PersistentDateTime")
+	private DateTime dateFinished;
 
 	@OneToOne(cascade = { CascadeType.ALL })
 	@JoinColumn(name = "scheduling_data_id")
@@ -84,12 +91,8 @@ public class Surgery extends BaseOpenmrsDataJPA {
 		this.procedure = procedure;
 	}
 
-	public Boolean getSurgeryCompleted() {
-		return surgeryCompleted;
-	}
-
-	public void setSurgeryCompleted(Boolean surgeryCompleted) {
-		this.surgeryCompleted = surgeryCompleted;
+	public boolean isSurgeryCompleted() {
+		return dateFinished != null;
 	}
 
 	public SchedulingData getSchedulingData() {
@@ -106,5 +109,21 @@ public class Surgery extends BaseOpenmrsDataJPA {
 
 	public void setSurgicalTeam(Set<Provider> surgicalTeam) {
 		this.surgicalTeam = surgicalTeam;
+	}
+
+	public DateTime getDateFinished() {
+		return dateFinished;
+	}
+
+	public void setDateFinished(DateTime dateFinished) {
+		this.dateFinished = dateFinished;
+	}
+
+	public DateTime getDateStarted() {
+		return dateStarted;
+	}
+
+	public void setDateStarted(DateTime dateStarted) {
+		this.dateStarted = dateStarted;
 	}
 }
