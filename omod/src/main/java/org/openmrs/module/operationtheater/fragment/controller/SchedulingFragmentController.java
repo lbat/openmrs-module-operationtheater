@@ -107,7 +107,7 @@ public class SchedulingFragmentController {
 		try {
 			int planningWindow = Integer.parseInt(administrationService.getGlobalProperty(
 					OTMetadata.GP_CONTINUOUS_PLANNING_WINDOW));
-			planningWindow = 1;
+			planningWindow = 14;
 			Scheduler.INSTANCE.solve(planningWindow);
 			return new SuccessResult(ui.message("operationtheater.scheduling.startedSuccessfully"));
 		}

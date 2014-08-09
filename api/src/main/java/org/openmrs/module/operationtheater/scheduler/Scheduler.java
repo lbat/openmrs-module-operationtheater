@@ -214,7 +214,8 @@ public enum Scheduler {
 		//fixed surgeries also need an anchor (also have to be inside the planning window)
 		for (Surgery surgery : surgeries) {
 			SchedulingData schedulingData = surgery.getSchedulingData();
-			if (schedulingData.getDateLocked() && schedulingData.getStart().isBefore(lastPlannedDay)) {
+			if (schedulingData != null && schedulingData.getDateLocked() && schedulingData.getStart()
+					.isBefore(lastPlannedDay)) {
 				anchors.add(new Anchor(schedulingData.getLocation(), schedulingData.getStart()));
 			}
 		}

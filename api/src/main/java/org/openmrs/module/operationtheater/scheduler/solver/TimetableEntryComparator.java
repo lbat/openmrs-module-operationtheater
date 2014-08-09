@@ -21,9 +21,11 @@ public class TimetableEntryComparator implements Comparator<TimetableEntry> {
 	public int compare(TimetableEntry left, TimetableEntry right) {
 		String leftLocationUuid = left.getLocation() != null ? left.getLocation().getUuid() : "aaaaa";
 		String rightLocationUuid = right.getLocation() != null ? right.getLocation().getUuid() : "aaaaa";
+		long leftMillis = left.getStart() != null ? left.getStart().getMillis() : Long.MAX_VALUE;
+		long rightMillis = right.getStart() != null ? right.getStart().getMillis() : Long.MAX_VALUE;
 		return new CompareToBuilder()
 				.append(leftLocationUuid, rightLocationUuid)
-				.append(left.getStart().getMillis(), right.getStart().getMillis())
+				.append(leftMillis, rightMillis)
 				.build();
 	}
 }
