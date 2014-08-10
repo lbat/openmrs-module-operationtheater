@@ -127,25 +127,25 @@
             <artifactId>appointmentscheduling-api</artifactId>
         </dependency>
 
-        <!-- Rest webservice -->
-        <dependency>
-            <groupId>org.openmrs.module</groupId>
-            <artifactId>webservices.rest-omod-common</artifactId>
-            <version>${webserviceRestVersion}</version>
-            <classifier>tests</classifier>
-            <scope>test</scope>
-        </dependency>
+        <!-- Rest webservice - not used at the moment -->
+        <!--<dependency>-->
+            <!--<groupId>org.openmrs.module</groupId>-->
+            <!--<artifactId>webservices.rest-omod-common</artifactId>-->
+            <!--<version>${webserviceRestVersion}</version>-->
+            <!--<classifier>tests</classifier>-->
+            <!--<scope>test</scope>-->
+        <!--</dependency>-->
 
-        <dependency>
-            <groupId>org.openmrs.module</groupId>
-            <artifactId>webservices.rest-omod</artifactId>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.openmrs.module</groupId>-->
+            <!--<artifactId>webservices.rest-omod</artifactId>-->
+        <!--</dependency>-->
 
-        <dependency>
-            <groupId>org.openmrs.module</groupId>
-            <artifactId>webservices.rest-omod</artifactId>
-            <classifier>tests</classifier>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.openmrs.module</groupId>-->
+            <!--<artifactId>webservices.rest-omod</artifactId>-->
+            <!--<classifier>tests</classifier>-->
+        <!--</dependency>-->
 
         <!-- OpenMRS modules simply required to fire up the application context when running component tests -->
         <dependency>
