@@ -51,7 +51,7 @@
         <htmlformentryVersion>2.1.4</htmlformentryVersion>
         <idgenVersion>2.5</idgenVersion>
         <providerManagementVersion>2.0</providerManagementVersion>
-        <reportingVersion>0.9.1-SNAPSHOT</reportingVersion>
+        <reportingVersion>0.9.1</reportingVersion>
         <paperrecordVersion>1.0-SNAPSHOT</paperrecordVersion>
         <calculationVersion>1.0</calculationVersion>
         <serializationxstreamVersion>0.2.7</serializationxstreamVersion>
