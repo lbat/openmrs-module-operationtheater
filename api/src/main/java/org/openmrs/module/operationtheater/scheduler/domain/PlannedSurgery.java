@@ -97,16 +97,25 @@ public class PlannedSurgery implements TimetableEntry {
 		return previousTimetableEntry;
 	}
 
+	/**
+	 * @param previousTimetableEntry
+	 * @should set all shadow variables to null if previousTimetableEntry is null
+	 * @should update all shadow variables
+	 * @should set values of shadow variables correctly if surgery has been started
+	 */
 	public void setPreviousTimetableEntry(TimetableEntry previousTimetableEntry) {
 		this.previousTimetableEntry = previousTimetableEntry;
 		if (previousTimetableEntry == null) {
+			location = null;
+			start = null;
+			end = null;
 			return;
 		}
 		setStart(previousTimetableEntry.getEnd());
 		//if surgery has already been started correct surgery end time, because otPreparation has already been performed
 		if (surgery.getDateStarted() != null) {
 			int interventionDuration = surgery.getProcedure().getInterventionDuration();
-			end = start.plusMinutes(interventionDuration);
+			end = surgery.getDateStarted().plusMinutes(interventionDuration);
 		}
 		location = previousTimetableEntry.getLocation();
 	}

@@ -310,4 +310,86 @@ public class PlannedSurgeryTest {
 		//verify
 		assertThat(result, is(200));
 	}
+
+	/**
+	 * @verifies set all shadow variables to null if previousTimetableEntry is null
+	 * @see PlannedSurgery#setPreviousTimetableEntry(TimetableEntry)
+	 */
+	@Test
+	public void setPreviousTimetableEntry_shouldSetAllShadowVariablesToNullIfPreviousTimetableEntryIsNull()
+			throws Exception {
+		//prepare
+		PlannedSurgery plannedSurgery = new PlannedSurgery();
+		plannedSurgery.setLocation(new Location());
+		plannedSurgery.setStart(new DateTime(), false);
+		plannedSurgery.setEnd(new DateTime());
+
+		//call method under test
+		plannedSurgery.setPreviousTimetableEntry(null);
+
+		//verify
+		assertThat(plannedSurgery.getLocation(), is(nullValue()));
+		assertThat(plannedSurgery.getStart(), is(nullValue()));
+		assertThat(plannedSurgery.getEnd(), is(nullValue()));
+	}
+
+	/**
+	 * @verifies update all shadow variables
+	 * @see PlannedSurgery#setPreviousTimetableEntry(TimetableEntry)
+	 */
+	@Test
+	public void setPreviousTimetableEntry_shouldUpdateAllShadowVariables() throws Exception {
+		//prepare
+		PlannedSurgery previous = new PlannedSurgery();
+		previous.setLocation(new Location());
+		previous.setStart(new DateTime().minusMinutes(30), false);
+		previous.setEnd(new DateTime());
+
+		PlannedSurgery plannedSurgery = new PlannedSurgery();
+		Procedure procedure = new Procedure();
+		procedure.setInterventionDuration(35);
+		procedure.setOtPreparationDuration(25);
+		Surgery surgery = new Surgery();
+		surgery.setProcedure(procedure);
+		plannedSurgery.setSurgery(surgery);
+
+		//call method under test
+		plannedSurgery.setPreviousTimetableEntry(previous);
+
+		//verify
+		assertThat(plannedSurgery.getLocation(), equalTo(previous.getLocation()));
+		assertThat(plannedSurgery.getStart(), equalTo(previous.getEnd()));
+		assertThat(plannedSurgery.getEnd(), equalTo(previous.getEnd().plusMinutes(60)));
+	}
+
+	/**
+	 * @verifies set values of shadow variables correctly if surgery has been started
+	 * @see PlannedSurgery#setPreviousTimetableEntry(TimetableEntry)
+	 */
+	@Test
+	public void setPreviousTimetableEntry_shouldSetValuesOfShadowVariablesCorrectlyIfSurgeryHasBeenStarted()
+			throws Exception {
+		//prepare
+		PlannedSurgery previous = new PlannedSurgery();
+		previous.setLocation(new Location());
+		previous.setStart(new DateTime().minusMinutes(30), false);
+		previous.setEnd(new DateTime());
+
+		PlannedSurgery plannedSurgery = new PlannedSurgery();
+		Procedure procedure = new Procedure();
+		procedure.setInterventionDuration(35);
+		procedure.setOtPreparationDuration(25);
+		Surgery surgery = new Surgery();
+		surgery.setDateStarted(new DateTime().plusMinutes(10));
+		surgery.setProcedure(procedure);
+		plannedSurgery.setSurgery(surgery);
+
+		//call method under test
+		plannedSurgery.setPreviousTimetableEntry(previous);
+
+		//verify
+		assertThat(plannedSurgery.getLocation(), equalTo(previous.getLocation()));
+		assertThat(plannedSurgery.getStart(), equalTo(previous.getEnd()));
+		assertThat(plannedSurgery.getEnd(), equalTo(surgery.getDateStarted().plusMinutes(35)));
+	}
 }
