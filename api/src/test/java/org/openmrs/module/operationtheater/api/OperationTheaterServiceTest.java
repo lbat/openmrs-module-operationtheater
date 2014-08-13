@@ -64,7 +64,7 @@ import static org.mockito.Mockito.when;
 
 /**
  * Tests {@link ${OperationTheaterService}}.
- * for context sensitive tests have a look at {@link org.openmrs.module.operationtheater.api.OperationTheaterServiceTest1}
+ * for context sensitive tests have a look at {@link OperationTheaterService_2Test}
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(ValidateUtil.class)
@@ -331,10 +331,10 @@ public class OperationTheaterServiceTest { //extends BaseModuleContextSensitiveT
 		blocks.add(block);
 
 		AppointmentService appointmentService = Mockito.mock(AppointmentService.class);
-		when(appointmentService
-				.getAppointmentBlocks(eq(date.toDate()), eq(date.toDate()), eq(location.getId() + ","), any(Provider.class),
-						any(
-								AppointmentType.class))).thenReturn(blocks);
+		Date from = date.withTimeAtStartOfDay().toDate();
+		Date to = date.withTimeAtStartOfDay().plusDays(1).toDate();
+		when(appointmentService.getAppointmentBlocks(eq(from), eq(to), eq(location.getId() + ","), any(Provider.class),
+				any(AppointmentType.class))).thenReturn(blocks);
 
 		OperationTheaterService otService = new OperationTheaterServiceImpl();
 		Whitebox.setInternalState(otService, "appointmentService", appointmentService);

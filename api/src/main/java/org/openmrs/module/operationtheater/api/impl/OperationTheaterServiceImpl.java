@@ -177,8 +177,8 @@ public class OperationTheaterServiceImpl extends BaseOpenmrsService implements O
 	@Override
 	public Interval getLocationAvailableTime(Location location, DateTime date) {
 		Date date1 = date.toDate();
-		List<AppointmentBlock> blocks = appointmentService.getAppointmentBlocks(date1,
-				date1, location.getId() + ",", null, null);
+		List<AppointmentBlock> blocks = appointmentService.getAppointmentBlocks(date.withTime(0, 0, 0, 0).toDate(),
+				date.withTime(0, 0, 0, 0).plusDays(1).toDate(), location.getId() + ",", null, null);
 		//		List<AppointmentBlock> blocks = new ArrayList<AppointmentBlock>();
 
 		if (blocks.size() == 1) {
