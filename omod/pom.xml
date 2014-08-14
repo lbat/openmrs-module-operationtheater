@@ -29,6 +29,14 @@
             <version>${project.parent.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>${project.parent.groupId}</groupId>
+            <artifactId>${project.parent.artifactId}-api</artifactId>
+            <version>${project.parent.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+
         <!-- Begin OpenMRS core -->
 
         <dependency>
@@ -129,22 +137,22 @@
 
         <!-- Rest webservice - not used at the moment -->
         <!--<dependency>-->
-            <!--<groupId>org.openmrs.module</groupId>-->
-            <!--<artifactId>webservices.rest-omod-common</artifactId>-->
-            <!--<version>${webserviceRestVersion}</version>-->
-            <!--<classifier>tests</classifier>-->
-            <!--<scope>test</scope>-->
+        <!--<groupId>org.openmrs.module</groupId>-->
+        <!--<artifactId>webservices.rest-omod-common</artifactId>-->
+        <!--<version>${webserviceRestVersion}</version>-->
+        <!--<classifier>tests</classifier>-->
+        <!--<scope>test</scope>-->
         <!--</dependency>-->
 
         <!--<dependency>-->
-            <!--<groupId>org.openmrs.module</groupId>-->
-            <!--<artifactId>webservices.rest-omod</artifactId>-->
+        <!--<groupId>org.openmrs.module</groupId>-->
+        <!--<artifactId>webservices.rest-omod</artifactId>-->
         <!--</dependency>-->
 
         <!--<dependency>-->
-            <!--<groupId>org.openmrs.module</groupId>-->
-            <!--<artifactId>webservices.rest-omod</artifactId>-->
-            <!--<classifier>tests</classifier>-->
+        <!--<groupId>org.openmrs.module</groupId>-->
+        <!--<artifactId>webservices.rest-omod</artifactId>-->
+        <!--<classifier>tests</classifier>-->
         <!--</dependency>-->
 
         <!-- OpenMRS modules simply required to fire up the application context when running component tests -->
@@ -185,13 +193,6 @@
 
         <dependency>
             <groupId>org.openmrs.module</groupId>
-            <artifactId>paperrecord-api</artifactId>
-            <version>${paperrecordVersion}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.openmrs.module</groupId>
             <artifactId>idgen-api</artifactId>
             <version>${idgenVersion}</version>
             <type>jar</type>
@@ -207,6 +208,13 @@
             <scope>test</scope>
         </dependency>
         <!-- End Test specific dependencies -->
+
+        <!-- DBSetup (dbunit alternative) -->
+        <dependency>
+            <groupId>com.ninja-squad</groupId>
+            <artifactId>DbSetup</artifactId>
+            <scope>test</scope>
+        </dependency>
 
         <!-- Compass sass-->
         <!--<dependency>
@@ -396,23 +404,23 @@
             <!-- bower - javascript dependency management -->
             <!-- Not used at the moment -->
             <!--<plugin>-->
-                <!--<groupId>org.codehaus.mojo</groupId>-->
-                <!--<artifactId>exec-maven-plugin</artifactId>-->
-                <!--<executions>-->
-                    <!--<execution>-->
-                        <!--<phase>generate-sources</phase>-->
-                        <!--<goals>-->
-                            <!--<goal>exec</goal>-->
-                        <!--</goals>-->
-                    <!--</execution>-->
-                <!--</executions>-->
-                <!--<configuration>-->
-                    <!--<executable>bower</executable>-->
-                    <!--<arguments>-->
-                        <!--<argument>install</argument>-->
-                    <!--</arguments>-->
-                    <!--<workingDirectory>${basedir}/src/main/webapp/resources</workingDirectory>-->
-                <!--</configuration>-->
+            <!--<groupId>org.codehaus.mojo</groupId>-->
+            <!--<artifactId>exec-maven-plugin</artifactId>-->
+            <!--<executions>-->
+            <!--<execution>-->
+            <!--<phase>generate-sources</phase>-->
+            <!--<goals>-->
+            <!--<goal>exec</goal>-->
+            <!--</goals>-->
+            <!--</execution>-->
+            <!--</executions>-->
+            <!--<configuration>-->
+            <!--<executable>bower</executable>-->
+            <!--<arguments>-->
+            <!--<argument>install</argument>-->
+            <!--</arguments>-->
+            <!--<workingDirectory>${basedir}/src/main/webapp/resources</workingDirectory>-->
+            <!--</configuration>-->
             <!--</plugin>-->
         </plugins>
     </build>

@@ -82,7 +82,7 @@
         </require_module>
 
         <!--<require_module version="${webservicesRestVersion}">-->
-            <!--org.openmrs.module.webservices.rest-->
+        <!--org.openmrs.module.webservices.rest-->
         <!--</require_module>-->
 
         <require_module version="${appointmentschedulingVersion}">
@@ -95,6 +95,10 @@
 
         <require_module version="${coreappsVersion}">
             org.openmrs.module.coreapps
+        </require_module>
+
+        <require_module version="${idgenVersion}">
+            org.openmrs.module.idgen
         </require_module>
 
     </require_modules>

@@ -52,6 +52,7 @@ public class HibernateSurgeryDAO extends HibernateGenericDAO<Surgery> implements
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public List<Surgery> getAllUncompletedSurgeries() {
 		return super.sessionFactory
 				.getCurrentSession()
@@ -62,6 +63,7 @@ public class HibernateSurgeryDAO extends HibernateGenericDAO<Surgery> implements
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public List<Surgery> getScheduledSurgeries(DateTime from, DateTime to) {
 		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Surgery.class);
 		criteria.add(Restrictions.eq("voided", false));
@@ -75,6 +77,19 @@ public class HibernateSurgeryDAO extends HibernateGenericDAO<Surgery> implements
 		if (to != null) {
 			criteria.add(Restrictions.le("schedulingData.end", to));
 		}
+
+		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+		return criteria.list();
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<Surgery> getAllOngoingSurgeries(DateTime dateTime) {
+		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Surgery.class);
+
+		criteria.add(Restrictions.eq("voided", false));
+		criteria.add(Restrictions.le("dateStarted", dateTime));
+		criteria.add(Restrictions.or(Restrictions.isNull("dateFinished"), Restrictions.gt("dateFinished", dateTime)));
 
 		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 		return criteria.list();

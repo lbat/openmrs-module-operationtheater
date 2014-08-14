@@ -216,6 +216,11 @@ public class DbUtil {
 			valueGeneratorMap.put("min_occurs", ValueGenerators.constant(0));
 			return valueGeneratorMap;
 		}
+
+		public Config setPkStartValue(int pkStartValue) {
+			this.pkStartValue = pkStartValue;
+			return this;
+		}
 	}
 
 	/**

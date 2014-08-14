@@ -17,6 +17,7 @@ import org.springframework.validation.Errors;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mock;
 
@@ -257,7 +258,7 @@ public class SurgeryValidatorTest {
 		Surgery surgery = createValidSurgery();
 		when(patientService.getPatient(1)).thenReturn(surgery.getPatient());
 		SchedulingDataValidator schedulingDataValidator = (SchedulingDataValidator) MockUtil
-				.mockValidator(false, SchedulingDataValidator.class, surgery.getSchedulingData(), "start", "someError");
+				.mockValidator(false, SchedulingDataValidator.class, SchedulingData.class, "start", "someError");
 		Whitebox.setInternalState(validator, "schedulingDataValidator", schedulingDataValidator);
 
 		Errors errors = new BindException(surgery, "surgery");
@@ -270,5 +271,6 @@ public class SurgeryValidatorTest {
 		assertThat(errors.getFieldErrorCount(), is(1));
 		assertThat(errors.getFieldError("schedulingData").getCode(),
 				is("operationtheater.surgery.validationError.schedulingDataInvalid"));
+		verify(schedulingDataValidator).validate(Mockito.eq(surgery.getSchedulingData()), Mockito.any(Errors.class));
 	}
 }

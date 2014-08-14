@@ -299,6 +299,42 @@ public class SurgeryFragmentController {
 		return new SuccessResult(ui.message("operationtheater.surgery.finished"));
 	}
 
+	/**
+	 * replaces the placeholder emergency patient with the given patient
+	 *
+	 * @param ui
+	 * @param surgery
+	 * @param patient
+	 * @param otService
+	 * @return
+	 * @should return FailureResult if surgery is null
+	 * @should return FailureResult if patient is null
+	 * @should return FailureResult if current patient is not the emergency placeholder patient
+	 * @should return SuccessResult if replacement was successful
+	 */
+	public FragmentActionResult replaceEmergencyPlaceholderPatient(UiUtils ui,
+	                                                               @RequestParam("surgery") Surgery surgery,
+	                                                               @RequestParam("patient") Patient patient,
+	                                                               @SpringBean OperationTheaterService otService) {
+		if (surgery == null) {
+			return new FailureResult(ui.message("operationtheater.surgery.notFound"));
+		}
+		if (patient == null) {
+			return new FailureResult(ui.message("operationtheater.patient.notFound"));
+		}
+
+		Patient currentPatient = surgery.getPatient();
+		if (!currentPatient.getUuid().equals(OTMetadata.PLACEHOLDER_PATIENT_UUID)) {
+			return new FailureResult(ui.message("operationtheater.surgery.notPlaceholderPatient",
+					currentPatient.getFamilyName() + ", " + currentPatient.getGivenName()));
+		}
+
+		surgery.setPatient(patient);
+		otService.saveSurgery(surgery);
+
+		return new SuccessResult(ui.message("operationtheater.surgery.replacedPlaceholderPatientSuccessfully"));
+	}
+
 	static enum SurgeryTimeType {CREATED, STARTED, FINISHED}
 
 	static class SurgeryTime {

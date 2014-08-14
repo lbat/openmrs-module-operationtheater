@@ -46,6 +46,10 @@ public class SurgeryDAOTest extends BaseModuleContextSensitiveTest {
 
 	@Before
 	public void setUp() throws Exception {
+		service = Context.getPatientService();
+	}
+
+	public void setUpDb() throws Exception {
 		Operation operation = sequenceOf(
 				DbUtilDefaultInserts.get(),
 				insertInto(DbUtil.Config.PROCEDURE)
@@ -70,7 +74,6 @@ public class SurgeryDAOTest extends BaseModuleContextSensitiveTest {
 		);
 		DbSetup dbSetup = DbUtil.buildDBSetup(operation, getConnection(), useInMemoryDatabase());
 		dbSetupTracker.launchIfNecessary(dbSetup);
-		service = Context.getPatientService();
 	}
 
 	/**
@@ -79,6 +82,8 @@ public class SurgeryDAOTest extends BaseModuleContextSensitiveTest {
 	 */
 	@Test
 	public void saveOrUpdate_shouldSaveNewEntryIfObjectIsNotNull() throws Exception {
+		setUpDb();
+
 		Surgery surgery = new Surgery();
 		Patient patient = service.getPatient(100);
 		surgery.setPatient(patient);
@@ -104,6 +109,8 @@ public class SurgeryDAOTest extends BaseModuleContextSensitiveTest {
 	 */
 	@Test
 	public void saveOrUpdate_shouldNotSaveObjectIfItIsNull() throws Exception {
+		setUpDb();
+
 		try {
 			surgeryDAO.saveOrUpdate(null);
 			fail("Should throw IllegalArgumentException");
@@ -121,6 +128,8 @@ public class SurgeryDAOTest extends BaseModuleContextSensitiveTest {
 	 */
 	@Test
 	public void saveOrUpdate_shouldUpdateObjectIfItIsNotNullAndIdAlreadyInTheDb() throws Exception {
+		setUpDb();
+
 		Surgery surgery = new Surgery();
 		int id = 1;
 		surgery.setSurgeryId(id);
@@ -144,17 +153,27 @@ public class SurgeryDAOTest extends BaseModuleContextSensitiveTest {
 
 	@Test
 	@Verifies(value = "should return all entries in the table", method = "getAll")
-	public void getAll_shouldReturnAllEntriesInTheTable() {
+	public void getAll_shouldReturnAllEntriesInTheTable() throws Exception {
+		setUpDb();
+
+		//call method under test
 		List<Surgery> surgeryList = surgeryDAO.getAll();
+
+		//verify
 		assertThat(surgeryList, hasSize(TOTAL_SURGERIES));
 	}
 
 	@Test
 	@Verifies(value = "should return the object with the specified uuid", method = "getByUuid")
 	public void getByUuid_shouldReturnTheObjectWithTheSpecifiedUuid() throws Exception {
+		setUpDb();
+
 		String uuid = "surgery1";
+
+		//call method under test
 		Surgery surgery = surgeryDAO.getByUuid(uuid);
 
+		//verify
 		assertThat(surgery.getId(), is(1));
 		assertThat(surgery.getPatient().getId(), is(100));
 	}
@@ -165,11 +184,16 @@ public class SurgeryDAOTest extends BaseModuleContextSensitiveTest {
 	 */
 	@Test
 	public void getSurgeriesByPatient_shouldReturnAllUnvoidedSurgeryEntriesForThisPatient() throws Exception {
+		setUpDb();
+
 		Patient patient = new Patient();
 		int id = 100;
 		patient.setId(id);
+
+		//call method under test
 		List<Surgery> surgeryList = surgeryDAO.getSurgeriesByPatient(patient);
 
+		//verify
 		assertThat(surgeryList, hasSize(1));
 		assertThat(surgeryList.get(0).getPatient().getId(), is(id));
 		assertThat(surgeryList.get(0).getSurgeryId(), is(1));
@@ -183,8 +207,12 @@ public class SurgeryDAOTest extends BaseModuleContextSensitiveTest {
 	public void getAllUncompletedSurgeries_shouldReturnAllUnvoidedSurgeriesInTheDbThatHaveNotYetBeenPerformed()
 			throws Exception {
 
+		setUpDb();
+
+		//call method under test
 		List<Surgery> surgeryList = surgeryDAO.getAllUncompletedSurgeries();
 
+		//verify
 		assertThat(surgeryList, hasSize(2));
 		assertThat(surgeryList.get(0).getId(), is(3));
 		assertThat(surgeryList.get(1).getId(), is(5));
@@ -197,6 +225,7 @@ public class SurgeryDAOTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void getScheduledSurgeries_shouldReturnAllUnvoidedSurgeriesThatAreScheduledBetweenFromAndToDate()
 			throws Exception {
+		setUpDb();
 
 		//call function under test
 		List<Surgery> surgeryList = surgeryDAO.getScheduledSurgeries(refDate, refDate.plusDays(1));
@@ -204,5 +233,55 @@ public class SurgeryDAOTest extends BaseModuleContextSensitiveTest {
 		//verify
 		assertThat(surgeryList, hasSize(1));
 		assertThat(surgeryList.get(0).getId(), is(3));
+	}
+
+	/**
+	 * @verifies return all unvoided surgeries that are started before dateTime but are not finished
+	 * @see SurgeryDAO#getAllOngoingSurgeries(org.joda.time.DateTime)
+	 */
+	@Test
+	public void getAllOngoingSurgeries_shouldReturnAllUnvoidedSurgeriesThatAreStartedBeforeDateTimeButAreNotFinished()
+			throws Exception {
+
+		//prepare
+		Operation operation = sequenceOf(
+				DbUtilDefaultInserts.get(),
+				insertInto(DbUtil.Config.PROCEDURE)
+						.columns("name", "intervention_duration", "ot_preparation_duration", "inpatient_stay")
+						.values("Test Surgery", 35, 25, 4)
+						.build(),
+				insertInto(DbUtil.Config.SURGERY, "voided")
+						.columns("patient_id", "procedure_id", "voided", "date_started", "date_finished")
+						.values(100, 1, false, refDate.plusHours(11).toDate(), refDate.plusHours(13).toDate())
+						.values(100, 1, false, refDate.plusHours(11).toDate(),
+								refDate.plusHours(11).plusMinutes(45).toDate())
+						.values(100, 1, false, refDate.plusHours(11).toDate(), null)
+						.values(100, 1, true, refDate.plusHours(11).toDate(), refDate.plusHours(13).toDate())
+						.build()
+		);
+		DbSetup dbSetup = DbUtil.buildDBSetup(operation, getConnection(), useInMemoryDatabase());
+		dbSetupTracker.launchIfNecessary(dbSetup);
+
+		//call method under test
+		List<Surgery> surgeries = surgeryDAO.getAllOngoingSurgeries(refDate.plusHours(12));
+
+		//verify
+		assertThat(surgeries, hasSize(2));
+		assertThat(surgeries.get(0).getId(), is(1));
+		assertThat(surgeries.get(1).getId(), is(3));
+	}
+
+	/**
+	 * @verifies return empty list if dateTime is null
+	 * @see SurgeryDAO#getAllOngoingSurgeries(org.joda.time.DateTime)
+	 */
+	@Test
+	public void getAllOngoingSurgeries_shouldReturnEmptyListIfDateTimeIsNull() throws Exception {
+
+		//call method under test
+		List<Surgery> surgeries = surgeryDAO.getAllOngoingSurgeries(null);
+
+		//verify
+		assertThat(surgeries, hasSize(0));
 	}
 }

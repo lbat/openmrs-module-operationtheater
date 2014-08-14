@@ -19,6 +19,12 @@ public class OTMetadata {
 
 	public static final String APPT_TYPE_UUID = "93263567-286d-4567-8596-0611d9800206";
 
+	public static final String PLACEHOLDER_PATIENT_UUID = "76f68fa5-8df4-4c51-a5cf-70039dbf5de4";
+
+	public static final String PLACEHOLDER_PROCEDURE_UUID = "e1f3d8c3-f533-499d-afa0-357f06509cca";
+
+	public static final String OPENMRS_ID_NAME = "OpenMRS ID";
+
 	//Global Properties
 
 	public static final String GP_CONTINUOUS_PLANNING_WINDOW = "operationtheater.continuousPlanningWindow";

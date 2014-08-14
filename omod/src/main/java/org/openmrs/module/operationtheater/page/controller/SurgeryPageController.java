@@ -25,6 +25,7 @@ import org.openmrs.module.emrapi.adt.AdtService;
 import org.openmrs.module.emrapi.event.ApplicationEventService;
 import org.openmrs.module.emrapi.patient.PatientDomainWrapper;
 import org.openmrs.module.emrapi.visit.VisitDomainWrapper;
+import org.openmrs.module.operationtheater.OTMetadata;
 import org.openmrs.module.operationtheater.Procedure;
 import org.openmrs.module.operationtheater.Surgery;
 import org.openmrs.module.operationtheater.api.OperationTheaterService;
@@ -69,6 +70,11 @@ public class SurgeryPageController {
 			providerList.removeAll(surgery.getSurgicalTeam());
 		}
 		model.addAttribute("providerList", providerList);
+
+		//is patient a emergency placeholder?
+		boolean isPlaceholderPatient =
+				surgery.getPatient() != null && surgery.getPatient().getUuid().equals(OTMetadata.PLACEHOLDER_PATIENT_UUID);
+		model.addAttribute("emergencyPatient", isPlaceholderPatient);
 
 		patientDomainWrapper.setPatient(patient);
 		model.addAttribute("patient", patientDomainWrapper);

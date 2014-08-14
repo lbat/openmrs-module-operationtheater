@@ -21,6 +21,8 @@
 <%=ui.includeFragment("appui", "messages", [codes: [
         "operationtheater.validation.error.greaterThan",
         "operationtheater.scheduling.page.availableTimesDialog.label.startTime",
+        "operationtheater.scheduling.emergency.freeOperationTheaterFound",
+        "operationtheater.scheduling.emergency.nextOtisAvailableInMinutes",
 ].flatten()
 ])%>
 
@@ -93,11 +95,29 @@ body {
         </div>
     </div>
 </div>
+<!-- emergency note container -->
+<div id="emergency-note-container" class="note-container" style="display: none">
+    <div class="note warning">
+        <div class="text">
+            <i class="icon-warning-sign medium"></i>
+
+            <p>${ui.message("operationtheater.scheduling.page.waitWhileSchedulingIsCalculated")}</p>
+        </div>
+
+        <div class="close-icon"><i class="icon-remove" onClick="javascript:jq('#emergency-note-container').hide();"></i>
+        </div>
+    </div>
+</div>
 
 <!-- action button with dropdown menu -->
 <div class="actions dropdown" style="top:0px;margin-bottom: 10px">
     <span class="dropdown-name"><i class="icon-cog"></i>Actions<i class="icon-sort-down"></i></span>
     <ul>
+        <li>
+            <a href="#" id="schedule-emergency"><i
+                    class="icon-ambulance"></i>${ui.message("operationtheater.scheduling.page.action.emergency")}</a>
+        </li>
+
         <li>
             <a href="#" id="schedule-action"><i
                     class="icon-calendar"></i>${ui.message("operationtheater.scheduling.page.action.schedule")}</a>

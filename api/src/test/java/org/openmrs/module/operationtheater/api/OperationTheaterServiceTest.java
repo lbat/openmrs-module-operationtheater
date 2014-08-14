@@ -495,4 +495,35 @@ public class OperationTheaterServiceTest { //extends BaseModuleContextSensitiveT
 		assertThat(result, hasSize(0));
 		verify(surgeryDAO, never()).getScheduledSurgeries(any(DateTime.class), any(DateTime.class));
 	}
+
+	/**
+	 * @verifies call surgeryDAO getAllOngoingSurgeries if parameter are not null
+	 * @see OperationTheaterService#getAllOngoingSurgeries(org.joda.time.DateTime)
+	 */
+	@Test
+	public void getAllOngoingSurgeries_shouldCallSurgeryDAOGetAllOngoingSurgeriesIfParameterAreNotNull() throws Exception {
+		DateTime dateTime = new DateTime();
+		List<Surgery> expected = new ArrayList<Surgery>();
+		when(surgeryDAO.getAllOngoingSurgeries(dateTime)).thenReturn(expected);
+
+		//call method under test
+		List<Surgery> result = service.getAllOngoingSurgeries(dateTime);
+
+		//verify
+		assertThat(result, is(expected));
+	}
+
+	/**
+	 * @verifies return empty list if dateTime is null
+	 * @see OperationTheaterService#getAllOngoingSurgeries(org.joda.time.DateTime)
+	 */
+	@Test
+	public void getAllOngoingSurgeries_shouldReturnEmptyListIfDateTimeIsNull() throws Exception {
+		//call method under test
+		List<Surgery> result = service.getAllOngoingSurgeries(null);
+
+		//verify
+		assertThat(result, hasSize(0));
+		verify(surgeryDAO, never()).getAllOngoingSurgeries(any(DateTime.class));
+	}
 }

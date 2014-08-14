@@ -30,7 +30,7 @@
                 );
             } else {
                 emr.getFragmentActionWithCallback("operationtheater", "surgery", "updateProcedure",
-                    {surgery: "${surgery.uuid}", procedure: procedureUuid}
+                    {surgery: surgeryUuid, procedure: procedureUuid}
                     , function (data) {
                         emr.successMessage(data.message);
                     }, function (err) {

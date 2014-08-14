@@ -207,6 +207,16 @@ public interface OperationTheaterService extends OpenmrsService {
 	public List<Surgery> getScheduledSurgeries(DateTime from, DateTime to);
 
 	/**
+	 * returns all unvoided surgeries that have been started, but have not been finished yet
+	 *
+	 * @param dateTime
+	 * @return
+	 * @should call surgeryDAO getAllOngoingSurgeries if parameter are not null
+	 * @should return empty list if dateTime is null
+	 */
+	public List<Surgery> getAllOngoingSurgeries(DateTime dateTime);
+
+	/**
 	 * get available times for the given date and location
 	 * custom available times for specific dates are stored inside appointment blocks,
 	 * defaults are stored as location attributes

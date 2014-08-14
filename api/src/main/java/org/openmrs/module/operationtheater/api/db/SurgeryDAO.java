@@ -38,4 +38,13 @@ public interface SurgeryDAO extends GenericDAO<Surgery> {
 	 */
 	public List<Surgery> getScheduledSurgeries(DateTime from, DateTime to);
 
+	/**
+	 * returns all unvoided surgeries that have been started, but have not been finished yet
+	 *
+	 * @param dateTime
+	 * @return
+	 * @should return all unvoided surgeries that are started before dateTime but are not finished
+	 * @should return empty list if dateTime is null
+	 */
+	public List<Surgery> getAllOngoingSurgeries(DateTime dateTime);
 }

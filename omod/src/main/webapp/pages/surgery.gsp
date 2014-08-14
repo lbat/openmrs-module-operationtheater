@@ -7,9 +7,14 @@
 
     ui.includeJavascript("uicommons", "emr.js")
     ui.includeJavascript("uicommons", "typeahead.js");
+    ui.includeJavascript("uicommons", "datatables/jquery.dataTables.min.js")
+    ui.includeJavascript("uicommons", "moment.min.js")
     ui.includeJavascript("operationtheater", "bower_components/validation/jquery.validate.js")
+    ui.includeJavascript("operationtheater", "patientSearchWidget.js")
 
     ui.includeCss("referenceapplication", "referenceapplication.css")
+    ui.includeCss("coreapps", "findpatient/findPatient.css")
+    ui.includeCss("uicommons", "datatables/dataTables_jui.css")
 %>
 <script type="text/javascript">
     var breadcrumbs = [
@@ -61,7 +66,7 @@ input.error {
                 surgery.initProcedureButton("${surgery.uuid}", procedureMap, newSurgery, patientId);
 
         //validation
-        surgery.setUpValidation(options, providerOptions);
+        //surgery.setUpValidation(options, providerOptions);
 
         //surgical team
         var providerMap = {};
@@ -75,6 +80,45 @@ input.error {
 
         //workflow
         workflow.init("${surgery.uuid}");
+
+
+        var widgetConfig = {
+            initialPatients: [],
+            minSearchCharacters: 1,
+            selectCallback: function (patientUuid) {
+                console.log(patientUuid);
+                var actionURL = emr.fragmentActionLink("operationtheater", "surgery", "replaceEmergencyPlaceholderPatient",
+                        {"patient": patientUuid,
+                            "surgery": "${surgery.uuid}"});
+
+                jq.getJSON(actionURL, null)
+                        .success(function (data) {
+                            emr.successMessage(data.message);
+                            jq('#replaceEmergencyPlaceholderPatient').hide();
+                        })
+                        .error(function (xhr, status, err) {
+                            emr.handleError(xhr);
+                        })
+            },
+            messages: {
+                info: '${ ui.message("coreapps.search.info") }',
+                first: '${ ui.message("coreapps.search.first") }',
+                previous: '${ ui.message("coreapps.search.previous") }',
+                next: '${ ui.message("coreapps.search.next") }',
+                last: '${ ui.message("coreapps.search.last") }',
+                noMatchesFound: '${ ui.message("coreapps.search.noMatchesFound") }',
+                noData: '${ ui.message("coreapps.search.noData") }',
+                recent: '${ ui.message("coreapps.search.label.recent") }',
+                searchError: '${ ui.message("coreapps.search.error") }',
+                identifierColHeader: '${ ui.message("coreapps.search.identifier") }',
+                nameColHeader: '${ ui.message("coreapps.search.name") }',
+                genderColHeader: '${ ui.message("coreapps.gender") }',
+                ageColHeader: '${ ui.message("coreapps.age") }',
+                birthdateColHeader: '${ ui.message("coreapps.birthdate") }'
+            }
+        };
+
+        new PatientSearchWidget(widgetConfig);
     });
 </script>
 
@@ -83,6 +127,16 @@ input.error {
 </h2>
 
 <form class="simple-form-ui" id="surgeryForm" autocomplete="off">
+
+    <fieldset id="replaceEmergencyPlaceholderPatient" ${emergencyPatient ? '' : 'style="display:none"'}>
+        <legend>${ui.message("operationtheater.surgery.page.fieldset.replaceEmergencyPlaceholderPatient")}</legend>
+
+        <input type="text" id="patient-search" placeholder="${ui.message("coreapps.findPatient.search.placeholder")}"
+               autocomplete="off"/>
+
+        <div id="patient-search-results"></div>
+    </fieldset>
+
     <fieldset>
         <legend>${ui.message("operationtheater.surgery.page.fieldset.procedure")}</legend>
         <!-- TODO maxlength should be managed centrally in the POJO-->

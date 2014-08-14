@@ -154,6 +154,14 @@ public class OperationTheaterServiceImpl extends BaseOpenmrsService implements O
 	}
 
 	@Override
+	public List<Surgery> getAllOngoingSurgeries(DateTime dateTime) {
+		if (dateTime == null) {
+			return new ArrayList<Surgery>();
+		}
+		return surgeryDAO.getAllOngoingSurgeries(dateTime);
+	}
+
+	@Override
 	public Procedure getProcedureByUuid(String uuid) {
 		return procedureDAO.getByUuid(uuid);
 	}

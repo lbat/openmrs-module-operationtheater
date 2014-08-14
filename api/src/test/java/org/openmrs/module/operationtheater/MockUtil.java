@@ -10,8 +10,6 @@ import org.springframework.validation.Validator;
 
 /**
  * common methods that are used to mock objects
- * mirror with omod project!
- * TODO create shared test project to avoid this code duplication
  */
 public class MockUtil {
 
@@ -42,7 +40,7 @@ public class MockUtil {
 	}
 
 	public static Validator mockValidator(final boolean validationShouldPass, Class<? extends Validator> validatorClass,
-	                                      Object validatedObj, final String errorField, final String errorCode)
+	                                      Class<?> validatedClass, final String errorField, final String errorCode)
 			throws Exception {
 
 		Validator validator = Mockito.mock(validatorClass);
@@ -58,7 +56,7 @@ public class MockUtil {
 				return null;
 			}
 
-		}).when(validator).validate(Mockito.eq(validatedObj), Mockito.any(Errors.class));
+		}).when(validator).validate(Mockito.any(validatedClass), Mockito.any(Errors.class));
 
 		return validator;
 	}

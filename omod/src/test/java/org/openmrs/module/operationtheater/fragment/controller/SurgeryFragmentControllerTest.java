@@ -6,10 +6,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.openmrs.Location;
 import org.openmrs.Patient;
+import org.openmrs.PersonName;
 import org.openmrs.Provider;
 import org.openmrs.api.ProviderService;
 import org.openmrs.module.appui.TestUiUtils;
 import org.openmrs.module.operationtheater.MockUtil;
+import org.openmrs.module.operationtheater.OTMetadata;
 import org.openmrs.module.operationtheater.Procedure;
 import org.openmrs.module.operationtheater.SchedulingData;
 import org.openmrs.module.operationtheater.Surgery;
@@ -20,6 +22,7 @@ import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.ui.framework.fragment.action.FailureResult;
 import org.openmrs.ui.framework.fragment.action.FragmentActionResult;
 import org.openmrs.ui.framework.fragment.action.SuccessResult;
+import org.springframework.validation.Errors;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -464,7 +467,7 @@ public class SurgeryFragmentControllerTest {
 
 		//mock validator - add validation error on field procedure
 		SurgeryValidator validator = (SurgeryValidator) MockUtil
-				.mockValidator(false, SurgeryValidator.class, surgery, "procedure", "errorCode");
+				.mockValidator(false, SurgeryValidator.class, Surgery.class, "procedure", "errorCode");
 		OperationTheaterService service = Mockito.mock(OperationTheaterService.class);
 
 		//call method under test
@@ -472,6 +475,7 @@ public class SurgeryFragmentControllerTest {
 				.startSurgery(new TestUiUtils(), surgery, service, validator);
 
 		//verify
+		verify(validator).validate(Mockito.eq(surgery), Mockito.any(Errors.class));
 		assertThat(result, instanceOf(FailureResult.class));
 		assertThat(((FailureResult) result).getErrors().getFieldErrors("procedure").get(0).getCode(), is("errorCode"));
 	}
@@ -525,7 +529,7 @@ public class SurgeryFragmentControllerTest {
 		surgery.setSchedulingData(schedulingData);
 
 		SurgeryValidator validator = (SurgeryValidator) MockUtil
-				.mockValidator(true, SurgeryValidator.class, surgery, null, null);
+				.mockValidator(true, SurgeryValidator.class, Surgery.class, null, null);
 		OperationTheaterService service = Mockito.mock(OperationTheaterService.class);
 		when(service.saveSurgery(eq(surgery))).thenReturn(surgery);
 
@@ -537,6 +541,7 @@ public class SurgeryFragmentControllerTest {
 		verify(service).saveSurgery(captor.capture());
 
 		//verify
+		verify(validator).validate(Mockito.eq(surgery), Mockito.any(Errors.class));
 		assertThat(captor.getValue().getDateStarted().withMillisOfSecond(0), is(new DateTime().withMillisOfSecond(0)));
 		assertThat(result, instanceOf(SuccessResult.class));
 		assertThat(((SuccessResult) result).getMessage(), is("operationtheater.surgery.started:locationName"));
@@ -566,7 +571,7 @@ public class SurgeryFragmentControllerTest {
 
 		//mock validator - add validation error on field procedure
 		SurgeryValidator validator = (SurgeryValidator) MockUtil
-				.mockValidator(false, SurgeryValidator.class, surgery, "procedure", "errorCode");
+				.mockValidator(false, SurgeryValidator.class, Surgery.class, "procedure", "errorCode");
 		OperationTheaterService service = Mockito.mock(OperationTheaterService.class);
 
 		//call method under test
@@ -574,6 +579,7 @@ public class SurgeryFragmentControllerTest {
 				.finishSurgery(new TestUiUtils(), surgery, service, validator);
 
 		//verify
+		verify(validator).validate(Mockito.eq(surgery), Mockito.any(Errors.class));
 		assertThat(result, instanceOf(FailureResult.class));
 		assertThat(((FailureResult) result).getErrors().getFieldErrors("procedure").get(0).getCode(), is("errorCode"));
 	}
@@ -609,7 +615,7 @@ public class SurgeryFragmentControllerTest {
 		surgery.setSchedulingData(schedulingData);
 
 		SurgeryValidator validator = (SurgeryValidator) MockUtil
-				.mockValidator(true, SurgeryValidator.class, surgery, null, null);
+				.mockValidator(true, SurgeryValidator.class, Surgery.class, null, null);
 		OperationTheaterService service = Mockito.mock(OperationTheaterService.class);
 		when(service.saveSurgery(eq(surgery))).thenReturn(surgery);
 
@@ -621,6 +627,7 @@ public class SurgeryFragmentControllerTest {
 		verify(service).saveSurgery(captor.capture());
 
 		//verify
+		verify(validator).validate(Mockito.eq(surgery), Mockito.any(Errors.class));
 		assertThat(captor.getValue().getDateFinished().withMillisOfSecond(0), is(new DateTime().withMillisOfSecond(0)));
 		assertThat(result, instanceOf(SuccessResult.class));
 		assertThat(((SuccessResult) result).getMessage(), is("operationtheater.surgery.finished"));
@@ -718,5 +725,91 @@ public class SurgeryFragmentControllerTest {
 		assertThat(captor.getValue().getUuid(), equalTo(surgeryUuid));
 		assertThat(captor.getValue().getPatient(), equalTo(patient));
 		assertThat(captor.getValue().getProcedure(), equalTo(procedure));
+	}
+
+	/**
+	 * @verifies return FailureResult if surgery is null
+	 * @see SurgeryFragmentController#replaceEmergencyPlaceholderPatient(org.openmrs.ui.framework.UiUtils, org.openmrs.module.operationtheater.Surgery, org.openmrs.Patient, org.openmrs.module.operationtheater.api.OperationTheaterService)
+	 */
+	@Test
+	public void replaceEmergencyPlaceholderPatient_shouldReturnFailureResultIfSurgeryIsNull() throws Exception {
+		//call method under test
+		FragmentActionResult result = new SurgeryFragmentController()
+				.replaceEmergencyPlaceholderPatient(new TestUiUtils(), null, new Patient(), null);
+
+		//verify
+		assertThat(result, instanceOf(FailureResult.class));
+		assertThat(((FailureResult) result).getSingleError(), is("operationtheater.surgery.notFound"));
+	}
+
+	/**
+	 * @verifies return FailureResult if patient is null
+	 * @see SurgeryFragmentController#replaceEmergencyPlaceholderPatient(org.openmrs.ui.framework.UiUtils, org.openmrs.module.operationtheater.Surgery, org.openmrs.Patient, org.openmrs.module.operationtheater.api.OperationTheaterService)
+	 */
+	@Test
+	public void replaceEmergencyPlaceholderPatient_shouldReturnFailureResultIfPatientIsNull() throws Exception {
+		//call method under test
+		FragmentActionResult result = new SurgeryFragmentController()
+				.replaceEmergencyPlaceholderPatient(new TestUiUtils(), new Surgery(), null, null);
+
+		//verify
+		assertThat(result, instanceOf(FailureResult.class));
+		assertThat(((FailureResult) result).getSingleError(), is("operationtheater.patient.notFound"));
+	}
+
+	/**
+	 * @verifies return FailureResult if current patient is not the emergency placeholder patient
+	 * @see SurgeryFragmentController#replaceEmergencyPlaceholderPatient(org.openmrs.ui.framework.UiUtils, org.openmrs.module.operationtheater.Surgery, org.openmrs.Patient, org.openmrs.module.operationtheater.api.OperationTheaterService)
+	 */
+	@Test
+	public void replaceEmergencyPlaceholderPatient_shouldReturnFailureResultIfCurrentPatientIsNotTheEmergencyPlaceholderPatient()
+			throws Exception {
+		//prepare
+		Surgery surgery = new Surgery();
+		Patient patient = new Patient();
+		patient.setUuid("not emergency placeholder patient uuid");
+		PersonName personName = new PersonName("given", "middle", "family");
+		patient.setNames(new HashSet<PersonName>(Arrays.asList(personName)));
+		surgery.setPatient(patient);
+
+		//call method under test
+		FragmentActionResult result = new SurgeryFragmentController()
+				.replaceEmergencyPlaceholderPatient(new TestUiUtils(), surgery, new Patient(), null);
+
+		//verify
+		assertThat(result, instanceOf(FailureResult.class));
+		assertThat(((FailureResult) result).getSingleError(),
+				is("operationtheater.surgery.notPlaceholderPatient:family, given"));
+	}
+
+	/**
+	 * @verifies return SuccessResult if replacement was successful
+	 * @see SurgeryFragmentController#replaceEmergencyPlaceholderPatient(org.openmrs.ui.framework.UiUtils, org.openmrs.module.operationtheater.Surgery, org.openmrs.Patient, org.openmrs.module.operationtheater.api.OperationTheaterService)
+	 */
+	@Test
+	public void replaceEmergencyPlaceholderPatient_shouldReturnSuccessResultIfReplacementWasSuccessful() throws Exception {
+		//prepare
+		Surgery surgery = new Surgery();
+		Patient patient = new Patient();
+		patient.setUuid(OTMetadata.PLACEHOLDER_PATIENT_UUID);
+		surgery.setPatient(patient);
+
+		Patient newPatient = new Patient();
+
+		OperationTheaterService service = Mockito.mock(OperationTheaterService.class);
+
+		//call method under test
+		FragmentActionResult result = new SurgeryFragmentController()
+				.replaceEmergencyPlaceholderPatient(new TestUiUtils(), surgery, newPatient, service);
+
+		ArgumentCaptor<Surgery> captor = ArgumentCaptor.forClass(Surgery.class);
+
+		//verify
+		verify(service).saveSurgery(captor.capture());
+		assertThat(captor.getValue(), is(surgery));
+		assertThat(captor.getValue().getPatient(), is(newPatient));
+		assertThat(result, instanceOf(SuccessResult.class));
+		assertThat(((SuccessResult) result).getMessage(),
+				is("operationtheater.surgery.replacedPlaceholderPatientSuccessfully"));
 	}
 }

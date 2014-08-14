@@ -26,16 +26,17 @@ import org.openmrs.module.operationtheater.SchedulingData;
 import org.openmrs.module.operationtheater.Surgery;
 import org.openmrs.module.operationtheater.api.OperationTheaterService;
 import org.openmrs.module.operationtheater.scheduler.Scheduler;
+import org.openmrs.module.operationtheater.validator.SchedulingDataValidator;
 import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.ui.framework.fragment.action.FailureResult;
 import org.openmrs.ui.framework.fragment.action.FragmentActionResult;
 import org.openmrs.ui.framework.fragment.action.SuccessResult;
-import org.openmrs.validator.ValidateUtil;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
+import org.springframework.validation.Validator;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -55,13 +56,17 @@ import static org.mockito.Mockito.when;
 
 /**
  * Tests {@link SchedulingFragmentController}
+ * also see {@see SchedulingFragmentControllerTest2} which doesn't use Powermock and extends BaseModuleContextSensitiveTest
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ ValidateUtil.class, Scheduler.class })
+@PrepareForTest({ Scheduler.class })
 public class SchedulingFragmentControllerTest {
 
-	private void mockValidateUtil(final boolean validationShouldPass) throws Exception {
-		MockUtil.mockValidateUtil(validationShouldPass, SchedulingData.class, "field", "code");
+	private void mockValidateUtil(SchedulingFragmentController controller, final boolean validationShouldPass)
+			throws Exception {
+		Validator validator = MockUtil
+				.mockValidator(validationShouldPass, SchedulingDataValidator.class, SchedulingData.class, "field", "code");
+		org.mockito.internal.util.reflection.Whitebox.setInternalState(controller, "schedulingDataValidator", validator);
 	}
 
 	/**
@@ -283,8 +288,6 @@ public class SchedulingFragmentControllerTest {
 	 */
 	@Test
 	public void adjustSurgerySchedule_shouldUpdateSchedulingDataWithProvidedValuesAndReturnSuccessResult() throws Exception {
-		mockValidateUtil(true);
-
 		String surgeryUuid = "surgeryUuid";
 		String locationUuid = "locationUuid";
 		Date scheduledDateTime = new Date();
@@ -309,8 +312,11 @@ public class SchedulingFragmentControllerTest {
 		ArgumentCaptor<Surgery> captor = ArgumentCaptor.forClass(Surgery.class);
 		when(otService.saveSurgery(captor.capture())).thenReturn(null);
 
+		SchedulingFragmentController controller = new SchedulingFragmentController();
+		mockValidateUtil(controller, true);
+
 		//call function under test
-		FragmentActionResult result = new SchedulingFragmentController()
+		FragmentActionResult result = controller
 				.adjustSurgerySchedule(new TestUiUtils(), surgeryUuid, locationUuid, scheduledDateTime, dateLocked,
 						locationService, otService);
 
@@ -334,8 +340,6 @@ public class SchedulingFragmentControllerTest {
 	 */
 	@Test
 	public void adjustSurgerySchedule_shouldReturnFailureResultIfSchedulingDataValidationFails() throws Exception {
-		mockValidateUtil(false);
-
 		String surgeryUuid = "surgeryUuid";
 		String locationUuid = "locationUuid";
 		Date scheduledDateTime = new Date();
@@ -359,8 +363,11 @@ public class SchedulingFragmentControllerTest {
 		ArgumentCaptor<Surgery> captor = ArgumentCaptor.forClass(Surgery.class);
 		when(otService.saveSurgery(captor.capture())).thenReturn(null);
 
+		SchedulingFragmentController controller = new SchedulingFragmentController();
+		mockValidateUtil(controller, false);
+
 		//call function under test
-		FragmentActionResult result = new SchedulingFragmentController()
+		FragmentActionResult result = controller
 				.adjustSurgerySchedule(new TestUiUtils(), surgeryUuid, locationUuid, scheduledDateTime, dateLocked,
 						locationService, otService);
 

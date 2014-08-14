@@ -4,12 +4,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 import org.joda.time.LocalTime;
+import org.joda.time.Minutes;
 import org.joda.time.format.DateTimeFormatter;
 import org.openmrs.Location;
 import org.openmrs.LocationAttribute;
 import org.openmrs.LocationTag;
+import org.openmrs.Patient;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.LocationService;
+import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointmentscheduling.AppointmentBlock;
 import org.openmrs.module.appointmentscheduling.AppointmentType;
@@ -18,15 +21,16 @@ import org.openmrs.module.operationtheater.OTMetadata;
 import org.openmrs.module.operationtheater.Procedure;
 import org.openmrs.module.operationtheater.SchedulingData;
 import org.openmrs.module.operationtheater.Surgery;
+import org.openmrs.module.operationtheater.Time;
 import org.openmrs.module.operationtheater.api.OperationTheaterService;
 import org.openmrs.module.operationtheater.scheduler.Scheduler;
+import org.openmrs.module.operationtheater.validator.SchedulingDataValidator;
 import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.ui.framework.annotation.SpringBean;
 import org.openmrs.ui.framework.fragment.action.FailureResult;
 import org.openmrs.ui.framework.fragment.action.FragmentActionResult;
 import org.openmrs.ui.framework.fragment.action.SuccessResult;
-import org.openmrs.validator.ValidateUtil;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.MapBindingResult;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -44,7 +48,11 @@ public class SchedulingFragmentController {
 
 	private final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm", Context.getLocale());
 
+	private final SchedulingDataValidator schedulingDataValidator = new SchedulingDataValidator();
+
 	protected Log log = LogFactory.getLog(getClass());
+
+	private Time time = new Time();
 
 	/**
 	 * @param ui
@@ -107,7 +115,6 @@ public class SchedulingFragmentController {
 		try {
 			int planningWindow = Integer.parseInt(administrationService.getGlobalProperty(
 					OTMetadata.GP_CONTINUOUS_PLANNING_WINDOW));
-			planningWindow = 14;
 			Scheduler.INSTANCE.solve(planningWindow);
 			return new SuccessResult(ui.message("operationtheater.scheduling.startedSuccessfully"));
 		}
@@ -177,7 +184,7 @@ public class SchedulingFragmentController {
 		schedulingData.setLocation(location);
 
 		MapBindingResult errors = new MapBindingResult(new HashMap<String, String>(), SchedulingData.class.getName());
-		ValidateUtil.validate(schedulingData, errors);
+		schedulingDataValidator.validate(schedulingData, errors);
 		if (errors.hasErrors()) {
 			return new FailureResult(errors);
 		}
@@ -231,6 +238,90 @@ public class SchedulingFragmentController {
 			block.setEndDate(end);
 		}
 		appointmentService.saveAppointmentBlock(block);
+	}
+
+	/**
+	 * creates a new surgery with placeholders for patient and procedure and schedules them in the next available operation theater
+	 *
+	 * @param ui
+	 * @param otService
+	 * @param locationService
+	 * @param patientService
+	 * @return
+	 * @should create a surgery record with scheduled start time is now if there is a free operation theater
+	 * @should create a surgery record with scheduled start equal to the time the next operation theater will be available
+	 */
+	public SimpleObject scheduleEmergency(UiUtils ui,
+	                                      @SpringBean OperationTheaterService otService,
+	                                      @SpringBean("locationService") LocationService locationService,
+	                                      @SpringBean("patientService") PatientService patientService) {
+		SimpleObject returnValue = new SimpleObject();
+
+		List<Surgery> ongoingSurgeries = otService.getAllOngoingSurgeries(time.now());
+		//get operation theaters
+		LocationTag tag = locationService.getLocationTagByUuid(OTMetadata.LOCATION_TAG_OPERATION_THEATER_UUID);
+		List<Location> locations = locationService.getLocationsByTag(tag);
+
+		//is there an operation theater with no ongoing surgery?
+		if (locations.size() > ongoingSurgeries.size()) { //there can only be one ongoing surgery per ot
+
+		}
+
+		Surgery earliestFinishingSurgery = null;
+		DateTime earliestFinishingTime = time.now().plusDays(1);
+		for (Surgery surgery : ongoingSurgeries) {
+			int interventionDuration = surgery.getProcedure().getInterventionDuration();
+			DateTime finishingTime = surgery.getDateStarted().plusMinutes(interventionDuration);
+			if (finishingTime.isBefore(earliestFinishingTime)) {
+				earliestFinishingSurgery = surgery;
+				earliestFinishingTime = finishingTime;
+			}
+			//remove location from operationTheater
+			SchedulingData schedulingData = surgery.getSchedulingData();
+			if (schedulingData != null && schedulingData.getLocation() != null) {
+				locations.remove(schedulingData.getLocation());
+			}
+		}
+
+		Location location = null;
+		DateTime plannedStart = null;
+		String resultMessage;
+		if (locations.size() != 0) {
+			//found a free operating theater
+			location = locations.get(0);
+			plannedStart = time.now();
+			returnValue.put("location", location.getName());
+			returnValue.put("waitingTime", 0);
+		} else {
+			//next free operating theater determined
+			location = earliestFinishingSurgery.getSchedulingData().getLocation();
+			plannedStart = earliestFinishingTime;
+			int availableInMinutes = Minutes.minutesBetween(time.now(), earliestFinishingTime).getMinutes();
+			returnValue.put("location", location.getName());
+			returnValue.put("waitingTime", availableInMinutes);
+		}
+
+		Surgery surgery = new Surgery();
+
+		Patient placeholder = patientService.getPatientByUuid(OTMetadata.PLACEHOLDER_PATIENT_UUID);
+		surgery.setPatient(placeholder);
+
+		Procedure procedure = otService.getProcedureByUuid(OTMetadata.PLACEHOLDER_PROCEDURE_UUID);
+		surgery.setProcedure(procedure);
+
+		SchedulingData schedulingData = new SchedulingData();
+		schedulingData.setStart(plannedStart);
+		schedulingData.setEnd(plannedStart
+				.plusMinutes(procedure.getOtPreparationDuration() + procedure.getInterventionDuration()));
+		schedulingData.setLocation(location);
+		schedulingData.setDateLocked(true);
+		surgery.setSchedulingData(schedulingData);
+
+		otService.saveSurgery(surgery);
+
+		//FIXME check if changed timetable is feasible or if it has to be rescheduled
+
+		return returnValue;
 	}
 
 	//-------------------------------------------------------------------------------------
