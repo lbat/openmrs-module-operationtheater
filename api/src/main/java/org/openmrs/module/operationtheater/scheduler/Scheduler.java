@@ -267,7 +267,7 @@ public enum Scheduler {
 	 */
 	private Surgery getStartedSurgery(List<Surgery> surgeries, Location location) {
 		for (Surgery surgery : surgeries) {
-			if (location.equals(surgery.getSchedulingData().getLocation()) && surgery.getDateStarted() != null) {
+			if (surgery.getSchedulingData() != null && location.equals(surgery.getSchedulingData().getLocation()) && surgery.getDateStarted() != null) {
 				return surgery;
 			}
 		}
