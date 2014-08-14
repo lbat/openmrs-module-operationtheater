@@ -43,11 +43,6 @@ public class TimetableEntryComparatorTest {
 		//call method under test
 		Collections.sort(plannedSurgeries, new TimetableEntryComparator());
 
-		System.out.println(plannedSurgeries.indexOf(ps0));
-		System.out.println(plannedSurgeries.indexOf(ps1));
-		System.out.println(plannedSurgeries.indexOf(ps2));
-		System.out.println(plannedSurgeries.indexOf(ps3));
-
 		//verify
 		assertThat(plannedSurgeries.get(0), is(ps3));
 		assertThat(plannedSurgeries.get(1), is(ps2));

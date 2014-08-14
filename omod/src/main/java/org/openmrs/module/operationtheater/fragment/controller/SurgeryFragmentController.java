@@ -102,7 +102,6 @@ public class SurgeryFragmentController {
 			                                                           "providerService") ProviderService providerService) {
 		//EMR Api already defines StringToProviderConverter that cannot deal with uuids
 		Provider provider = providerService.getProviderByUuid(providerUuid);
-		System.err.println("test");
 		if (surgery == null) {
 			return new FailureResult(ui.message("operationtheater.surgery.notFound"));
 		}
