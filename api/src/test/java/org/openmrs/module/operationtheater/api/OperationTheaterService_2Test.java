@@ -37,7 +37,7 @@ import static org.mockito.Mockito.when;
  * Tests {@link ${OperationTheaterService}}.
  * tests that are placed here are context sensitive
  */
-public class OperationTheaterServiceTest1 extends BaseModuleContextSensitiveTest {
+public class OperationTheaterService_2Test extends BaseModuleContextSensitiveTest {
 
 	private OperationTheaterService service;
 
