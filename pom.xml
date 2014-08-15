@@ -45,14 +45,12 @@
         <uicommonsVersion>1.2</uicommonsVersion>
         <webserviceRestVersion>2.5</webserviceRestVersion>
         <apppointmentschedulingVersion>1.1-SNAPSHOT</apppointmentschedulingVersion>
-        <emrVersion>1.1</emrVersion>
         <coreappsVersion>1.2</coreappsVersion>
 
         <htmlformentryVersion>2.1.4</htmlformentryVersion>
         <idgenVersion>2.5</idgenVersion>
         <providerManagementVersion>2.0</providerManagementVersion>
         <reportingVersion>0.9.1</reportingVersion>
-        <paperrecordVersion>1.0-SNAPSHOT</paperrecordVersion>
         <calculationVersion>1.0</calculationVersion>
         <serializationxstreamVersion>0.2.7</serializationxstreamVersion>
 
@@ -358,23 +356,6 @@
             <name>OpenMRS Nexus Repository</name>
             <url>http://mavenrepo.openmrs.org/nexus/content/repositories/public</url>
         </repository>
-
-        <!-- TODO remove this once maven central replicates the jboss repository -->
-        <!-- Included so the examples sources in the distribution zip build out-of-the-box with maven -->
-        <!--<repository>-->
-        <!--<id>jboss-public-repository-group</id>-->
-        <!--<name>JBoss Public Repository Group</name>-->
-        <!--<url>http://repository.jboss.org/nexus/content/groups/public/</url>-->
-        <!--<layout>default</layout>-->
-        <!--<releases>-->
-        <!--<enabled>true</enabled>-->
-        <!--<updatePolicy>never</updatePolicy>-->
-        <!--</releases>-->
-        <!--<snapshots>-->
-        <!--<enabled>true</enabled>-->
-        <!--<updatePolicy>daily</updatePolicy>-->
-        <!--</snapshots>-->
-        <!--</repository>-->
 
         <repository>
             <id>rubygems-releases</id>
