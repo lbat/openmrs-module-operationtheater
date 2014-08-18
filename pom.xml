@@ -44,7 +44,7 @@
         <appuiVersion>1.1</appuiVersion>
         <uicommonsVersion>1.2</uicommonsVersion>
         <webserviceRestVersion>2.5</webserviceRestVersion>
-        <apppointmentschedulingVersion>1.1-SNAPSHOT</apppointmentschedulingVersion>
+        <apppointmentschedulingVersion>1.0</apppointmentschedulingVersion>
         <coreappsVersion>1.2</coreappsVersion>
 
         <htmlformentryVersion>2.1.4</htmlformentryVersion>

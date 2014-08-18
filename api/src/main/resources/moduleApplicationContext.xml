@@ -26,6 +26,59 @@
         </property>
     </bean>
 
+    <!-- Appointmentscheduling version 1.0 doesn't contain bean definition - remove if newer version is used! -->
+    <bean id="appointmentService"
+          class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+        <property name="transactionManager">
+            <ref bean="transactionManager"/>
+        </property>
+        <property name="target">
+            <bean class="${project.parent.groupId}.appointmentscheduling.api.impl.AppointmentServiceImpl">
+                <property name="appointmentTypeDAO">
+                    <bean class="${project.parent.groupId}.appointmentscheduling.api.db.hibernate.HibernateAppointmentTypeDAO">
+                        <property name="sessionFactory">
+                            <ref bean="sessionFactory"/>
+                        </property>
+                    </bean>
+                </property>
+                <property name="appointmentBlockDAO">
+                    <bean class="${project.parent.groupId}.appointmentscheduling.api.db.hibernate.HibernateAppointmentBlockDAO">
+                        <property name="sessionFactory">
+                            <ref bean="sessionFactory"/>
+                        </property>
+                    </bean>
+                </property>
+                <property name="appointmentDAO">
+                    <bean class="${project.parent.groupId}.appointmentscheduling.api.db.hibernate.HibernateAppointmentDAO">
+                        <property name="sessionFactory">
+                            <ref bean="sessionFactory"/>
+                        </property>
+                    </bean>
+                </property>
+                <property name="timeSlotDAO">
+                    <bean class="${project.parent.groupId}.appointmentscheduling.api.db.hibernate.HibernateTimeSlotDAO">
+                        <property name="sessionFactory">
+                            <ref bean="sessionFactory"/>
+                        </property>
+                    </bean>
+                </property>
+                <property name="appointmentStatusHistoryDAO">
+                    <bean class="${project.parent.groupId}.appointmentscheduling.api.db.hibernate.HibernateAppointmentStatusHistoryDAO">
+                        <property name="sessionFactory">
+                            <ref bean="sessionFactory"/>
+                        </property>
+                    </bean>
+                </property>
+            </bean>
+        </property>
+        <property name="preInterceptors">
+            <ref bean="serviceInterceptors"/>
+        </property>
+        <property name="transactionAttributeSource">
+            <ref bean="transactionAttributeSource"/>
+        </property>
+    </bean>
+
     <!-- Services accessible via Context.getService() -->
     <bean parent="serviceContext">
         <property name="moduleService">
